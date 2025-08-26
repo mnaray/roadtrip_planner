@@ -9,6 +9,16 @@ Rails.application.routes.draw do
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
-  # Defines the root path route ("/")
-  # root "posts#index"
+  # Root route
+  root "trips#index"
+  
+  # Nested resources for trip planning
+  resources :trips do
+    resources :routes do
+      member do
+        get :export_gpx
+      end
+      resources :stops, except: [:show, :index]
+    end
+  end
 end
