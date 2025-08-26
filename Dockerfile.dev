@@ -1,0 +1,29 @@
+# syntax=docker/dockerfile:1
+FROM ruby:3.3.9-slim
+
+# Install dependencies
+RUN apt-get update -qq && apt-get install -y \
+  build-essential \
+  git \
+  curl \
+  libpq-dev \
+  nodejs \
+  npm \
+  ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /rails
+
+# Copy Gemfile and install gems
+COPY Gemfile Gemfile.lock ./
+RUN bundle install
+
+# Copy the main application
+COPY . .
+
+# Expose port
+EXPOSE 3000
+
+# Start server
+CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0"]
