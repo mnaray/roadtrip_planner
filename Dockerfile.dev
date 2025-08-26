@@ -23,13 +23,14 @@ ENV BUNDLE_SSL_VERIFY_NONE=1
 ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 ENV SSL_CERT_DIR=/etc/ssl/certs
 ENV BUNDLER_SKIP_DEFAULT_GEM=true
+ENV BUNDLE_FORCE_RUBY_PLATFORM=1
 
 # Copy Gemfile and install gems
 COPY Gemfile Gemfile.lock ./
-RUN export GEM_SSL_VERIFY_MODE=0 && \
-    export BUNDLE_SSL_VERIFY_NONE=1 && \
+RUN echo "gem: --no-document" > ~/.gemrc && \
     bundle config set --global ssl_verify_mode 0 && \
     bundle config set --global disable_platform_warnings true && \
+    bundle config set --global force_ruby_platform true && \
     bundle install
 
 # Copy the main application
