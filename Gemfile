@@ -41,10 +41,10 @@ gem "thruster", require: false
 # gem "image_processing", "~> 1.2"
 
 # Phlex for UI components [https://phlex.fun]
-gem "phlex-rails"
+# gem "phlex-rails"
 
 # For GPX file generation
-gem "gpx"
+# gem "gpx"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem

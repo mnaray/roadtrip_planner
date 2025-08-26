@@ -1,1 +1,49 @@
-<%= render TripsIndexComponent.new(trips: @trips) %>
+<% content_for :title, "All Road Trips" %>
+
+<div class="space-y-6">
+  <header class="text-center">
+    <h1 class="text-4xl font-bold text-gray-900">Your Road Trips</h1>
+    <p class="mt-2 text-gray-600">Plan amazing adventures with multiple routes and stops</p>
+  </header>
+  
+  <% if @trips.any? %>
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <% @trips.each do |trip| %>
+        <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="text-xl font-semibold text-gray-900">
+              <%= link_to trip.name, trip_path(trip), class: "hover:text-blue-600" %>
+            </h3>
+            <div class="text-sm text-gray-500">
+              <%= pluralize((trip.end_date - trip.start_date).to_i + 1, "day") %>
+            </div>
+          </div>
+          
+          <% if trip.description.present? %>
+            <p class="text-gray-600 mb-4"><%= truncate(trip.description, length: 100) %></p>
+          <% end %>
+          
+          <div class="flex justify-between items-center text-sm text-gray-500 mb-4">
+            <span><%= trip.start_date.strftime('%b %d') %> - <%= trip.end_date.strftime('%b %d, %Y') %></span>
+            <span><%= pluralize(trip.routes.count, "route") %></span>
+          </div>
+          
+          <div class="flex space-x-2">
+            <%= link_to "View", trip_path(trip), 
+                        class: "flex-1 text-center bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700" %>
+            <%= link_to "Edit", edit_trip_path(trip), 
+                        class: "flex-1 text-center bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="text-center py-12">
+      <div class="text-6xl mb-4">🗺️</div>
+      <h2 class="text-2xl font-semibold text-gray-900 mb-2">No trips yet</h2>
+      <p class="text-gray-600 mb-6">Start planning your first road trip adventure!</p>
+      <%= link_to "Create Your First Trip", new_trip_path, 
+                  class: "bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 inline-block" %>
+    </div>
+  <% end %>
+</div>

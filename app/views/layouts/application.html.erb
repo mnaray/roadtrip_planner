@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= content_for(:title) || "Workspace" %></title>
+    <title><%= content_for(:title) || "Roadtrip Planner" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -21,7 +21,34 @@
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
   </head>
 
-  <body>
-    <%= yield %>
+  <body class="bg-gray-50 min-h-screen">
+    <nav class="bg-white shadow-sm border-b">
+      <div class="container mx-auto px-4 py-4">
+        <div class="flex justify-between items-center">
+          <%= link_to root_path, class: "text-2xl font-bold text-blue-600" do %>
+            🚗 Roadtrip Planner
+          <% end %>
+          
+          <div class="space-x-4">
+            <%= link_to "All Trips", trips_path, class: "text-blue-600 hover:text-blue-800" %>
+            <%= link_to "New Trip", new_trip_path, class: "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" %>
+          </div>
+        </div>
+      </div>
+    </nav>
+    
+    <main class="container mx-auto px-4 py-8">
+      <% if flash.any? %>
+        <div class="mb-4">
+          <% flash.each do |type, message| %>
+            <div class="p-4 rounded <%= flash_class(type) %>">
+              <%= message %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+      
+      <%= yield %>
+    </main>
   </body>
 </html>
