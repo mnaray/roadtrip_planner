@@ -7,20 +7,30 @@ RUN apt-get update -qq && apt-get install -y \
   git \
   curl \
   libpq-dev \
+  libyaml-dev \
   nodejs \
   npm \
   ca-certificates \
+  openssl \
+  && update-ca-certificates \
   && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /rails
 
-# Configure bundler to handle SSL issues
+# Configure bundler and gem sources to handle SSL issues
 ENV BUNDLE_SSL_VERIFY_NONE=1
+ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+ENV SSL_CERT_DIR=/etc/ssl/certs
+ENV BUNDLER_SKIP_DEFAULT_GEM=true
 
 # Copy Gemfile and install gems
 COPY Gemfile Gemfile.lock ./
-RUN bundle install
+RUN export GEM_SSL_VERIFY_MODE=0 && \
+    export BUNDLE_SSL_VERIFY_NONE=1 && \
+    bundle config set --global ssl_verify_mode 0 && \
+    bundle config set --global disable_platform_warnings true && \
+    bundle install
 
 # Copy the main application
 COPY . .
