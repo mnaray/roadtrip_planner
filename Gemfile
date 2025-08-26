@@ -41,7 +41,7 @@ gem "thruster", require: false
 # gem "image_processing", "~> 1.2"
 
 # Phlex for UI components [https://phlex.fun]
-# gem "phlex-rails"
+gem "phlex-rails"
 
 # For GPX file generation
 # gem "gpx"
