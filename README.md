@@ -17,33 +17,19 @@ This is a Ruby on Rails application to plan your roadtrips. The application uses
    cd roadtrip_planner
    ```
 
-2. **Run the setup script:**
-   ```bash
-   ./setup.sh
-   ```
-   
-   This script will handle Docker setup and provide fallback options if there are SSL certificate issues.
-
-3. **If the setup script works, continue with:**
-   ```bash
-   docker compose up
-   ```
-
-### Manual Setup
-
-If you prefer to set up manually or the setup script encounters issues:
-
-1. **Build and start the application:**
+2. **Build and start the application:**
    ```bash
    docker compose up --build
    ```
 
    This will:
    - Build the Rails application container
-   - Start a PostgreSQL database container
-   - Start the Rails development server on port 3000
+   - Start a PostgreSQL database container  
+   - Attempt to install Ruby gems and start the Rails server
 
-2. **Setup the database:**
+   **Note**: If gem installation fails due to network restrictions (common in corporate environments), see the troubleshooting section below.
+
+3. **Setup the database (once the Rails server is running):**
    ```bash
    # In a new terminal, run database migrations
    docker compose exec web rails db:create
@@ -148,39 +134,33 @@ The application is configured to use PostgreSQL with the following default setti
 
 ### Troubleshooting
 
-#### SSL Certificate Issues
+#### Network Restrictions / Gem Installation Issues
 
-If you encounter SSL certificate verification errors during the Docker build process, this may be due to corporate firewalls or proxy settings. Here are several solutions:
+If the Rails container fails to start due to network restrictions preventing access to rubygems.org (common in corporate environments or CI/CD systems):
 
-**Option 1: Use the setup script**
+**Option 1: Manual setup inside the container**
 ```bash
-./setup.sh
-```
-The setup script automatically detects SSL issues and provides workarounds.
+# Start only the database
+docker compose up -d db
 
-**Option 2: Manual workaround - Modify Gemfile source**
-Change the first line of `Gemfile` from:
-```ruby
-source "https://rubygems.org"
-```
-to:
-```ruby
-source "http://rubygems.org"
+# Start an interactive session in the web container
+docker compose run --rm web bash
+
+# Inside the container, manually install gems and start Rails
+bundle install
+bundle exec rails server -b 0.0.0.0
 ```
 
-**Option 3: Corporate network configuration**
-If you're behind a corporate firewall:
-1. Configure your network to allow access to `https://rubygems.org/`
-2. Or use your organization's gem mirror
-3. Set appropriate proxy environment variables in the Dockerfile
-
-**Option 4: Local gem installation**
-If Docker continues to fail, you can install Ruby and Rails locally:
+**Option 2: Use host networking (if allowed)**
 ```bash
-# Install Ruby 3.2.3 locally
-# Install Rails: gem install rails
-# Run: rails server -p 3000
-# Use external PostgreSQL instance
+# Modify docker-compose.yml to use host networking
+# Add `network_mode: host` under the web service
+```
+
+**Option 3: Alternative gem sources**
+If your environment has access to alternative gem sources, modify the first line of `Gemfile`:
+```ruby
+source "your_internal_gem_source"
 ```
 
 #### Port Conflicts
