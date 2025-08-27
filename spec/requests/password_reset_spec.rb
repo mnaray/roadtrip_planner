@@ -9,19 +9,19 @@ RSpec.describe "Password Reset Functionality", type: :request do
       # Check that common password reset routes return 404 or routing errors
       get "/passwords/new"
       expect(response.status).to eq(404).or eq(403)
-      
+
       post "/passwords"
       expect(response.status).to eq(404).or eq(403)
-      
-      get "/passwords/edit" 
+
+      get "/passwords/edit"
       expect(response.status).to eq(404).or eq(403)
-      
+
       patch "/passwords/1"
       expect(response.status).to eq(404).or eq(403)
-      
+
       get "/forgot_password"
       expect(response.status).to eq(404).or eq(403)
-      
+
       post "/reset_password"
       expect(response.status).to eq(404).or eq(403)
     end
@@ -57,7 +57,7 @@ RSpec.describe "Password Reset Functionality", type: :request do
   describe "Application routes" do
     it "does not include password reset related routes" do
       routes_output = Rails.application.routes.routes.map(&:path).map(&:spec).join("\n")
-      
+
       expect(routes_output).not_to include("password")
       expect(routes_output).not_to include("reset")
       expect(routes_output).not_to include("forgot")

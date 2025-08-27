@@ -31,9 +31,9 @@ RSpec.describe "User Registration", type: :request do
             password_confirmation: "password123"
           }
         }
-        
+
         post "/register", params: test_attributes
-        
+
         user = User.last
         expect(user.username).to eq(test_username.downcase)
         expect(user.authenticate("password123")).to be_truthy
@@ -53,9 +53,9 @@ RSpec.describe "User Registration", type: :request do
             password_confirmation: "password123"
           }
         }
-        
+
         post "/register", params: test_attributes
-        
+
         follow_redirect!
         expect(response.body).to include("Welcome, #{test_username.downcase}!")
       end
@@ -120,7 +120,7 @@ RSpec.describe "User Registration", type: :request do
 
       it "does not create duplicate usernames" do
         create(:user, username: "existinguser")
-        
+
         duplicate_attributes = {
           user: {
             username: "existinguser",

@@ -24,7 +24,7 @@ Rails.application.configure do
 
   # Render exception templates for rescuable exceptions and raise for other exceptions.
   config.action_dispatch.show_exceptions = :rescuable
-  
+
   # Disable web console in test environment
   config.web_console.development_only = false
 
