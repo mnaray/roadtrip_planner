@@ -13,10 +13,19 @@ services:
   web:
     build: .
     command: >
-      bash -c "echo 'Note: If this fails, see README for manual setup steps' &&
-      bundle install &&
+      bash -c "echo 'Starting Roadtrip Planner application...' &&
+      echo 'Checking gem dependencies...' &&
+      (bundle check > /dev/null 2>&1 || (
+        echo 'Installing missing gems...' &&
+        bundle config set --local retry 3 &&
+        bundle config set --local timeout 30 &&
+        bundle install
+      )) &&
+      echo 'Removing any stale PID files...' &&
       rm -f tmp/pids/server.pid &&
+      echo 'Preparing database...' &&
       bundle exec rails db:prepare &&
+      echo 'Starting Rails server on port 3000...' &&
       bundle exec rails server -b 0.0.0.0"
     volumes:
       - .:/app
@@ -28,6 +37,7 @@ services:
     environment:
       DATABASE_URL: postgresql://roadtrip_planner:password@db:5432/roadtrip_planner_development
       RAILS_ENV: development
+    restart: on-failure
 
 volumes:
   postgres_data:

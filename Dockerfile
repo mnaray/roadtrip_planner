@@ -18,6 +18,16 @@ WORKDIR /app
 # Copy application code
 COPY . .
 
+# Try to install gems during build, but don't fail if network is restricted
+RUN bundle config set --local without 'development test' && \
+    (timeout 60 bundle install || echo "Network restricted - gems will be installed at startup") || true
+
+# Create necessary directories
+RUN mkdir -p tmp/pids log
+
+# Ensure bin files are executable
+RUN chmod +x bin/rails bin/rake
+
 # Expose port 3000
 EXPOSE 3000
 

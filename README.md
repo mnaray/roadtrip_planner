@@ -147,31 +147,52 @@ This will create a new PostgreSQL 16 database from scratch.
 
 #### Network Restrictions / Gem Installation Issues
 
-If the Rails container fails to start due to network restrictions preventing access to rubygems.org (common in corporate environments or CI/CD systems):
+If you see errors like "Access token could not be authenticated for http://rubygems.org/" or "Authentication is required for http://rubygems.org/", this indicates network restrictions preventing access to rubygems.org (common in corporate environments or CI/CD systems).
 
-**Option 1: Manual setup inside the container**
+**The container will show these symptoms:**
+- Gems fail to install during startup
+- Rails shows "rails new" usage instead of starting the server
+- Container keeps restarting
+
+**Solution Options:**
+
+**Option 1: Use the manual setup workflow**
 ```bash
+# Stop any running containers
+docker compose down
+
 # Start only the database
 docker compose up -d db
 
-# Start an interactive session in the web container
+# Run an interactive session in the web container
 docker compose run --rm web bash
 
-# Inside the container, manually install gems and start Rails
+# Inside the container, try manual setup:
+bundle config set --global silence_root_warning true
 bundle install
+
+# If bundle install works, continue with Rails setup:
+bundle exec rails db:prepare
 bundle exec rails server -b 0.0.0.0
 ```
 
-**Option 2: Use host networking (if allowed)**
-```bash
-# Modify docker-compose.yml to use host networking
-# Add `network_mode: host` under the web service
+**Option 2: Pre-build with gems (if you have external access)**
+If you have access to rubygems.org from another environment:
+1. Generate a complete `Gemfile.lock` with access to rubygems.org
+2. Copy it to your restricted environment
+3. Use `bundle install --deployment` which uses the lockfile
+
+**Option 3: Use a gem cache or mirror**
+If your organization provides a gem cache or mirror:
+```ruby
+# Modify the first line of Gemfile
+source "https://your-internal-gem-mirror.com"
 ```
 
-**Option 3: Alternative gem sources**
-If your environment has access to alternative gem sources, modify the first line of `Gemfile`:
-```ruby
-source "your_internal_gem_source"
+**Option 4: Wait and retry**
+Network restrictions are sometimes temporary. The container is configured with restart policies, so it will keep trying to start. You can monitor progress with:
+```bash
+docker compose logs -f web
 ```
 
 #### Port Conflicts
