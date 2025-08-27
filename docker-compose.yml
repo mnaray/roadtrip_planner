@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: roadtrip_planner
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: roadtrip_planner_development
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  web:
+    build: .
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails server -b 0.0.0.0"
+    volumes:
+      - .:/app
+      - bundle_data:/usr/local/bundle
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql://roadtrip_planner:password@db:5432/roadtrip_planner_development
+      RAILS_ENV: development
+
+volumes:
+  postgres_data:
+  bundle_data:
