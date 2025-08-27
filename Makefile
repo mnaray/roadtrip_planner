@@ -1,4 +1,4 @@
-.PHONY: build up down logs bash console reset-db clean css-build css-watch lint lint-fix
+.PHONY: build up down logs bash console reset-db clean css-build css-watch lint lint-fix importmap
 
 # Build Docker images
 build:
@@ -64,3 +64,7 @@ lint:
 # Run Ruby linter with auto-fix
 lint-fix:
 	docker compose exec web bundle exec rubocop -A
+
+# Show importmap packages
+importmap:
+	docker compose exec web bin/importmap packages
