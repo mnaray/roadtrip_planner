@@ -25,16 +25,9 @@ This is a Ruby on Rails application to plan your roadtrips. The application uses
    This will:
    - Build the Rails application container
    - Start a PostgreSQL database container  
-   - Attempt to install Ruby gems and start the Rails server
+   - Automatically install Ruby gems, prepare the database, and start the Rails server
 
    **Note**: If gem installation fails due to network restrictions (common in corporate environments), see the troubleshooting section below.
-
-3. **Setup the database (once the Rails server is running):**
-   ```bash
-   # In a new terminal, run database migrations
-   docker compose exec web rails db:create
-   docker compose exec web rails db:migrate
-   ```
 
 3. **Access the application:**
    - Open your browser and navigate to `http://localhost:3000`
@@ -79,7 +72,7 @@ The development environment is configured to support live code changes without r
 
 - **Run tests:**
   ```bash
-  docker compose exec web rails test
+  docker compose exec web rspec
   ```
 
 - **Generate new Rails components:**
@@ -133,6 +126,24 @@ The application is configured to use PostgreSQL with the following default setti
 - **Port**: `5432`
 
 ### Troubleshooting
+
+#### PostgreSQL Version Compatibility Issues
+
+If you see an error like "database files are incompatible with server" or "The data directory was initialized by PostgreSQL version 16, which is not compatible with this version 15", this means you have an existing PostgreSQL data volume from a different version:
+
+**Solution: Clean up the old data volume**
+```bash
+# Stop all containers
+docker compose down
+
+# Remove the old PostgreSQL data volume
+docker volume rm roadtrip_planner_postgres_data
+
+# Start fresh
+docker compose up --build
+```
+
+This will create a new PostgreSQL 16 database from scratch.
 
 #### Network Restrictions / Gem Installation Issues
 
