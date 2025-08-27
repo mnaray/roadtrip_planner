@@ -28,6 +28,10 @@ bash:
 console:
 	docker compose exec web bin/rails console
 
+# Run database migrations
+migrate:
+	docker compose exec web bin/rails db:migrate
+
 # Reset database
 reset-db:
 	docker compose exec web bin/rails db:drop db:create db:migrate db:seed
