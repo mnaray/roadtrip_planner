@@ -1,20 +1,20 @@
 #!/bin/bash
 set -e
 
-# Wait for PostgreSQL to be ready
-echo "Waiting for PostgreSQL..."
-until pg_isready -h "$DATABASE_HOST" -U "$POSTGRES_USER" -q; do
-  echo "PostgreSQL is unavailable - sleeping"
-  sleep 2
-done
-echo "PostgreSQL is available!"
+# Install npm dependencies if package.json exists and node_modules doesn't
+if [ -f package.json ] && [ ! -d node_modules ]; then
+  echo "Installing npm dependencies..."
+  npm install
+fi
 
-# Check if bundle is installed, if not install it
-bundle check || bundle install
+# Build Tailwind CSS if in development mode
+if [ "$RAILS_ENV" != "production" ]; then
+  echo "Building Tailwind CSS for development..."
+  npm run build-css:production || true
+fi
 
-# Prepare database (create if doesn't exist, migrate if needed)
-echo "Preparing database..."
-bin/rails db:prepare
+# Remove a potentially pre-existing server.pid for Rails.
+rm -f /app/tmp/pids/server.pid
 
-# Execute the main container command
+# Then exec the container's main process (what's set as CMD in the Dockerfile).
 exec "$@"

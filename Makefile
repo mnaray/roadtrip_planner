@@ -1,4 +1,4 @@
-.PHONY: build up down logs bash console reset-db clean
+.PHONY: build up down logs bash console reset-db clean css-build css-watch
 
 # Build Docker images
 build:
@@ -48,3 +48,11 @@ test:
 # Check routes
 routes:
 	docker compose exec web bin/rails routes
+
+# Build CSS for production
+css-build:
+	docker compose exec web npm run build-css:production
+
+# Watch CSS changes (for development)
+css-watch:
+	docker compose exec web npm run build-css:watch

@@ -19,6 +19,7 @@ services:
     volumes:
       - .:/app
       - bundle_cache:/usr/local/bundle
+      - node_modules_cache:/app/node_modules
     ports:
       - "3000:3000"
     depends_on:
@@ -35,3 +36,4 @@ services:
 volumes:
   postgres_data:
   bundle_cache:
+  node_modules_cache:
