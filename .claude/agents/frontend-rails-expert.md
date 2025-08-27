@@ -1,7 +1,7 @@
 ---
 name: frontend-rails-expert
 description: Use this agent when you need expert guidance on frontend development in Rails applications, particularly involving Tailwind CSS (especially v4) and Phlex view components. Examples: <example>Context: User is building a Rails application with Phlex components and needs help with styling.\nuser: "I'm trying to create a responsive card component using Phlex with Tailwind CSS 4. How should I structure this?"\nassistant: "I'll use the frontend-rails-expert agent to help you create an optimal Phlex card component with modern Tailwind CSS 4 patterns."</example> <example>Context: User encounters issues with Tailwind CSS 4 configuration in their Rails app.\nuser: "My Tailwind CSS 4 styles aren't being applied correctly in my Rails application. The new @import syntax seems problematic."\nassistant: "Let me use the frontend-rails-expert agent to troubleshoot your Tailwind CSS 4 configuration issues in Rails."</example> <example>Context: User needs to refactor existing ERB views to Phlex components.\nuser: "I have these ERB partials that I want to convert to Phlex components while maintaining the same styling."\nassistant: "I'll use the frontend-rails-expert agent to help you migrate from ERB to Phlex components effectively."</example>
-model: sonnet
+model: inherit
 color: cyan
 ---
 
