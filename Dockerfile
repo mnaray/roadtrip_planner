@@ -18,6 +18,10 @@ WORKDIR /app
 # Copy application code
 COPY . .
 
+# Copy entrypoint script
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 # Try to install gems during build, but don't fail if network is restricted
 RUN bundle config set --local without 'development test' && \
     (timeout 60 bundle install || echo "Network restricted - gems will be installed at startup") || true
@@ -31,5 +35,5 @@ RUN chmod +x bin/rails bin/rake
 # Expose port 3000
 EXPOSE 3000
 
-# Default command - can be overridden by docker-compose
-CMD ["bash"]
+# Use entrypoint script
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

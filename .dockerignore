@@ -1,0 +1,39 @@
+# Ignore git files
+.git
+.gitignore
+
+# Ignore log files
+log/*
+
+# Ignore temporary files
+tmp/*
+!tmp/.keep
+
+# Ignore node modules
+node_modules
+
+# Ignore environment files
+.env
+.env.*
+
+# Ignore bundler config
+.bundle
+
+# Ignore coverage files
+coverage
+
+# Ignore documentation files
+.yardoc
+doc/
+
+# Ignore compiled assets
+public/assets
+public/packs
+
+# Ignore storage files
+storage/*
+
+# Ignore test files
+spec/reports/
+test/tmp/
+test/version_tmp/
