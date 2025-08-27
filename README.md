@@ -9,7 +9,7 @@ This is a Ruby on Rails application to plan your roadtrips. The application uses
 - Docker and Docker Compose
 - Git
 
-### Getting Started
+### Quick Start
 
 1. **Clone the repository:**
    ```bash
@@ -17,7 +17,23 @@ This is a Ruby on Rails application to plan your roadtrips. The application uses
    cd roadtrip_planner
    ```
 
-2. **Build and start the application:**
+2. **Run the setup script:**
+   ```bash
+   ./setup.sh
+   ```
+   
+   This script will handle Docker setup and provide fallback options if there are SSL certificate issues.
+
+3. **If the setup script works, continue with:**
+   ```bash
+   docker compose up
+   ```
+
+### Manual Setup
+
+If you prefer to set up manually or the setup script encounters issues:
+
+1. **Build and start the application:**
    ```bash
    docker compose up --build
    ```
@@ -27,14 +43,14 @@ This is a Ruby on Rails application to plan your roadtrips. The application uses
    - Start a PostgreSQL database container
    - Start the Rails development server on port 3000
 
-3. **Setup the database:**
+2. **Setup the database:**
    ```bash
    # In a new terminal, run database migrations
    docker compose exec web rails db:create
    docker compose exec web rails db:migrate
    ```
 
-4. **Access the application:**
+3. **Access the application:**
    - Open your browser and navigate to `http://localhost:3000`
    - You should see a welcome message from the Rails application
 
@@ -134,14 +150,38 @@ The application is configured to use PostgreSQL with the following default setti
 
 #### SSL Certificate Issues
 
-If you encounter SSL certificate verification errors during the Docker build process, this may be due to corporate firewalls or proxy settings. You can resolve this by:
+If you encounter SSL certificate verification errors during the Docker build process, this may be due to corporate firewalls or proxy settings. Here are several solutions:
 
-1. **Update the Dockerfile** to disable SSL verification temporarily (development only):
-   ```dockerfile
-   RUN gem install rails --no-document --source http://rubygems.org/
-   ```
+**Option 1: Use the setup script**
+```bash
+./setup.sh
+```
+The setup script automatically detects SSL issues and provides workarounds.
 
-2. **Or configure your network** to allow access to `https://rubygems.org/`
+**Option 2: Manual workaround - Modify Gemfile source**
+Change the first line of `Gemfile` from:
+```ruby
+source "https://rubygems.org"
+```
+to:
+```ruby
+source "http://rubygems.org"
+```
+
+**Option 3: Corporate network configuration**
+If you're behind a corporate firewall:
+1. Configure your network to allow access to `https://rubygems.org/`
+2. Or use your organization's gem mirror
+3. Set appropriate proxy environment variables in the Dockerfile
+
+**Option 4: Local gem installation**
+If Docker continues to fail, you can install Ruby and Rails locally:
+```bash
+# Install Ruby 3.2.3 locally
+# Install Rails: gem install rails
+# Run: rails server -p 3000
+# Use external PostgreSQL instance
+```
 
 #### Port Conflicts
 
@@ -183,12 +223,42 @@ This application is set up for development. To add new features:
 3. Run the test suite to ensure everything works
 4. Update this README if you add new setup requirements
 
-## Next Steps
+## Summary
 
-This is a basic Rails application setup. You can now:
+This repository contains a complete Ruby on Rails application setup for roadtrip planning with:
 
-- Add authentication (devise gem)
-- Create models for trips, destinations, routes
-- Add a user interface for planning roadtrips
-- Integrate with mapping APIs (Google Maps, Mapbox)
-- Add features like weather integration, points of interest, etc.
+- **Rails 8.0** application framework
+- **PostgreSQL** database configuration
+- **Docker & Docker Compose** development environment
+- **Live code reloading** support
+- **RSpec** testing framework
+- **Comprehensive documentation** and troubleshooting guides
+
+The application is ready for development and can be extended with roadtrip planning features such as:
+- User authentication and profiles
+- Trip creation and management
+- Route planning and optimization
+- Points of interest integration
+- Weather and traffic data
+- Collaborative trip planning
+
+## Architecture
+
+```
+┌─────────────────┐    ┌─────────────────┐
+│   Rails App     │    │   PostgreSQL    │
+│   (Port 3000)   │────│   (Port 5432)   │
+│                 │    │                 │
+│ • Controllers   │    │ • Development   │
+│ • Models        │    │ • Test          │
+│ • Views         │    │ • Production    │
+│ • API Endpoints │    │   Databases     │
+└─────────────────┘    └─────────────────┘
+```
+
+The development environment supports:
+- **Hot reloading**: Code changes are reflected immediately
+- **Volume mounting**: No need to rebuild containers for code changes
+- **Database persistence**: Data survives container restarts
+- **Testing**: Integrated RSpec test suite
+- **Debugging**: Rails console and logging support
