@@ -23,7 +23,7 @@ class ApplicationLayout < Phlex::HTML
         link rel: "icon", href: "/icon.png", type: "image/png"
         link rel: "icon", href: "/icon.svg", type: "image/svg+xml"
         link rel: "apple-touch-icon", href: "/icon.png"
-        
+
         # Google Fonts for better typography
         link rel: "preconnect", href: "https://fonts.googleapis.com"
         link rel: "preconnect", href: "https://fonts.gstatic.com", crossorigin: true
@@ -34,8 +34,8 @@ class ApplicationLayout < Phlex::HTML
       end
 
       body class: "h-full bg-gradient-to-br from-slate-50 to-blue-50 text-gray-800" do
-        main class: "min-h-screen" do 
-          yield 
+        main class: "min-h-screen" do
+          yield
         end
       end
     end

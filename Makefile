@@ -1,4 +1,4 @@
-.PHONY: build up down logs bash console reset-db clean css-build css-watch
+.PHONY: build up down logs bash console reset-db clean css-build css-watch lint lint-fix
 
 # Build Docker images
 build:
@@ -56,3 +56,11 @@ css-build:
 # Watch CSS changes (for development)
 css-watch:
 	docker compose exec web npm run build-css:watch
+
+# Run Ruby linter
+lint:
+	docker compose exec web bundle exec rubocop
+
+# Run Ruby linter with auto-fix
+lint-fix:
+	docker compose exec web bundle exec rubocop -A
