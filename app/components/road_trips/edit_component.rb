@@ -18,8 +18,12 @@ class RoadTrips::EditComponent < ApplicationComponent
                 end
               end
               li do
-                svg_raw svg_path(fill_rule: "evenodd", d: "M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z", clip_rule: "evenodd"),
-                        class: "w-4 h-4 text-gray-400", fill: "currentColor", viewBox: "0 0 20 20"
+                svg_icon path_d: "M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z",
+                         class: "w-4 h-4 text-gray-400",
+                         fill: "currentColor",
+                         fill_rule: "evenodd",
+                         clip_rule: "evenodd",
+                         viewBox: "0 0 20 20"
               end
               li do
                 link_to road_trip_path(@road_trip), class: "text-blue-600 hover:text-blue-800 text-sm font-medium" do
@@ -27,8 +31,12 @@ class RoadTrips::EditComponent < ApplicationComponent
                 end
               end
               li do
-                svg_raw svg_path(fill_rule: "evenodd", d: "M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z", clip_rule: "evenodd"),
-                        class: "w-4 h-4 text-gray-400", fill: "currentColor", viewBox: "0 0 20 20"
+                svg_icon path_d: "M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z",
+                         class: "w-4 h-4 text-gray-400",
+                         fill: "currentColor",
+                         fill_rule: "evenodd",
+                         clip_rule: "evenodd",
+                         viewBox: "0 0 20 20"
               end
               li class: "text-sm font-medium text-gray-900" do
                 "Edit"

@@ -182,12 +182,29 @@ RSpec.describe "Routes", type: :request do
         let(:datetime_param) { 2.hours.from_now.strftime("%Y-%m-%dT%H:%M") }
 
         it "creates a new route" do
+          # First create the route data in session by posting to create route
+          post road_trip_routes_path(road_trip), params: {
+            route: {
+              starting_location: "San Francisco, CA",
+              destination: "Los Angeles, CA"
+            }
+          }
+          
+          # Then approve the route
           expect {
             post approve_route_path, params: { datetime: datetime_param }
           }.to change(Route, :count).by(1)
         end
 
         it "associates route with correct user and road trip" do
+          # First create the route data in session
+          post road_trip_routes_path(road_trip), params: {
+            route: {
+              starting_location: "San Francisco, CA",
+              destination: "Los Angeles, CA"
+            }
+          }
+          
           post approve_route_path, params: { datetime: datetime_param }
           new_route = Route.last
           expect(new_route.user).to eq(user)
@@ -195,11 +212,27 @@ RSpec.describe "Routes", type: :request do
         end
 
         it "clears session data" do
+          # First create the route data in session
+          post road_trip_routes_path(road_trip), params: {
+            route: {
+              starting_location: "San Francisco, CA",
+              destination: "Los Angeles, CA"
+            }
+          }
+          
           post approve_route_path, params: { datetime: datetime_param }
           expect(session[:route_data]).to be_nil
         end
 
         it "redirects to road trip show page" do
+          # First create the route data in session
+          post road_trip_routes_path(road_trip), params: {
+            route: {
+              starting_location: "San Francisco, CA",
+              destination: "Los Angeles, CA"
+            }
+          }
+          
           post approve_route_path, params: { datetime: datetime_param }
           expect(response).to redirect_to(road_trip_path(road_trip))
           follow_redirect!
@@ -221,17 +254,41 @@ RSpec.describe "Routes", type: :request do
         end
 
         it "does not create route" do
+          # First create the route data in session
+          post road_trip_routes_path(road_trip), params: {
+            route: {
+              starting_location: "San Francisco, CA",
+              destination: "Los Angeles, CA"
+            }
+          }
+          
           expect {
             post approve_route_path, params: { datetime: overlapping_datetime.strftime("%Y-%m-%dT%H:%M") }
           }.not_to change(Route, :count)
         end
 
         it "returns unprocessable entity status" do
+          # First create the route data in session
+          post road_trip_routes_path(road_trip), params: {
+            route: {
+              starting_location: "San Francisco, CA",
+              destination: "Los Angeles, CA"
+            }
+          }
+          
           post approve_route_path, params: { datetime: overlapping_datetime.strftime("%Y-%m-%dT%H:%M") }
           expect(response).to have_http_status(:unprocessable_content)
         end
 
         it "displays error message" do
+          # First create the route data in session
+          post road_trip_routes_path(road_trip), params: {
+            route: {
+              starting_location: "San Francisco, CA",
+              destination: "Los Angeles, CA"
+            }
+          }
+          
           post approve_route_path, params: { datetime: overlapping_datetime.strftime("%Y-%m-%dT%H:%M") }
           expect(response.body).to include("overlaps with another route")
         end

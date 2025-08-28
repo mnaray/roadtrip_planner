@@ -7,7 +7,7 @@ class RoutesController < ApplicationController
   def new
     @route = @road_trip.routes.build
     session[:route_data] = nil
-    render Routes::ModalFormComponent.new(route: @route, road_trip: @road_trip, current_user: current_user)
+    render Routes::FormPageComponent.new(route: @route, road_trip: @road_trip, current_user: current_user)
   end
 
   def create
@@ -15,16 +15,16 @@ class RoutesController < ApplicationController
     @route.user = current_user
 
     session[:route_data] = {
-      road_trip_id: @road_trip.id,
-      starting_location: @route.starting_location,
-      destination: @route.destination
+      "road_trip_id" => @road_trip.id,
+      "starting_location" => @route.starting_location,
+      "destination" => @route.destination
     }
 
     if @route.valid?(:location_only)
       redirect_to confirm_route_path
     else
-      render Routes::ModalFormComponent.new(route: @route, road_trip: @road_trip, current_user: current_user), 
-             status: :unprocessable_entity
+      render Routes::FormPageComponent.new(route: @route, road_trip: @road_trip, current_user: current_user), 
+             status: :unprocessable_content
     end
   end
 
@@ -33,15 +33,15 @@ class RoutesController < ApplicationController
   end
 
   def edit
-    render Routes::ModalFormComponent.new(route: @route, road_trip: @route.road_trip, current_user: current_user)
+    render Routes::FormPageComponent.new(route: @route, road_trip: @route.road_trip, current_user: current_user)
   end
 
   def update
     if @route.update(route_params)
       redirect_to @route.road_trip, notice: "Route was successfully updated."
     else
-      render Routes::ModalFormComponent.new(route: @route, road_trip: @route.road_trip, current_user: current_user), 
-             status: :unprocessable_entity
+      render Routes::FormPageComponent.new(route: @route, road_trip: @route.road_trip, current_user: current_user), 
+             status: :unprocessable_content
     end
   end
 
@@ -52,7 +52,7 @@ class RoutesController < ApplicationController
   end
 
   def confirm_route
-    render Routes::ConfirmRouteComponent.new(route_data: session[:route_data], current_user: current_user)
+    render Routes::ConfirmPageComponent.new(route_data: session[:route_data], current_user: current_user)
   end
 
   def approve_route
@@ -71,8 +71,9 @@ class RoutesController < ApplicationController
       session[:route_data] = nil
       redirect_to road_trip, notice: "Route was successfully added to your road trip."
     else
-      render Routes::ConfirmRouteComponent.new(route_data: route_data, route: @route, current_user: current_user), 
-             status: :unprocessable_entity
+      Rails.logger.error "Route validation failed: #{@route.errors.full_messages}"
+      render Routes::ConfirmPageComponent.new(route_data: route_data, route: @route, current_user: current_user), 
+             status: :unprocessable_content
     end
   end
 

@@ -20,8 +20,12 @@ class RoadTrips::ShowComponent < ApplicationComponent
                   end
                 end
                 li do
-                  svg_raw svg_path(fill_rule: "evenodd", d: "M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z", clip_rule: "evenodd"),
-                          class: "w-4 h-4 text-gray-400", fill: "currentColor", viewBox: "0 0 20 20"
+                  svg_icon path_d: "M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z",
+                           class: "w-4 h-4 text-gray-400",
+                           fill: "currentColor",
+                           fill_rule: "evenodd",
+                           clip_rule: "evenodd",
+                           viewBox: "0 0 20 20"
                 end
                 li class: "text-sm font-medium text-gray-900" do
                   @road_trip.name
@@ -37,16 +41,21 @@ class RoadTrips::ShowComponent < ApplicationComponent
           div class: "flex items-center space-x-3" do
             link_to edit_road_trip_path(@road_trip),
                     class: "inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" do
-              svg_raw svg_path(stroke_linecap: "round", stroke_linejoin: "round", stroke_width: "2", d: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"),
-                      class: "w-4 h-4 mr-1.5", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24"
+              svg_icon path_d: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z",
+                       class: "w-4 h-4 mr-1.5",
+                       stroke_linecap: "round",
+                       stroke_linejoin: "round",
+                       stroke_width: "2"
               "Edit"
             end
 
             link_to new_road_trip_route_path(@road_trip),
-                    class: "inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
-                    data: { "turbo-frame": "modal" } do
-              svg_raw svg_path(stroke_linecap: "round", stroke_linejoin: "round", stroke_width: "2", d: "M12 4v16m8-8H4"),
-                      class: "w-4 h-4 mr-1.5", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24"
+                    class: "inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" do
+              svg_icon path_d: "M12 4v16m8-8H4",
+                       class: "w-4 h-4 mr-1.5",
+                       stroke_linecap: "round",
+                       stroke_linejoin: "round",
+                       stroke_width: "2"
               "Add Route"
             end
           end
@@ -100,9 +109,11 @@ class RoadTrips::ShowComponent < ApplicationComponent
             end
           else
             div class: "p-12 text-center" do
-              svg_raw svg_path(stroke_linecap: "round", stroke_linejoin: "round", stroke_width: "2",
-                               d: "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"),
-                      class: "mx-auto h-12 w-12 text-gray-400", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24"
+              svg_icon path_d: "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z",
+                       class: "mx-auto h-12 w-12 text-gray-400",
+                       stroke_linecap: "round",
+                       stroke_linejoin: "round",
+                       stroke_width: "2"
               
               h3 class: "mt-4 text-lg font-medium text-gray-900" do
                 "No routes yet"
@@ -124,8 +135,7 @@ class RoadTrips::ShowComponent < ApplicationComponent
         end
       end
 
-      # Modal frame for route forms
-      turbo_frame_tag "modal"
+      # Removed modal frame - using dedicated pages instead
     end
   end
 
@@ -148,17 +158,22 @@ class RoadTrips::ShowComponent < ApplicationComponent
               span class: "text-sm font-semibold text-gray-900 truncate" do
                 route.starting_location
               end
-              svg_raw svg_path(stroke_linecap: "round", stroke_linejoin: "round", stroke_width: "2", d: "M17 8l4 4m0 0l-4 4m4-4H3"),
-                      class: "w-4 h-4 text-gray-400", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24"
+              svg_icon path_d: "M17 8l4 4m0 0l-4 4m4-4H3",
+                       class: "w-4 h-4 text-gray-400",
+                       stroke_linecap: "round",
+                       stroke_linejoin: "round",
+                       stroke_width: "2"
               span class: "text-sm font-semibold text-gray-900 truncate" do
                 route.destination
               end
             end
             
             div class: "flex items-center text-xs text-gray-500" do
-              svg_raw svg_path(stroke_linecap: "round", stroke_linejoin: "round", stroke_width: "2",
-                               d: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"),
-                      class: "w-3 h-3 mr-1", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24"
+              svg_icon path_d: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
+                       class: "w-3 h-3 mr-1",
+                       stroke_linecap: "round",
+                       stroke_linejoin: "round",
+                       stroke_width: "2"
               route.datetime.strftime("%B %d, %Y at %l:%M %p")
             end
           end
@@ -170,9 +185,11 @@ class RoadTrips::ShowComponent < ApplicationComponent
                   class: "inline-flex items-center p-1.5 border border-transparent rounded-md text-gray-400 hover:text-gray-600",
                   data: { "turbo-frame": "modal" },
                   onclick: "event.stopPropagation()" do
-            svg_raw svg_path(stroke_linecap: "round", stroke_linejoin: "round", stroke_width: "2", 
-                             d: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"),
-                    class: "w-4 h-4", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24"
+            svg_icon path_d: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z",
+                     class: "w-4 h-4",
+                     stroke_linecap: "round",
+                     stroke_linejoin: "round",
+                     stroke_width: "2"
           end
 
           link_to route_path(route),
@@ -180,9 +197,11 @@ class RoadTrips::ShowComponent < ApplicationComponent
                   class: "inline-flex items-center p-1.5 border border-transparent rounded-md text-gray-400 hover:text-red-600",
                   onclick: "event.stopPropagation(); return confirm('Are you sure you want to delete this route?')",
                   data: { confirm: "Are you sure you want to delete this route?" } do
-            svg_raw svg_path(stroke_linecap: "round", stroke_linejoin: "round", stroke_width: "2", 
-                             d: "M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"),
-                    class: "w-4 h-4", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24"
+            svg_icon path_d: "M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16",
+                     class: "w-4 h-4",
+                     stroke_linecap: "round",
+                     stroke_linejoin: "round",
+                     stroke_width: "2"
           end
         end
       end

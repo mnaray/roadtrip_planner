@@ -5,16 +5,21 @@ class ApplicationComponent < Phlex::HTML
   include Phlex::Rails::Helpers::TurboFrameTag
   include Phlex::Rails::Helpers::Routes
   
-  # Helper method to render SVG as raw HTML to avoid path method conflict
-  def svg_raw(content, **attributes)
-    attrs = attributes.map { |k, v| "#{k}=\"#{v}\"" }.join(" ")
-    # Use plain string to avoid method_missing conflicts
-    plain "<svg #{attrs}>#{content}</svg>"
-  end
-
-  # Helper method to create SVG path element as string
-  def svg_path(**attributes)
-    attrs = attributes.map { |k, v| "#{k}=\"#{v}\"" }.join(" ")
-    "<path #{attrs}></path>"
+  # Helper method to create complete SVG icons without using path method
+  def svg_icon(path_d:, **svg_attributes)
+    # Set default SVG attributes
+    defaults = {
+      fill: "none",
+      stroke: "currentColor", 
+      viewBox: "0 0 24 24"
+    }
+    attrs = defaults.merge(svg_attributes)
+    
+    # Generate complete SVG HTML as a string
+    svg_attrs_str = attrs.map { |k, v| "#{k}=\"#{v}\"" }.join(" ")
+    svg_html = "<svg #{svg_attrs_str}><path d=\"#{path_d}\"></path></svg>"
+    
+    # Use raw to output unescaped HTML (mark as html_safe first)
+    raw svg_html.html_safe
   end
 end
