@@ -16,6 +16,16 @@ Rails.application.routes.draw do
   post "login", to: "sessions#create"
   delete "logout", to: "sessions#destroy", as: :logout
 
+  # Road trip planning routes
+  resources :road_trips do
+    resources :routes, except: [:index], shallow: true
+  end
+  
+  # Special route flow for confirmation and approval
+  get "confirm_route", to: "routes#confirm_route"
+  post "approve_route", to: "routes#approve_route"
+  get "routes/:id/map", to: "routes#map", as: :route_map
+
   # Defines the root path route ("/")
   root "pages#home"
 end

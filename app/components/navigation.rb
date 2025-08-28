@@ -18,6 +18,10 @@ class Navigation < ApplicationComponent
           div class: "flex items-center space-x-4" do
             if @current_user
               # Logged in navigation
+              link_to "My Road Trips",
+                     road_trips_path,
+                     class: "inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+
               span class: "text-gray-600 text-sm" do
                 "Welcome, #{@current_user.username}!"
               end

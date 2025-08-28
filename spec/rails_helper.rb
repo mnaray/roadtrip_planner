@@ -36,6 +36,18 @@ RSpec.configure do |config|
   # Include FactoryBot methods
   config.include FactoryBot::Syntax::Methods
 
+  # Configure default host for request specs
+  config.before(:each, type: :request) do
+    host! 'localhost'
+    # Disable CSRF protection for request specs
+    ActionController::Base.allow_forgery_protection = false
+  end
+  
+  # Re-enable CSRF protection after request specs
+  config.after(:each, type: :request) do
+    ActionController::Base.allow_forgery_protection = true
+  end
+
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_paths = [
     Rails.root.join('spec/fixtures')
