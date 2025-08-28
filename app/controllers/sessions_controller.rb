@@ -16,8 +16,9 @@ class SessionsController < ApplicationController
       redirect_to root_path, notice: "Welcome back, #{user.username}!"
     else
       flash.now[:alert] = "Invalid username or password"
+      flash.now[:username] = params[:username].to_s.strip if params[:username].present?
       component = ApplicationLayout.new(title: "Login", current_user: current_user) do
-        render LoginForm.new(username: params[:username])
+        render LoginForm.new
       end
       render component, layout: false
     end

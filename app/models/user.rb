@@ -7,7 +7,7 @@ class User < ApplicationRecord
 
   validates :password, presence: true,
                       length: { minimum: 8 },
-                      format: { with: /\A(?=.*[a-zA-Z])(?=.*\d)/,
+                      format: { with: /\A(?=.*[a-zA-Z])(?=.*\d).*\z/,
                                message: "must contain both letters and numbers" }
 
   before_save :downcase_username

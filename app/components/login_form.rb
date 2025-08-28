@@ -32,7 +32,7 @@ class LoginForm < ApplicationComponent
               form.text_field :username,
                              required: true,
                              autofocus: true,
-                             value: @username,
+                             value: @username || (defined?(flash) && flash[:username]),
                              class: "appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm",
                              placeholder: "Enter your username"
             end
