@@ -3,6 +3,8 @@ class ApplicationLayout < Phlex::HTML
   include Phlex::Rails::Helpers::CSPMetaTag
   include Phlex::Rails::Helpers::StylesheetLinkTag
   include Phlex::Rails::Helpers::JavascriptImportmapTags
+  
+  register_value_helper :flash
 
   def initialize(title: "App", current_user: nil)
     @title = title
@@ -54,11 +56,11 @@ class ApplicationLayout < Phlex::HTML
                    alert: "bg-red-50 text-red-800 border-red-200" }
 
     flash_types.each do |type, classes|
-      if helpers.flash[type].present?
+      if flash[type].present?
         div class: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4" do
           div class: "rounded-md p-4 border #{classes}" do
             p class: "text-sm font-medium" do
-              helpers.flash[type]
+              flash[type]
             end
           end
         end

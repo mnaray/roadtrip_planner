@@ -1,10 +1,12 @@
 class LoginForm < ApplicationComponent
+  register_value_helper :flash
+  
   def initialize(username: nil)
     @username = username
   end
 
   def view_template
-    flash_alert = defined?(helpers.flash) && helpers.flash[:alert] ? helpers.flash[:alert] : nil
+    flash_alert = flash[:alert] if defined?(flash) && flash.present?
 
     div class: "min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8",
         **flash_alert_data(flash_alert) do
