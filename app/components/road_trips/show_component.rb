@@ -102,10 +102,9 @@ class RoadTrips::ShowComponent < ApplicationComponent
           end
 
           if @routes.any?
-            div class: "divide-y divide-gray-200" do
-              @routes.each_with_index do |route, index|
-                render_route_row(route, index + 1)
-              end
+            @routes.each_with_index do |route, index|
+              is_last = index == @routes.length - 1
+              render_route_row(route, index + 1, is_last)
             end
           else
             div class: "p-12 text-center" do
@@ -141,10 +140,12 @@ class RoadTrips::ShowComponent < ApplicationComponent
 
   private
 
-  def render_route_row(route, sequence)
-    link_to route_map_path(route), class: "block p-6 hover:bg-gray-50 no-underline text-inherit" do
+  def render_route_row(route, sequence, is_last = false)
+    border_class = is_last ? "" : "border-b border-gray-200"
+    div class: "#{border_class}" do
       div class: "flex items-center justify-between" do
-        div class: "flex items-center space-x-4" do
+        # Main clickable area for route content
+        link_to route_map_path(route), class: "flex items-center space-x-4 flex-1 p-6 hover:bg-gray-50 no-underline text-inherit transition-colors" do
           # Sequence number
           div class: "flex-shrink-0" do
             span class: "inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 text-sm font-medium" do
@@ -179,8 +180,8 @@ class RoadTrips::ShowComponent < ApplicationComponent
           end
         end
 
-        # Actions
-        div class: "flex items-center space-x-2" do
+        # Actions - separate from main clickable area
+        div class: "flex items-center space-x-2 px-6 py-6" do
           link_to edit_route_path(route),
                   class: "inline-flex items-center p-1.5 border border-transparent rounded-md text-gray-400 hover:text-gray-600" do
             svg_icon path_d: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z",
