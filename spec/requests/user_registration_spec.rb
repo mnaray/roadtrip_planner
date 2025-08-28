@@ -1,9 +1,6 @@
 require 'rails_helper'
 
 RSpec.describe "User Registration", type: :request do
-  before do
-    host! 'localhost:3000'
-  end
   describe "POST /register" do
     context "with valid parameters" do
       let(:valid_attributes) do

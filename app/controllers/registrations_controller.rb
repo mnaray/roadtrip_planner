@@ -19,7 +19,7 @@ class RegistrationsController < ApplicationController
       component = ApplicationLayout.new(title: "Sign Up", current_user: current_user) do
         render RegistrationForm.new(@user)
       end
-      render component, layout: false
+      render component, layout: false, status: :unprocessable_content
     end
   end
 
