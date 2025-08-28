@@ -4,85 +4,197 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a roadtrip planner application currently in its initial stages. The repository is licensed under the MIT License.
+Roadtrip Planner is a Rails 8 application for planning and managing road trips. The application features user authentication, component-based views with Phlex, and modern styling with Tailwind CSS v4. The entire development environment is containerized with Docker for consistency across development machines.
 
-## Repository Status
+## Technology Stack
 
-The repository is currently empty except for README.md and LICENSE files. No technology stack or build system has been chosen yet.
+### Core Technologies
+- **Rails**: 8.0.2.1 - Modern web application framework
+- **Ruby**: 3.4.x - Latest stable Ruby version
+- **PostgreSQL**: 17 - Primary database
+- **Docker & Docker Compose**: Containerized development environment
 
-## Development Notes
+### Frontend Stack
+- **Phlex**: Component-based Ruby views (replacing traditional ERB templates)
+- **Tailwind CSS v4**: Utility-first CSS framework with modern @import syntax
+- **Importmaps**: JavaScript without build step
+- **Stimulus.js**: Modest JavaScript framework for HTML you already have
 
-## System / Role
-You are a senior Rails + DevOps engineer. Generate a brand-new Rails 8 application called **`roadtrip_planner`**, containerized with Docker Compose for development. It should run with **Docker only** (no host Ruby/Node required) and show a default page in the browser.
+### Testing & Quality
+- **RSpec**: BDD testing framework with request specs
+- **FactoryBot**: Test data generation
+- **Rubocop**: Ruby style guide enforcement
 
----
+## Architecture Decisions
 
-## Goal
-Produce a fully working Rails 8.0.2.1 + Ruby 3.4 + Postgres 17 stack that boots with `docker compose up` and renders a page at `http://localhost:3000`.
+### Component-Based Views
+The application uses Phlex components (`app/components/`) instead of traditional Rails views. This provides:
+- Type-safe view composition
+- Reusable UI components
+- Better testing capabilities
+- Ruby-native templating
 
----
+### Authentication
+Custom authentication implementation using:
+- `bcrypt` for password hashing
+- Session-based authentication
+- User model with secure password
 
-## Requirements
+### Styling Approach
+- Tailwind CSS v4 with new @import syntax
+- Component-scoped styles where needed
+- Responsive design patterns
+- Dark mode ready (infrastructure in place)
 
-1. **App Scaffold**  
-   - Project name: `roadtrip_planner`  
-   - Rails: `8.0.2.1`  
-   - Ruby: `3.4.x`  
-   - PostgreSQL: `17`  
-   - JavaScript: **Importmap** (Rails default, no Node service required).  
+## Development Guidelines
 
-2. **Files to Generate**  
-   - `Dockerfile` → based on `ruby:3.4-slim`. Install build deps, add non-root user, run `bundle install`, expose port 3000, default `CMD` starts Puma.  
-   - `docker-compose.yml` → services:  
-     • `web`: builds Rails app, mounts code volume, uses bundle cache volume, depends on db (healthy).  
-     • `db`: uses `postgres:17-alpine`, with env vars in `.env`.  
-   - `.dockerignore` → ignore logs, tmp, node_modules, vendor/bundle, .git.  
-   - `.env` → DB name, user, password, host.  
-   - `Gemfile` → Rails `~> 8.0.2`, pg, puma, bootsnap, etc.  
-   - `config/database.yml` → postgres adapter, env vars, host=db.  
-   - `bin/docker-entrypoint` → wait for db (`pg_isready`), `bundle check || bundle install`, `bin/rails db:prepare`, then `exec "$@"`.  
-   - `Makefile` (optional) with targets `build`, `up`, `down`, `logs`, `bash`, `reset-db`.  
+### Working with Phlex Components
+When creating or modifying UI components:
+1. Place components in `app/components/`
+2. Inherit from `ApplicationComponent`
+3. Use semantic HTML and Tailwind utilities
+4. Keep components focused and reusable
 
-3. **Rails Initialization**  
-   - Scaffold with `rails new roadtrip_planner --database=postgresql` (accept defaults for JS = importmap).  
-   - Add a simple `PagesController#home`, root route to `home`, and a view that displays “Hello from roadtrip_planner!”.  
+Example pattern:
+```ruby
+class ButtonComponent < ApplicationComponent
+  def initialize(text:, variant: :primary)
+    @text = text
+    @variant = variant
+  end
 
-4. **Instructions Section**  
-   - Show how to build and run:  
-     ```bash
-     docker compose build
-     docker compose up
-     ```  
-   - Note: first boot will create DB automatically.  
-   - Access at `http://localhost:3000`.  
+  def view_template
+    button(class: button_classes) { @text }
+  end
 
-5. **Sanity Check Section**  
-   - `docker compose ps` shows healthy db + running web.  
-   - Visit `/` → page loads with “Hello from roadtrip_planner!”.  
-   - Restart doesn’t reinstall gems (thanks to cache volume).  
+  private
 
----
+  def button_classes
+    # Tailwind classes based on variant
+  end
+end
+```
 
-## Acceptance Criteria
-- One command (`docker compose up`) starts everything.  
-- No system dependencies beyond Docker + Compose.  
-- PostgreSQL auto-prepared.  
-- Live reload works from mounted volume.  
+### Database Considerations
+- Always use migrations for schema changes
+- PostgreSQL 17 specific features are available
+- Use strong parameters in controllers
+- Follow Rails conventions for associations
 
----
+### Docker Development
+- All commands should be run inside containers
+- Use `docker compose exec web` for Rails commands
+- Volumes persist gems and node_modules for performance
+- Database runs in separate container
 
-## Key Improvements
-- Project explicitly named `roadtrip_planner`.  
-- Version pinning for long-term reproducibility.  
-- Minimal, Docker-only, Importmap-ready.  
-- Entrypoint ensures DB is ready and app boots cleanly.  
+### Testing Best Practices
+- Write request specs for new features
+- Use factories instead of fixtures
+- Test user interactions, not implementation
+- Keep specs focused and readable
 
----
+## Current Application State
 
-## Techniques Applied
-Role assignment, task decomposition, constraint pinning, structured deliverables, acceptance criteria.  
+### ✅ Completed Features
+- Rails 8 application scaffolding
+- Docker containerization with compose
+- PostgreSQL 17 database setup
+- User authentication system (register/login/logout)
+- Phlex component architecture
+- Tailwind CSS v4 integration
+- RSpec test suite setup
+- Basic navigation and layout components
 
----
+### 🚧 In Progress
+- None currently
 
-## Pro Tip
-After generation, commit all files immediately so you can safely extend from a clean baseline.
+### 📋 Planned Features
+These features are planned but not yet implemented:
+- Trip planning functionality
+- Route mapping integration
+- Accommodation booking
+- Expense tracking
+- Trip sharing and collaboration
+- Photo galleries
+- Offline mode support
+
+## File Organization
+
+```
+app/
+├── components/        # Phlex view components
+│   ├── layouts/      # Layout components
+│   ├── shared/       # Shared/common components
+│   └── features/     # Feature-specific components
+├── controllers/      # Rails controllers
+├── models/          # ActiveRecord models
+└── javascript/      # Stimulus controllers
+
+spec/
+├── components/      # Component specs
+├── requests/        # Request/integration specs
+├── models/         # Model specs
+└── factories/      # FactoryBot definitions
+```
+
+## Common Tasks
+
+### Adding a New Feature
+1. Create migration if database changes needed
+2. Add model with validations and associations
+3. Create Phlex components for UI
+4. Add controller actions
+5. Write request specs
+6. Add routes
+
+### Modifying Styles
+1. Edit `tailwind.config.js` for theme customization
+2. Use Tailwind utilities in Phlex components
+3. Run `npm run build-css` to rebuild in development
+
+### Running Tests
+```bash
+docker compose exec web rspec
+docker compose exec web rspec spec/requests/
+docker compose exec web rubocop
+```
+
+## Performance Considerations
+
+- Use Stimulus for JavaScript interactions (already set up)
+- Leverage Turbo for SPA-like navigation
+- Implement caching strategies with Solid Cache
+- Use Active Job with Solid Queue for background jobs
+
+## Security Notes
+
+- Never commit secrets to the repository
+- Use Rails credentials for sensitive configuration
+- Implement strong parameters in all controllers
+- Use CSRF protection (enabled by default)
+- Sanitize user input in components
+
+## Deployment Preparation
+
+When ready for deployment:
+1. Set up production credentials
+2. Configure Kamal for deployment (gem already included)
+3. Set up production database
+4. Configure CDN for assets
+5. Set up monitoring and error tracking
+
+## Important Reminders
+
+- Always run commands inside Docker containers
+- Test changes with `docker compose up` before committing
+- Follow Rails conventions and best practices
+- Keep components small and focused
+- Write tests for new functionality
+- Update this file when making architectural changes
+
+## Getting Help
+
+- Rails 8 guides: https://guides.rubyonrails.org/
+- Phlex documentation: https://www.phlex.fun/
+- Tailwind CSS v4: https://tailwindcss.com/docs
+- Docker Compose: https://docs.docker.com/compose/

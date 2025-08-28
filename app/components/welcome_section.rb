@@ -1,4 +1,8 @@
-class WelcomeSection < Phlex::HTML
+class WelcomeSection < ApplicationComponent
+  def initialize(current_user: nil)
+    @current_user = current_user
+  end
+
   def view_template
     div class: "min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8" do
       div class: "max-w-4xl mx-auto text-center" do
@@ -50,13 +54,43 @@ class WelcomeSection < Phlex::HTML
 
         # Call to action
         div class: "mt-12 animate-bounce-in animate-delay-800" do
-          button class: "group relative inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white transition-all duration-300 bg-gradient-to-r from-primary-600 to-accent-600 rounded-full hover:from-primary-700 hover:to-accent-700 hover:shadow-2xl hover:scale-105 focus:outline-none focus:ring-4 focus:ring-primary-300" do
-            span class: "relative z-10" do
-              "Start Your Journey"
+          if @current_user
+            div class: "space-y-4" do
+              h4 class: "text-xl font-medium text-gray-700" do
+                "Welcome back, #{@current_user.username}!"
+              end
+              p class: "text-gray-600" do
+                "Ready to plan your next adventure?"
+              end
+              button class: "group relative inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white transition-all duration-300 bg-gradient-to-r from-primary-600 to-accent-600 rounded-full hover:from-primary-700 hover:to-accent-700 hover:shadow-2xl hover:scale-105 focus:outline-none focus:ring-4 focus:ring-primary-300" do
+                span class: "relative z-10" do
+                  "Start Planning"
+                end
+                # Animated background
+                div class: "absolute inset-0 rounded-full bg-gradient-to-r from-primary-400 to-accent-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse"
+              end
             end
+          else
+            div class: "space-y-4" do
+              p class: "text-gray-600 mb-6" do
+                "Join thousands of travelers planning amazing roadtrips!"
+              end
+              div class: "flex flex-col sm:flex-row gap-4 justify-center items-center" do
+                link_to register_path,
+                       class: "group relative inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white transition-all duration-300 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full hover:from-blue-700 hover:to-purple-700 hover:shadow-2xl hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300" do
+                  span class: "relative z-10" do
+                    "Get Started"
+                  end
+                  # Animated background
+                  div class: "absolute inset-0 rounded-full bg-gradient-to-r from-blue-400 to-purple-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse"
+                end
 
-            # Animated background
-            div class: "absolute inset-0 rounded-full bg-gradient-to-r from-primary-400 to-accent-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse"
+                link_to login_path,
+                       class: "inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-blue-600 transition-all duration-300 bg-white border-2 border-blue-600 rounded-full hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-300" do
+                  "Sign In"
+                end
+              end
+            end
           end
         end
       end

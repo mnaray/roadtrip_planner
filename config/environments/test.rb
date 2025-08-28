@@ -6,6 +6,9 @@
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
+  # Skip the HostAuthorization middleware entirely in test environment
+  config.middleware.delete ActionDispatch::HostAuthorization
+
   # While tests run files are not watched, reloading is not necessary.
   config.enable_reloading = false
 
@@ -25,8 +28,12 @@ Rails.application.configure do
   # Render exception templates for rescuable exceptions and raise for other exceptions.
   config.action_dispatch.show_exceptions = :rescuable
 
+
   # Disable request forgery protection in test environment.
   config.action_controller.allow_forgery_protection = false
+
+  # Disable host authorization entirely in test environment
+  config.hosts = nil
 
   # Store uploaded files on the local file system in a temporary directory.
   config.active_storage.service = :test
