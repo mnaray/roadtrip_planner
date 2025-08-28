@@ -3,7 +3,7 @@ class ApplicationLayout < Phlex::HTML
   include Phlex::Rails::Helpers::CSPMetaTag
   include Phlex::Rails::Helpers::StylesheetLinkTag
   include Phlex::Rails::Helpers::JavascriptImportmapTags
-  
+
   register_value_helper :flash
 
   def initialize(title: "App", current_user: nil)

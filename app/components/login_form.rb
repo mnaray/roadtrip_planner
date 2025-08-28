@@ -1,6 +1,6 @@
 class LoginForm < ApplicationComponent
   register_value_helper :flash
-  
+
   def initialize(username: nil)
     @username = username
   end
