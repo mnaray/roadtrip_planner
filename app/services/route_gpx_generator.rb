@@ -20,9 +20,9 @@ class RouteGpxGenerator
     route_data = fetch_route_data(start_coords, end_coords)
 
     # Check for coordinates with both string and symbol keys for compatibility
-    has_coordinates = route_data && route_data[:geometry] && 
+    has_coordinates = route_data && route_data[:geometry] &&
                      (route_data[:geometry]["coordinates"] || route_data[:geometry][:coordinates])
-    
+
     if has_coordinates
       generate_gpx_with_route(route_data)
     else
@@ -36,7 +36,7 @@ class RouteGpxGenerator
     coordinates = route_data[:geometry]["coordinates"] || route_data[:geometry][:coordinates]
     distance = route_data[:distance]
     duration = route_data[:duration]
-    
+
     Rails.logger.info "RouteGpxGenerator: Building GPX with #{coordinates.length} track points" if defined?(Rails) && coordinates
 
     builder = Nokogiri::XML::Builder.new(encoding: "UTF-8") do |xml|
@@ -171,7 +171,7 @@ class RouteGpxGenerator
 
     # OSRM expects lon,lat order in URL
     url = "https://router.project-osrm.org/route/v1/driving/#{start_lon},#{start_lat};#{end_lon},#{end_lat}?overview=full&geometries=geojson"
-    
+
     Rails.logger.info "RouteGpxGenerator: Fetching route from OSRM: #{url}" if defined?(Rails)
     response = Net::HTTP.get_response(URI(url))
     return nil unless response.code == "200"
@@ -181,7 +181,7 @@ class RouteGpxGenerator
     if data["routes"] && data["routes"].any?
       route = data["routes"][0]
       geometry = route["geometry"]
-      
+
       if geometry && geometry["coordinates"]
         Rails.logger.info "RouteGpxGenerator: Retrieved #{geometry["coordinates"].length} points from OSRM" if defined?(Rails)
         {

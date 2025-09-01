@@ -205,6 +205,7 @@ RSpec.describe RouteGpxGenerator, type: :service do
       end
 
       it "includes actual distance and duration in track description" do
+        gpx_content = generator.generate
         doc = parse_gpx(gpx_content)
 
         track = doc.at_xpath("//xmlns:trk")
@@ -222,6 +223,7 @@ RSpec.describe RouteGpxGenerator, type: :service do
         end
 
         it "returns fallback GPX" do
+          gpx_content = generator.generate
           doc = parse_gpx(gpx_content)
 
           # Should still have valid GPX structure
@@ -249,6 +251,7 @@ RSpec.describe RouteGpxGenerator, type: :service do
         end
 
         it "still generates valid GPX structure" do
+          gpx_content = generator.generate
           expect { parse_gpx(gpx_content) }.not_to raise_error
         end
       end

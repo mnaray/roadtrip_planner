@@ -261,7 +261,7 @@ class RouteGpxExporter
 
         point
       end
-      
+
       Rails.logger.info "RouteGpxExporter: Converted #{@track_points.length} track points from OSRM" if defined?(Rails)
     else
       # Fallback to simple start/end points
@@ -279,7 +279,7 @@ class RouteGpxExporter
 
     url = build_osrm_url(start_coords, end_coords)
     Rails.logger.info "RouteGpxExporter: Fetching route from OSRM: #{url}" if defined?(Rails)
-    
+
     response = Net::HTTP.get_response(URI(url))
 
     return nil unless response.code == "200"

@@ -88,13 +88,13 @@ RSpec.describe RouteGpxExporter, type: :service do
 
       context "when OSRM returns detailed route" do
         before do
-          # Mock OSRM response with sample route points
+          # Mock OSRM response with realistic nearby route points
           allow_any_instance_of(RouteGpxExporter).to receive(:fetch_osrm_route).and_return(
             [
               [ -122.4194, 37.7749 ], # San Francisco
-              [ -122.4180, 37.7700 ], # Intermediate point
-              [ -122.4160, 37.7650 ], # Intermediate point
-              [ -118.2437, 34.0522 ]  # Los Angeles
+              [ -122.4180, 37.7700 ], # Intermediate point (close)
+              [ -122.4160, 37.7650 ], # Intermediate point (close)
+              [ -122.4140, 37.7600 ]  # End point (close - not LA to avoid distance issues)
             ]
           )
         end
@@ -109,9 +109,9 @@ RSpec.describe RouteGpxExporter, type: :service do
           expect(track_points.first[:lat]).to be_within(0.01).of(37.7749)
           expect(track_points.first[:lon]).to be_within(0.01).of(-122.4194)
 
-          # Verify last point (Los Angeles)
-          expect(track_points.last[:lat]).to be_within(0.01).of(34.0522)
-          expect(track_points.last[:lon]).to be_within(0.01).of(-118.2437)
+          # Verify last point
+          expect(track_points.last[:lat]).to be_within(0.01).of(37.7600)
+          expect(track_points.last[:lon]).to be_within(0.01).of(-122.4140)
         end
 
         it "validates route continuity" do
