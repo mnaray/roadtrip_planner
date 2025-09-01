@@ -96,18 +96,35 @@ RSpec.describe RoadTrip, type: :model do
     end
   end
 
-  describe '#total_distance_placeholder' do
+  describe '#total_distance' do
     let(:road_trip) { create(:road_trip) }
 
-    it 'returns a placeholder calculation based on route count' do
-      create(:route, road_trip: road_trip, user: road_trip.user, datetime: 1.hour.from_now)
-      create(:route, road_trip: road_trip, user: road_trip.user, datetime: 4.hours.from_now)
-      create(:route, road_trip: road_trip, user: road_trip.user, datetime: 7.hours.from_now)
-      expect(road_trip.total_distance_placeholder).to eq(300)
+    it 'returns the sum of all route distances' do
+      route1 = create(:route, road_trip: road_trip, user: road_trip.user, datetime: 1.hour.from_now)
+      route2 = create(:route, road_trip: road_trip, user: road_trip.user, datetime: 4.hours.from_now)
+      route3 = create(:route, road_trip: road_trip, user: road_trip.user, datetime: 7.hours.from_now)
+      
+      # Mock the distance values
+      allow(route1).to receive(:distance_in_km).and_return(120.5)
+      allow(route2).to receive(:distance_in_km).and_return(85.3)
+      allow(route3).to receive(:distance_in_km).and_return(200.7)
+      
+      # Need to reload to get the mocked routes
+      allow(road_trip).to receive(:routes).and_return([route1, route2, route3])
+      
+      expect(road_trip.total_distance).to eq(406.5)
     end
 
-    it 'returns 0 for no routes' do
-      expect(road_trip.total_distance_placeholder).to eq(0)
+    it 'returns 0.0 for no routes' do
+      expect(road_trip.total_distance).to eq(0.0)
+    end
+    
+    it 'handles nil distances gracefully' do
+      route = create(:route, road_trip: road_trip, user: road_trip.user, datetime: 1.hour.from_now)
+      allow(route).to receive(:distance_in_km).and_return(nil)
+      allow(road_trip).to receive(:routes).and_return([route])
+      
+      expect(road_trip.total_distance).to eq(0.0)
     end
   end
 end

@@ -170,4 +170,79 @@ RSpec.describe Route, type: :model do
       expect(route.duration_hours).to eq(2)
     end
   end
+
+  describe '#distance_in_km' do
+    let(:user) { create(:user) }
+    let(:road_trip) { create(:road_trip, user: user) }
+    let(:route) { create(:route, user: user, road_trip: road_trip) }
+    
+    context 'when distance is already stored' do
+      before { route.update_column(:distance, 150.5) }
+      
+      it 'returns the stored distance' do
+        expect(route.distance_in_km).to eq(150.5)
+      end
+    end
+    
+    context 'when distance is not stored' do
+      before { route.update_column(:distance, nil) }
+      
+      it 'calculates and saves the distance' do
+        calculator = instance_double(RouteDistanceCalculator)
+        allow(RouteDistanceCalculator).to receive(:new)
+          .with(route.starting_location, route.destination)
+          .and_return(calculator)
+        allow(calculator).to receive(:calculate).and_return(120.5)
+        
+        expect(route.distance_in_km).to eq(120.5)
+        expect(route.reload.distance).to eq(120.5)
+      end
+    end
+  end
+  
+  describe 'distance calculation on save' do
+    let(:user) { create(:user) }
+    let(:road_trip) { create(:road_trip, user: user) }
+    
+    it 'calculates distance when creating a new route' do
+      calculator = instance_double(RouteDistanceCalculator)
+      allow(RouteDistanceCalculator).to receive(:new)
+        .with("New York", "Boston")
+        .and_return(calculator)
+      allow(calculator).to receive(:calculate).and_return(250.0)
+      
+      route = Route.create!(
+        starting_location: "New York",
+        destination: "Boston",
+        datetime: 1.hour.from_now,
+        road_trip: road_trip,
+        user: user
+      )
+      
+      expect(route.distance).to eq(250.0)
+    end
+    
+    it 'recalculates distance when locations change' do
+      route = create(:route, user: user, road_trip: road_trip)
+      route.update_column(:distance, 100.0)
+      
+      calculator = instance_double(RouteDistanceCalculator)
+      allow(RouteDistanceCalculator).to receive(:new)
+        .with("Chicago", route.destination)
+        .and_return(calculator)
+      allow(calculator).to receive(:calculate).and_return(300.0)
+      
+      route.update!(starting_location: "Chicago")
+      expect(route.distance).to eq(300.0)
+    end
+    
+    it 'does not recalculate if locations do not change' do
+      route = create(:route, user: user, road_trip: road_trip)
+      route.update_column(:distance, 100.0)
+      
+      expect(RouteDistanceCalculator).not_to receive(:new)
+      route.update!(datetime: 5.hours.from_now)
+      expect(route.distance).to eq(100.0)
+    end
+  end
 end

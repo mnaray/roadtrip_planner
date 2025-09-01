@@ -72,7 +72,7 @@ class RoadTrips::IndexComponent < ApplicationComponent
                      stroke_linecap: "round",
                      stroke_linejoin: "round",
                      stroke_width: "2"
-            "~#{road_trip.total_distance_placeholder} miles"
+            "#{road_trip.total_distance} km"
           end
         end
 

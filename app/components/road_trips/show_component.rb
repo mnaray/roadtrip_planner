@@ -75,10 +75,10 @@ class RoadTrips::ShowComponent < ApplicationComponent
 
             div class: "text-center" do
               div class: "text-2xl font-bold text-green-600" do
-                "~#{@road_trip.total_distance_placeholder}"
+                "#{@road_trip.total_distance} km"
               end
               div class: "text-sm text-gray-600" do
-                "Miles"
+                "Total Distance"
               end
             end
 

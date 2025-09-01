@@ -8,6 +8,8 @@ class Route < ApplicationRecord
   validate :datetime_not_overlapping_with_other_routes, unless: -> { validation_context == :location_only }
   validate :user_matches_road_trip_user
 
+  before_save :calculate_distance, if: :locations_changed?
+
   scope :for_user, ->(user) { where(user: user) }
   scope :ordered_by_datetime, -> { order(:datetime) }
 
@@ -15,7 +17,30 @@ class Route < ApplicationRecord
     2
   end
 
+  def distance_in_km
+    distance || calculate_and_save_distance
+  end
+
   private
+
+  def locations_changed?
+    starting_location_changed? || destination_changed?
+  end
+
+  def calculate_distance
+    return unless starting_location.present? && destination.present?
+    
+    calculator = RouteDistanceCalculator.new(starting_location, destination)
+    self.distance = calculator.calculate
+  end
+
+  def calculate_and_save_distance
+    return nil unless starting_location.present? && destination.present?
+    
+    calculate_distance
+    save if persisted? && distance_changed?
+    distance
+  end
 
   def datetime_not_overlapping_with_other_routes
     return unless datetime && road_trip

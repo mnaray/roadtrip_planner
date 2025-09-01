@@ -6,8 +6,8 @@ class RoadTrip < ApplicationRecord
 
   scope :for_user, ->(user) { where(user: user) }
 
-  def total_distance_placeholder
-    routes.count * 100
+  def total_distance
+    routes.sum { |route| route.distance_in_km.to_f }.round(1)
   end
 
   def day_count
