@@ -49,28 +49,6 @@ const sidebars: SidebarsConfig = {
       label: 'Services',
       items: [
         'services/overview',
-        'services/route-distance-calculator',
-        'services/route-gpx-exporter',
-        'services/route-gpx-generator',
-      ],
-    },
-    {
-      type: 'category',
-      label: 'Components',
-      items: [
-        'components/overview',
-        'components/application-component',
-        'components/layout-components',
-        'components/form-components',
-        'components/feature-components',
-      ],
-    },
-    {
-      type: 'category',
-      label: 'Development',
-      items: [
-        'development/testing',
-        'development/deployment',
       ],
     },
   ],

@@ -103,12 +103,12 @@ const config: Config = {
               to: '/docs/intro',
             },
             {
-              label: 'Architecture',
-              to: '/docs/architecture',
+              label: 'Architecture Overview',
+              to: '/docs/architecture/overview',
             },
             {
-              label: 'Development',
-              to: '/docs/development',
+              label: 'Development Setup',
+              to: '/docs/development-setup',
             },
           ],
         },

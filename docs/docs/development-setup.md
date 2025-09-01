@@ -360,8 +360,8 @@ Once your environment is set up:
 
 1. Explore the [Architecture Overview](./architecture/overview.md)
 2. Learn about [Models](./models/overview.md)
-3. Understand [Components](./components/overview.md)
-4. Review [Testing Guidelines](./development/testing.md)
+3. Understand [Services](./services/overview.md)
+4. Review Testing Guidelines (coming soon)
 
 ## Getting Help
 
