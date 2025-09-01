@@ -165,9 +165,45 @@ RSpec.describe Route, type: :model do
   end
 
   describe '#duration_hours' do
-    it 'returns the default duration' do
-      route = build(:route)
-      expect(route.duration_hours).to eq(2)
+    let(:user) { create(:user) }
+    let(:road_trip) { create(:road_trip, user: user) }
+    let(:route) { create(:route, user: user, road_trip: road_trip) }
+    
+    context 'when duration is already stored' do
+      before { route.update_column(:duration, 3.5) }
+      
+      it 'returns the stored duration' do
+        expect(route.duration_hours).to eq(3.5)
+      end
+    end
+    
+    context 'when duration is not stored' do
+      before { route.update_column(:duration, nil) }
+      
+      it 'calculates and saves the duration' do
+        calculator = instance_double(RouteDistanceCalculator)
+        allow(RouteDistanceCalculator).to receive(:new)
+          .with(route.starting_location, route.destination)
+          .and_return(calculator)
+        allow(calculator).to receive(:calculate).and_return({ distance: 120.5, duration: 2.5 })
+        
+        expect(route.duration_hours).to eq(2.5)
+        expect(route.reload.duration).to eq(2.5)
+      end
+    end
+    
+    context 'when no route data is available' do
+      before { route.update_columns(duration: nil, distance: nil) }
+      
+      it 'returns default duration of 2 hours' do
+        calculator = instance_double(RouteDistanceCalculator)
+        allow(RouteDistanceCalculator).to receive(:new)
+          .with(route.starting_location, route.destination)
+          .and_return(calculator)
+        allow(calculator).to receive(:calculate).and_return({ distance: nil, duration: nil })
+        
+        expect(route.duration_hours).to eq(2.0)
+      end
     end
   end
 
@@ -192,7 +228,7 @@ RSpec.describe Route, type: :model do
         allow(RouteDistanceCalculator).to receive(:new)
           .with(route.starting_location, route.destination)
           .and_return(calculator)
-        allow(calculator).to receive(:calculate).and_return(120.5)
+        allow(calculator).to receive(:calculate).and_return({ distance: 120.5, duration: 2.5 })
         
         expect(route.distance_in_km).to eq(120.5)
         expect(route.reload.distance).to eq(120.5)
@@ -204,12 +240,12 @@ RSpec.describe Route, type: :model do
     let(:user) { create(:user) }
     let(:road_trip) { create(:road_trip, user: user) }
     
-    it 'calculates distance when creating a new route' do
+    it 'calculates distance and duration when creating a new route' do
       calculator = instance_double(RouteDistanceCalculator)
       allow(RouteDistanceCalculator).to receive(:new)
         .with("New York", "Boston")
         .and_return(calculator)
-      allow(calculator).to receive(:calculate).and_return(250.0)
+      allow(calculator).to receive(:calculate).and_return({ distance: 250.0, duration: 4.5 })
       
       route = Route.create!(
         starting_location: "New York",
@@ -220,29 +256,32 @@ RSpec.describe Route, type: :model do
       )
       
       expect(route.distance).to eq(250.0)
+      expect(route.duration).to eq(4.5)
     end
     
-    it 'recalculates distance when locations change' do
+    it 'recalculates distance and duration when locations change' do
       route = create(:route, user: user, road_trip: road_trip)
-      route.update_column(:distance, 100.0)
+      route.update_columns(distance: 100.0, duration: 2.0)
       
       calculator = instance_double(RouteDistanceCalculator)
       allow(RouteDistanceCalculator).to receive(:new)
         .with("Chicago", route.destination)
         .and_return(calculator)
-      allow(calculator).to receive(:calculate).and_return(300.0)
+      allow(calculator).to receive(:calculate).and_return({ distance: 300.0, duration: 5.5 })
       
       route.update!(starting_location: "Chicago")
       expect(route.distance).to eq(300.0)
+      expect(route.duration).to eq(5.5)
     end
     
     it 'does not recalculate if locations do not change' do
       route = create(:route, user: user, road_trip: road_trip)
-      route.update_column(:distance, 100.0)
+      route.update_columns(distance: 100.0, duration: 2.0)
       
       expect(RouteDistanceCalculator).not_to receive(:new)
       route.update!(datetime: 5.hours.from_now)
       expect(route.distance).to eq(100.0)
+      expect(route.duration).to eq(2.0)
     end
   end
 end

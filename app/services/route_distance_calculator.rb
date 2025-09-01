@@ -3,25 +3,40 @@ require 'json'
 require 'uri'
 
 class RouteDistanceCalculator
+  attr_reader :distance_km, :duration_hours
+  
   def initialize(starting_location, destination)
     @starting_location = starting_location
     @destination = destination
+    @distance_km = nil
+    @duration_hours = nil
   end
 
   def calculate
     start_coords = geocode(@starting_location)
     end_coords = geocode(@destination)
     
-    return nil unless start_coords && end_coords
+    return { distance: nil, duration: nil } unless start_coords && end_coords
     
     # Try primary routing service
-    distance = fetch_route_distance_osrm(start_coords, end_coords)
+    route_data = fetch_route_data_osrm(start_coords, end_coords)
     
-    # Fallback to straight-line distance if routing fails
-    distance ||= calculate_straight_line_distance(start_coords, end_coords)
+    # Fallback to straight-line calculations if routing fails
+    route_data ||= calculate_straight_line_estimates(start_coords, end_coords)
     
-    # Convert from meters to kilometers
-    distance ? (distance / 1000.0).round(1) : nil
+    if route_data
+      # Convert from meters to kilometers and seconds to hours
+      @distance_km = route_data[:distance] ? (route_data[:distance] / 1000.0).round(1) : nil
+      @duration_hours = route_data[:duration] ? (route_data[:duration] / 3600.0).round(2) : nil
+    end
+    
+    { distance: @distance_km, duration: @duration_hours }
+  end
+
+  # Legacy method for backward compatibility
+  def calculate_distance_only
+    result = calculate
+    result[:distance]
   end
 
   private
@@ -47,7 +62,7 @@ class RouteDistanceCalculator
     nil
   end
 
-  def fetch_route_distance_osrm(start_coords, end_coords)
+  def fetch_route_data_osrm(start_coords, end_coords)
     start_lat, start_lon = start_coords
     end_lat, end_lon = end_coords
     
@@ -65,11 +80,23 @@ class RouteDistanceCalculator
     data = JSON.parse(response.body)
     return nil unless data['routes'] && data['routes'].any?
     
-    # Distance is returned in meters
-    data['routes'][0]['distance']
+    route = data['routes'][0]
+    # Distance is in meters, duration is in seconds
+    { distance: route['distance'], duration: route['duration'] }
   rescue StandardError => e
     Rails.logger.error "OSRM routing error: #{e.message}"
     nil
+  end
+
+  def calculate_straight_line_estimates(start_coords, end_coords)
+    distance_meters = calculate_straight_line_distance(start_coords, end_coords)
+    
+    # Estimate duration based on average driving speed
+    # Assuming 60 km/h average speed for estimation
+    average_speed_mps = 60 / 3.6  # Convert km/h to m/s
+    estimated_duration_seconds = distance_meters / average_speed_mps
+    
+    { distance: distance_meters, duration: estimated_duration_seconds }
   end
 
   def calculate_straight_line_distance(start_coords, end_coords)
