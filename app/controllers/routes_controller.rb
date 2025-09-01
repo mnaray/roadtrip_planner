@@ -1,7 +1,7 @@
 class RoutesController < ApplicationController
   before_action :require_login
   before_action :set_road_trip, only: [ :new, :create ]
-  before_action :set_route, only: [ :show, :edit, :update, :destroy, :map ]
+  before_action :set_route, only: [ :show, :edit, :update, :destroy, :map, :export_gpx ]
   before_action :set_route_for_confirmation, only: [ :confirm_route, :approve_route ]
 
   def new
@@ -79,6 +79,18 @@ class RoutesController < ApplicationController
 
   def map
     render Routes::MapComponent.new(route: @route, current_user: current_user)
+  end
+
+  def export_gpx
+    gpx_generator = RouteGpxGenerator.new(@route)
+    gpx_content = gpx_generator.generate
+
+    filename = "route_#{@route.id}_#{@route.starting_location.parameterize}_to_#{@route.destination.parameterize}.gpx"
+
+    send_data gpx_content,
+              filename: filename,
+              type: "application/gpx+xml",
+              disposition: "attachment"
   end
 
   private

@@ -147,6 +147,16 @@ class Routes::MapComponent < ApplicationComponent
                 "Edit Route"
               end
 
+              link_to route_export_gpx_path(@route),
+                      class: "inline-flex items-center px-3 py-2 border border-green-300 text-sm font-medium rounded-md text-green-700 bg-white hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2" do
+                svg_icon path_d: "M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
+                         class: "w-4 h-4 mr-1.5",
+                         stroke_linecap: "round",
+                         stroke_linejoin: "round",
+                         stroke_width: "2"
+                "Download GPX"
+              end
+
               link_to route_path(@route),
                       method: :delete,
                       class: "inline-flex items-center px-3 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2",
