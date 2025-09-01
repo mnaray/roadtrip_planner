@@ -2,6 +2,7 @@ class RoutesController < ApplicationController
   before_action :require_login
   before_action :set_road_trip, only: [ :new, :create ]
   before_action :set_route, only: [ :show, :edit, :update, :destroy, :map, :export_gpx ]
+  before_action :set_road_trip_for_route, only: [ :edit, :update ]
   before_action :set_route_for_confirmation, only: [ :confirm_route, :approve_route ]
 
   def new
@@ -105,6 +106,10 @@ class RoutesController < ApplicationController
     @route = current_user.routes.find(params[:id])
   rescue ActiveRecord::RecordNotFound
     redirect_to road_trips_path, alert: "Route not found."
+  end
+
+  def set_road_trip_for_route
+    @road_trip = @route.road_trip
   end
 
   def set_route_for_confirmation

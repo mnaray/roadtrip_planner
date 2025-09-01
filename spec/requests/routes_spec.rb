@@ -128,11 +128,15 @@ RSpec.describe "Routes", type: :request do
 
       context "with route data in session" do
         before do
-          session[:route_data] = {
-            "road_trip_id" => road_trip.id,
-            "starting_location" => "San Francisco, CA",
-            "destination" => "Los Angeles, CA"
+          # Set up session data by following the actual flow (POST to create route first)
+          post road_trip_routes_path(road_trip), params: {
+            route: {
+              starting_location: "San Francisco, CA",
+              destination: "Los Angeles, CA"
+            }
           }
+          # The create action should set session data and redirect to confirm_route
+          expect(response).to redirect_to(confirm_route_path)
         end
 
         it "returns successful response" do
@@ -171,13 +175,6 @@ RSpec.describe "Routes", type: :request do
       before { sign_in_user(user) }
 
       context "with valid route data and datetime" do
-        before do
-          session[:route_data] = {
-            "road_trip_id" => road_trip.id,
-            "starting_location" => "San Francisco, CA",
-            "destination" => "Los Angeles, CA"
-          }
-        end
 
         let(:datetime_param) { 2.hours.from_now.strftime("%Y-%m-%dT%H:%M") }
 
@@ -246,11 +243,6 @@ RSpec.describe "Routes", type: :request do
 
         before do
           existing_route # Ensure it exists
-          session[:route_data] = {
-            "road_trip_id" => road_trip.id,
-            "starting_location" => "San Francisco, CA",
-            "destination" => "Los Angeles, CA"
-          }
         end
 
         it "does not create route" do

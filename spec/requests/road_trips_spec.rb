@@ -1,4 +1,5 @@
 require 'rails_helper'
+require 'cgi'
 
 RSpec.describe "RoadTrips", type: :request do
   let(:user) { create(:user) }
@@ -26,8 +27,9 @@ RSpec.describe "RoadTrips", type: :request do
 
         get road_trips_path
 
-        expect(response.body).to include(user_road_trip.name)
-        expect(response.body).not_to include(other_road_trip.name)
+        # Check for HTML-escaped version since apostrophes are escaped in HTML
+        expect(response.body).to include(CGI.escapeHTML(user_road_trip.name))
+        expect(response.body).not_to include(CGI.escapeHTML(other_road_trip.name))
       end
     end
 
@@ -50,7 +52,7 @@ RSpec.describe "RoadTrips", type: :request do
         end
 
         it "displays road trip with routes ordered by datetime" do
-          route1 = create(:route, road_trip: road_trip, user: user, datetime: 2.hours.from_now)
+          route1 = create(:route, road_trip: road_trip, user: user, datetime: 5.hours.from_now)
           route2 = create(:route, road_trip: road_trip, user: user, datetime: 1.hour.from_now)
 
           get road_trip_path(road_trip)
