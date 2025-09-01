@@ -12,10 +12,9 @@ class RoadTrip < ApplicationRecord
 
   def day_count
     return 0 if routes.empty?
+    return 1 if routes.count == 1
     
     sorted_routes = routes.order(:datetime)
-    return 1 if sorted_routes.count == 1
-    
     start_date = sorted_routes.first.datetime.to_date
     end_date = sorted_routes.last.datetime.to_date
     (end_date - start_date).to_i + 1
