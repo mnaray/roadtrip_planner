@@ -72,9 +72,10 @@ RSpec.describe RoadTrip, type: :model do
       let(:start_time) { Time.current.beginning_of_day }
 
       before do
-        create(:route, road_trip: road_trip, user: road_trip.user, datetime: start_time)
-        create(:route, road_trip: road_trip, user: road_trip.user, datetime: start_time + 1.day)
-        create(:route, road_trip: road_trip, user: road_trip.user, datetime: start_time + 3.days)
+        # Create routes without validation to test day count logic
+        build(:route, road_trip: road_trip, user: road_trip.user, datetime: start_time + 8.hours).save!(validate: false)
+        build(:route, road_trip: road_trip, user: road_trip.user, datetime: start_time + 1.day + 8.hours).save!(validate: false)
+        build(:route, road_trip: road_trip, user: road_trip.user, datetime: start_time + 3.days + 8.hours).save!(validate: false)
       end
 
       it 'returns the correct day span' do
@@ -86,8 +87,9 @@ RSpec.describe RoadTrip, type: :model do
       let(:start_time) { Time.current.beginning_of_day }
 
       before do
-        create(:route, road_trip: road_trip, user: road_trip.user, datetime: start_time + 8.hours)
-        create(:route, road_trip: road_trip, user: road_trip.user, datetime: start_time + 14.hours)
+        # Create routes without validation to test day count logic
+        build(:route, road_trip: road_trip, user: road_trip.user, datetime: start_time + 8.hours).save!(validate: false)
+        build(:route, road_trip: road_trip, user: road_trip.user, datetime: start_time + 12.hours).save!(validate: false)
       end
 
       it 'returns 1' do
@@ -100,30 +102,33 @@ RSpec.describe RoadTrip, type: :model do
     let(:road_trip) { create(:road_trip) }
 
     it 'returns the sum of all route distances' do
-      route1 = create(:route, road_trip: road_trip, user: road_trip.user, datetime: 1.hour.from_now)
-      route2 = create(:route, road_trip: road_trip, user: road_trip.user, datetime: 4.hours.from_now)
-      route3 = create(:route, road_trip: road_trip, user: road_trip.user, datetime: 7.hours.from_now)
-      
+      route1 = build(:route, road_trip: road_trip, user: road_trip.user, datetime: 1.hour.from_now)
+      route1.save!(validate: false)  # Skip overlap validation for this test
+      route2 = build(:route, road_trip: road_trip, user: road_trip.user, datetime: 5.hours.from_now)
+      route2.save!(validate: false)  # Skip overlap validation for this test
+      route3 = build(:route, road_trip: road_trip, user: road_trip.user, datetime: 9.hours.from_now)
+      route3.save!(validate: false)  # Skip overlap validation for this test
+
       # Mock the distance values
       allow(route1).to receive(:distance_in_km).and_return(120.5)
       allow(route2).to receive(:distance_in_km).and_return(85.3)
       allow(route3).to receive(:distance_in_km).and_return(200.7)
-      
+
       # Need to reload to get the mocked routes
-      allow(road_trip).to receive(:routes).and_return([route1, route2, route3])
-      
+      allow(road_trip).to receive(:routes).and_return([ route1, route2, route3 ])
+
       expect(road_trip.total_distance).to eq(406.5)
     end
 
     it 'returns 0.0 for no routes' do
       expect(road_trip.total_distance).to eq(0.0)
     end
-    
+
     it 'handles nil distances gracefully' do
       route = create(:route, road_trip: road_trip, user: road_trip.user, datetime: 1.hour.from_now)
       allow(route).to receive(:distance_in_km).and_return(nil)
-      allow(road_trip).to receive(:routes).and_return([route])
-      
+      allow(road_trip).to receive(:routes).and_return([ route ])
+
       expect(road_trip.total_distance).to eq(0.0)
     end
   end

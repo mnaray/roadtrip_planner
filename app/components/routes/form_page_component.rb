@@ -23,7 +23,7 @@ class Routes::FormPageComponent < ApplicationComponent
                 @road_trip.name
               end
             end
-            
+
             if @current_user
               div class: "flex items-center space-x-4" do
                 span class: "text-gray-700" do
@@ -50,17 +50,16 @@ class Routes::FormPageComponent < ApplicationComponent
           end
 
           # Form
-          form_with model: [@road_trip, @route], 
-                    local: true, 
+          form_with model: [ @road_trip, @route ],
+                    local: true,
                     class: "space-y-6" do |form|
-            
             # Starting Location
             div do
-              form.label :starting_location, 
+              form.label :starting_location,
                          class: "block text-sm font-medium text-gray-700 mb-2" do
                 "Starting Location"
               end
-              
+
               form.text_field :starting_location,
                               class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
                               placeholder: "e.g., San Francisco, CA",
@@ -80,7 +79,7 @@ class Routes::FormPageComponent < ApplicationComponent
                          class: "block text-sm font-medium text-gray-700 mb-2" do
                 "Destination"
               end
-              
+
               form.text_field :destination,
                               class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
                               placeholder: "e.g., Los Angeles, CA",
@@ -100,7 +99,7 @@ class Routes::FormPageComponent < ApplicationComponent
                            class: "block text-sm font-medium text-gray-700 mb-2" do
                   "Date & Time"
                 end
-                
+
                 form.datetime_local_field :datetime,
                                           class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
                                           required: true

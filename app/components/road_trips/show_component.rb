@@ -113,15 +113,15 @@ class RoadTrips::ShowComponent < ApplicationComponent
                        stroke_linecap: "round",
                        stroke_linejoin: "round",
                        stroke_width: "2"
-              
+
               h3 class: "mt-4 text-lg font-medium text-gray-900" do
                 "No routes yet"
               end
-              
+
               p class: "mt-2 text-sm text-gray-500" do
                 "Add your first route to get started with this road trip."
               end
-              
+
               div class: "mt-6" do
                 link_to new_road_trip_route_path(@road_trip),
                         class: "inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700",
@@ -168,7 +168,7 @@ class RoadTrips::ShowComponent < ApplicationComponent
                 route.destination
               end
             end
-            
+
             div class: "flex items-center text-xs text-gray-500" do
               svg_icon path_d: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
                        class: "w-3 h-3 mr-1",

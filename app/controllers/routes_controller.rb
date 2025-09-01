@@ -1,8 +1,8 @@
 class RoutesController < ApplicationController
   before_action :require_login
-  before_action :set_road_trip, only: [:new, :create]
-  before_action :set_route, only: [:show, :edit, :update, :destroy, :map]
-  before_action :set_route_for_confirmation, only: [:confirm_route, :approve_route]
+  before_action :set_road_trip, only: [ :new, :create ]
+  before_action :set_route, only: [ :show, :edit, :update, :destroy, :map ]
+  before_action :set_route_for_confirmation, only: [ :confirm_route, :approve_route ]
 
   def new
     @route = @road_trip.routes.build
@@ -23,7 +23,7 @@ class RoutesController < ApplicationController
     if @route.valid?(:location_only)
       redirect_to confirm_route_path
     else
-      render Routes::FormPageComponent.new(route: @route, road_trip: @road_trip, current_user: current_user), 
+      render Routes::FormPageComponent.new(route: @route, road_trip: @road_trip, current_user: current_user),
              status: :unprocessable_content
     end
   end
@@ -40,7 +40,7 @@ class RoutesController < ApplicationController
     if @route.update(route_params)
       redirect_to @route.road_trip, notice: "Route was successfully updated."
     else
-      render Routes::FormPageComponent.new(route: @route, road_trip: @route.road_trip, current_user: current_user), 
+      render Routes::FormPageComponent.new(route: @route, road_trip: @route.road_trip, current_user: current_user),
              status: :unprocessable_content
     end
   end
@@ -72,7 +72,7 @@ class RoutesController < ApplicationController
       redirect_to road_trip, notice: "Route was successfully added to your road trip."
     else
       Rails.logger.error "Route validation failed: #{@route.errors.full_messages}"
-      render Routes::ConfirmPageComponent.new(route_data: route_data, route: @route, current_user: current_user), 
+      render Routes::ConfirmPageComponent.new(route_data: route_data, route: @route, current_user: current_user),
              status: :unprocessable_content
     end
   end

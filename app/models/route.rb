@@ -14,7 +14,9 @@ class Route < ApplicationRecord
   scope :ordered_by_datetime, -> { order(:datetime) }
 
   def duration_hours
-    duration || calculate_and_save_route_metrics[:duration] || 2.0
+    # Return stored duration if available, otherwise default to 2 hours
+    # Avoid expensive API calls during validation
+    duration || 2.0
   end
 
   def distance_in_km
@@ -29,23 +31,23 @@ class Route < ApplicationRecord
 
   def calculate_route_metrics
     return unless starting_location.present? && destination.present?
-    
+
     calculator = RouteDistanceCalculator.new(starting_location, destination)
     result = calculator.calculate
-    
+
     self.distance = result[:distance]
     self.duration = result[:duration]
   end
 
   def calculate_and_save_route_metrics
     return { distance: nil, duration: nil } unless starting_location.present? && destination.present?
-    
+
     # Only calculate if we don't have both values
     if distance.nil? || duration.nil?
       calculate_route_metrics
       save if persisted? && (distance_changed? || duration_changed?)
     end
-    
+
     { distance: distance, duration: duration }
   end
 
@@ -53,13 +55,18 @@ class Route < ApplicationRecord
     return unless datetime && road_trip
 
     # Calculate end time using duration_hours which handles nil values
-    end_time = datetime + duration_hours.hours
-    
+    # Use a default of 2 hours if duration is not available
+    my_duration = duration || 2.0
+    end_time = datetime + my_duration.hours
+
+    # Check for overlap: two time ranges [A1,A2] and [B1,B2] overlap if A1 < B2 AND A2 > B1
+    # In our case: new route is [datetime, end_time] and existing route is [existing_start, existing_end]
+    # They overlap if: datetime < existing_end AND end_time > existing_start
     overlapping_routes = road_trip.routes
                                  .where.not(id: id)
                                  .where(
-                                   "(datetime < ? AND datetime + (COALESCE(duration, 2.0) * INTERVAL '1 hour') > ?)",
-                                   end_time, datetime
+                                   "? < datetime + (COALESCE(duration, 2.0) * INTERVAL '1 hour') AND ? > datetime",
+                                   datetime, end_time
                                  )
 
     if overlapping_routes.exists?

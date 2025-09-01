@@ -64,7 +64,7 @@ RSpec.describe "Routes", type: :request do
 
           it "stores route data in session" do
             post road_trip_routes_path(road_trip), params: valid_params
-            
+
             expect(session[:route_data]).to include(
               "road_trip_id" => road_trip.id,
               "starting_location" => "San Francisco, CA",
@@ -189,7 +189,7 @@ RSpec.describe "Routes", type: :request do
               destination: "Los Angeles, CA"
             }
           }
-          
+
           # Then approve the route
           expect {
             post approve_route_path, params: { datetime: datetime_param }
@@ -204,7 +204,7 @@ RSpec.describe "Routes", type: :request do
               destination: "Los Angeles, CA"
             }
           }
-          
+
           post approve_route_path, params: { datetime: datetime_param }
           new_route = Route.last
           expect(new_route.user).to eq(user)
@@ -219,7 +219,7 @@ RSpec.describe "Routes", type: :request do
               destination: "Los Angeles, CA"
             }
           }
-          
+
           post approve_route_path, params: { datetime: datetime_param }
           expect(session[:route_data]).to be_nil
         end
@@ -232,7 +232,7 @@ RSpec.describe "Routes", type: :request do
               destination: "Los Angeles, CA"
             }
           }
-          
+
           post approve_route_path, params: { datetime: datetime_param }
           expect(response).to redirect_to(road_trip_path(road_trip))
           follow_redirect!
@@ -261,7 +261,7 @@ RSpec.describe "Routes", type: :request do
               destination: "Los Angeles, CA"
             }
           }
-          
+
           expect {
             post approve_route_path, params: { datetime: overlapping_datetime.strftime("%Y-%m-%dT%H:%M") }
           }.not_to change(Route, :count)
@@ -275,7 +275,7 @@ RSpec.describe "Routes", type: :request do
               destination: "Los Angeles, CA"
             }
           }
-          
+
           post approve_route_path, params: { datetime: overlapping_datetime.strftime("%Y-%m-%dT%H:%M") }
           expect(response).to have_http_status(:unprocessable_content)
         end
@@ -288,7 +288,7 @@ RSpec.describe "Routes", type: :request do
               destination: "Los Angeles, CA"
             }
           }
-          
+
           post approve_route_path, params: { datetime: overlapping_datetime.strftime("%Y-%m-%dT%H:%M") }
           expect(response.body).to include("overlaps with another route")
         end

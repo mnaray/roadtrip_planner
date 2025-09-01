@@ -42,7 +42,7 @@ RSpec.configure do |config|
     # Disable CSRF protection for request specs
     ActionController::Base.allow_forgery_protection = false
   end
-  
+
   # Re-enable CSRF protection after request specs
   config.after(:each, type: :request) do
     ActionController::Base.allow_forgery_protection = true

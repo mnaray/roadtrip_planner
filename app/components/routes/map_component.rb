@@ -50,7 +50,7 @@ class Routes::MapComponent < ApplicationComponent
             h1 class: "text-2xl font-bold text-gray-900" do
               "#{@route.starting_location} → #{@route.destination}"
             end
-            
+
             p class: "text-sm text-gray-600 mt-1" do
               @route.datetime.strftime("%B %d, %Y at %l:%M %p")
             end
@@ -69,7 +69,7 @@ class Routes::MapComponent < ApplicationComponent
 
         # Map container
         div class: "bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden" do
-          div id: "route-map", 
+          div id: "route-map",
                class: "w-full h-96",
                data: {
                  controller: "route-map",

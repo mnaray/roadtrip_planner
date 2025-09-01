@@ -1,6 +1,6 @@
 class RoadTripsController < ApplicationController
   before_action :require_login
-  before_action :set_road_trip, only: [:show, :edit, :update, :destroy]
+  before_action :set_road_trip, only: [ :show, :edit, :update, :destroy ]
 
   def index
     @road_trips = current_user.road_trips.includes(:routes)
@@ -19,7 +19,7 @@ class RoadTripsController < ApplicationController
 
   def create
     @road_trip = current_user.road_trips.build(road_trip_params)
-    
+
     if @road_trip.save
       redirect_to @road_trip, notice: "Road trip was successfully created."
     else

@@ -25,7 +25,7 @@ RSpec.describe "RoadTrips", type: :request do
         other_road_trip = create(:road_trip, user: other_user, name: "Other's Trip")
 
         get road_trips_path
-        
+
         expect(response.body).to include(user_road_trip.name)
         expect(response.body).not_to include(other_road_trip.name)
       end

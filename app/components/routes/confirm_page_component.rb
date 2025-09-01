@@ -25,7 +25,7 @@ class Routes::ConfirmPageComponent < ApplicationComponent
                 end
               end
             end
-            
+
             if @current_user
               div class: "flex items-center space-x-4" do
                 span class: "text-gray-700" do
@@ -69,7 +69,7 @@ class Routes::ConfirmPageComponent < ApplicationComponent
                 h2 class: "text-lg font-semibold text-gray-900 mb-4" do
                   "Route Details"
                 end
-                
+
                 div class: "bg-gray-50 rounded-lg p-4 space-y-3" do
                   div class: "flex items-start" do
                     svg_icon path_d: "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z",
@@ -117,7 +117,7 @@ class Routes::ConfirmPageComponent < ApplicationComponent
                      } do
                   # Map will be rendered here by Stimulus controller
                 end
-                
+
                 # Map attribution and info
                 div class: "mt-2 text-xs text-gray-500" do
                   "Map data © OpenStreetMap contributors"
@@ -129,13 +129,13 @@ class Routes::ConfirmPageComponent < ApplicationComponent
                 div do
                   form.label :datetime, "Select Date & Time for this Route",
                              class: "block text-sm font-medium text-gray-700 mb-2"
-                  
+
                   form.datetime_local_field :datetime,
                                             class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500",
                                             required: true,
                                             min: DateTime.now.strftime("%Y-%m-%dT%H:%M"),
                                             value: 1.hour.from_now.strftime("%Y-%m-%dT%H:%M")
-                  
+
                   if @route && @route.errors[:datetime].any?
                     div class: "mt-1 text-sm text-red-600" do
                       @route.errors[:datetime].first

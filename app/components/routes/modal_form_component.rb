@@ -22,7 +22,7 @@ class Routes::ModalFormComponent < ApplicationComponent
                     "Add New Route"
                   end
                 end
-                
+
                 link_to @road_trip,
                         class: "rounded-md bg-white text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500",
                         data: { "turbo-frame": "_top" } do
@@ -38,17 +38,16 @@ class Routes::ModalFormComponent < ApplicationComponent
               end
 
               # Form
-              form_with model: [@road_trip, @route], 
-                        local: true, 
+              form_with model: [ @road_trip, @route ],
+                        local: true,
                         data: { "turbo-frame": @is_edit_mode ? "_top" : "modal" },
                         class: "space-y-4" do |form|
-                
                 div do
-                  form.label :starting_location, 
+                  form.label :starting_location,
                              class: "block text-sm font-medium text-gray-700 mb-2" do
                     "Starting Location"
                   end
-                  
+
                   form.text_field :starting_location,
                                   class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
                                   placeholder: "e.g., San Francisco, CA",
@@ -67,7 +66,7 @@ class Routes::ModalFormComponent < ApplicationComponent
                              class: "block text-sm font-medium text-gray-700 mb-2" do
                     "Destination"
                   end
-                  
+
                   form.text_field :destination,
                                   class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
                                   placeholder: "e.g., Los Angeles, CA",
@@ -87,7 +86,7 @@ class Routes::ModalFormComponent < ApplicationComponent
                                class: "block text-sm font-medium text-gray-700 mb-2" do
                       "Date & Time"
                     end
-                    
+
                     form.datetime_local_field :datetime,
                                               class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
                                               required: true

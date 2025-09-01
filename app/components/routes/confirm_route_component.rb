@@ -13,7 +13,7 @@ class Routes::ConfirmRouteComponent < ApplicationComponent
           h1 class: "text-3xl font-bold text-gray-900 mb-2" do
             "Review Your Route"
           end
-          
+
           p class: "text-lg text-gray-600" do
             "#{@route_data['starting_location']} → #{@route_data['destination']}"
           end
@@ -40,17 +40,16 @@ class Routes::ConfirmRouteComponent < ApplicationComponent
                 "If the route looks correct, choose a date and time to add it to your road trip."
               end
 
-              form_with url: approve_route_path, 
-                        method: :post, 
-                        local: true, 
+              form_with url: approve_route_path,
+                        method: :post,
+                        local: true,
                         class: "space-y-4" do |form|
-                
                 div do
-                  form.label :datetime, 
+                  form.label :datetime,
                              class: "block text-sm font-medium text-gray-700 mb-2" do
                     "Date & Time"
                   end
-                  
+
                   form.datetime_local_field :datetime,
                                             class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
                                             required: true,
@@ -99,7 +98,7 @@ class Routes::ConfirmRouteComponent < ApplicationComponent
                 h3 class: "text-sm font-semibold text-gray-900 mb-3" do
                   "Route Details"
                 end
-                
+
                 div class: "space-y-2 text-sm" do
                   div do
                     span class: "text-gray-500" do
@@ -109,7 +108,7 @@ class Routes::ConfirmRouteComponent < ApplicationComponent
                       @route_data["starting_location"]
                     end
                   end
-                  
+
                   div do
                     span class: "text-gray-500" do
                       "To: "
@@ -118,7 +117,7 @@ class Routes::ConfirmRouteComponent < ApplicationComponent
                       @route_data["destination"]
                     end
                   end
-                  
+
                   div do
                     span class: "text-gray-500" do
                       "Est. Duration: "
@@ -127,7 +126,7 @@ class Routes::ConfirmRouteComponent < ApplicationComponent
                       "2 hours"
                     end
                   end
-                  
+
                   div do
                     span class: "text-gray-500" do
                       "Est. Distance: "
@@ -157,7 +156,7 @@ class Routes::ConfirmRouteComponent < ApplicationComponent
                stroke_linecap: "round",
                stroke_linejoin: "round",
                stroke_width: "2"
-      
+
       div class: "text-gray-600" do
         p class: "font-medium mb-1" do
           "Route Preview"
