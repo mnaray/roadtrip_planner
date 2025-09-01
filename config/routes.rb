@@ -25,6 +25,7 @@ Rails.application.routes.draw do
   get "confirm_route", to: "routes#confirm_route"
   post "approve_route", to: "routes#approve_route"
   get "routes/:id/map", to: "routes#map", as: :route_map
+  get "routes/:id/export_gpx", to: "routes#export_gpx", as: :route_export_gpx
 
   # Defines the root path route ("/")
   root "pages#home"
