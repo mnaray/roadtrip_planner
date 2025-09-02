@@ -54,7 +54,7 @@ class Routes::FormPageComponent < ApplicationComponent
             form_with model: @route,
                       local: true,
                       class: "space-y-6" do |form|
-              # Starting Location
+            # Starting Location
             div do
               form.label :starting_location,
                          class: "block text-sm font-medium text-gray-700 mb-2" do

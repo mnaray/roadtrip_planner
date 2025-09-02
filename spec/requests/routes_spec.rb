@@ -175,7 +175,6 @@ RSpec.describe "Routes", type: :request do
       before { sign_in_user(user) }
 
       context "with valid route data and datetime" do
-
         let(:datetime_param) { 2.hours.from_now.strftime("%Y-%m-%dT%H:%M") }
 
         it "creates a new route" do
