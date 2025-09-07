@@ -1,4 +1,4 @@
-.PHONY: build up down logs bash console reset-db clean test rspec rspec-fast rspec-requests rspec-requests-safe rspec-models rspec-helpers rspec-failures rspec-debug css-build css-watch lint lint-fix importmap
+.PHONY: build up down logs bash console reset-db clean test rspec rspec-fast rspec-requests rspec-requests-safe rspec-models rspec-helpers rspec-failures rspec-debug rspec-all css-build css-watch lint lint-fix importmap
 
 # Build Docker images
 build:
@@ -42,6 +42,7 @@ clean:
 	docker rmi roadtrip_planner-web || true
 
 # Run optimized tests (models + helpers - fast and reliable)
+# This matches what CI runs: only the stable, fast-running specs
 test:
 	docker compose exec web bundle exec rspec spec/models/ spec/helpers/
 
@@ -77,6 +78,11 @@ rspec-failures:
 # Run tests with verbose output for debugging
 rspec-debug:
 	docker compose exec web bundle exec rspec spec/models/ spec/helpers/ --format documentation
+
+# Run ALL tests (including potentially slow service/request specs)
+rspec-all:
+	@echo "⚠️  Running full test suite including service specs (may be slow)"
+	docker compose exec web bundle exec rspec
 
 # Check routes
 routes:
