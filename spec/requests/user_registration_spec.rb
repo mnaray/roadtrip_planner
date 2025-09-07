@@ -145,5 +145,11 @@ RSpec.describe "User Registration", type: :request do
       expect(response.body).to include("Username")
       expect(response.body).to include("Password")
     end
+
+    it "includes autocomplete attributes for password managers" do
+      get "/register"
+      expect(response.body).to include('autocomplete="username"')
+      expect(response.body).to include('autocomplete="new-password"')
+    end
   end
 end
