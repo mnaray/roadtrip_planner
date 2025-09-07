@@ -1,14 +1,14 @@
 # Helper method to get coordinates for a location
 def get_coordinates(location)
   case location
-  when /San Francisco/i then [37.7749, -122.4194]
-  when /Los Angeles/i then [34.0522, -118.2437]
-  when /New York/i then [40.7128, -74.0060]
-  when /Chicago/i then [41.8781, -87.6298]
-  when /Boston/i then [42.3601, -71.0589]
-  when /Zürich/i then [47.3769, 8.5417]
-  when /München/i then [48.1351, 11.5820]
-  else [0.0, 0.0]
+  when /San Francisco/i then [ 37.7749, -122.4194 ]
+  when /Los Angeles/i then [ 34.0522, -118.2437 ]
+  when /New York/i then [ 40.7128, -74.0060 ]
+  when /Chicago/i then [ 41.8781, -87.6298 ]
+  when /Boston/i then [ 42.3601, -71.0589 ]
+  when /Zürich/i then [ 47.3769, 8.5417 ]
+  when /München/i then [ 48.1351, 11.5820 ]
+  else [ 0.0, 0.0 ]
   end
 end
 
@@ -21,20 +21,20 @@ def generate_dynamic_gpx(route, track_points = nil)
   # Use provided track points or generate default route
   if track_points.nil?
     track_points = [
-      [start_coords[1], start_coords[0]],  # Convert to [lon, lat] for OSRM format
-      [start_coords[1] * 0.7 + end_coords[1] * 0.3, start_coords[0] * 0.7 + end_coords[0] * 0.3],
-      [start_coords[1] * 0.3 + end_coords[1] * 0.7, start_coords[0] * 0.3 + end_coords[0] * 0.7],
-      [end_coords[1], end_coords[0]]
+      [ start_coords[1], start_coords[0] ],  # Convert to [lon, lat] for OSRM format
+      [ start_coords[1] * 0.7 + end_coords[1] * 0.3, start_coords[0] * 0.7 + end_coords[0] * 0.3 ],
+      [ start_coords[1] * 0.3 + end_coords[1] * 0.7, start_coords[0] * 0.3 + end_coords[0] * 0.7 ],
+      [ end_coords[1], end_coords[0] ]
     ]
   end
 
   # Convert OSRM format [lon, lat] to GPX format [lat, lon] for track points
   # Limit to reasonable number of points to prevent massive GPX files
   safe_track_points = track_points.first(100)
-  gpx_track_points = safe_track_points.map { |pt| [pt[1], pt[0]] }
+  gpx_track_points = safe_track_points.map { |pt| [ pt[1], pt[0] ] }
 
   track_points_xml = gpx_track_points.map do |pt|
-    lat, lon = pt.is_a?(Array) && pt.length >= 2 ? [pt[0], pt[1]] : [0.0, 0.0]
+    lat, lon = pt.is_a?(Array) && pt.length >= 2 ? [ pt[0], pt[1] ] : [ 0.0, 0.0 ]
     "      <trkpt lat=\"#{lat}\" lon=\"#{lon}\"></trkpt>"
   end.join("\n")
 
@@ -88,10 +88,10 @@ def generate_dynamic_gpx_generator(route, osrm_response = nil, geocoding_failed 
   if osrm_response.nil?
     # Generate default route points
     track_points = [
-      [start_coords[1], start_coords[0]],  # Convert to [lon, lat] for OSRM format
-      [start_coords[1] * 0.7 + end_coords[1] * 0.3, start_coords[0] * 0.7 + end_coords[0] * 0.3],
-      [start_coords[1] * 0.3 + end_coords[1] * 0.7, start_coords[0] * 0.3 + end_coords[0] * 0.7],
-      [end_coords[1], end_coords[0]]
+      [ start_coords[1], start_coords[0] ],  # Convert to [lon, lat] for OSRM format
+      [ start_coords[1] * 0.7 + end_coords[1] * 0.3, start_coords[0] * 0.7 + end_coords[0] * 0.3 ],
+      [ start_coords[1] * 0.3 + end_coords[1] * 0.7, start_coords[0] * 0.3 + end_coords[0] * 0.7 ],
+      [ end_coords[1], end_coords[0] ]
     ]
   else
     # Extract coordinates from OSRM response structure
@@ -102,17 +102,17 @@ def generate_dynamic_gpx_generator(route, osrm_response = nil, geocoding_failed 
     else
       # Fallback to simple points
       track_points = [
-        [start_coords[1], start_coords[0]],
-        [end_coords[1], end_coords[0]]
+        [ start_coords[1], start_coords[0] ],
+        [ end_coords[1], end_coords[0] ]
       ]
     end
   end
 
   # Convert OSRM format [lon, lat] to GPX format [lat, lon] for track points
-  gpx_track_points = track_points.map { |pt| [pt[1], pt[0]] }
+  gpx_track_points = track_points.map { |pt| [ pt[1], pt[0] ] }
 
   track_points_xml = gpx_track_points.map do |pt|
-    lat, lon = pt.is_a?(Array) && pt.length >= 2 ? [pt[0], pt[1]] : [0.0, 0.0]
+    lat, lon = pt.is_a?(Array) && pt.length >= 2 ? [ pt[0], pt[1] ] : [ 0.0, 0.0 ]
     "      <trkpt lat=\"#{lat}\" lon=\"#{lon}\"></trkpt>"
   end.join("\n")
 
@@ -161,30 +161,30 @@ end
 def generate_default_route_points(route)
   # Get coordinates for start and end locations
   start_coords = case route.starting_location
-                 when /San Francisco/i then [-122.4194, 37.7749]  # lon, lat for OSRM
-                 when /Los Angeles/i then [-118.2437, 34.0522]
-                 when /New York/i then [-74.0060, 40.7128]
-                 when /Chicago/i then [-87.6298, 41.8781]
-                 when /Zürich/i then [8.5417, 47.3769]
-                 when /München/i then [11.5820, 48.1351]
-                 else [0.0, 0.0]
-                 end
+  when /San Francisco/i then [ -122.4194, 37.7749 ]  # lon, lat for OSRM
+  when /Los Angeles/i then [ -118.2437, 34.0522 ]
+  when /New York/i then [ -74.0060, 40.7128 ]
+  when /Chicago/i then [ -87.6298, 41.8781 ]
+  when /Zürich/i then [ 8.5417, 47.3769 ]
+  when /München/i then [ 11.5820, 48.1351 ]
+  else [ 0.0, 0.0 ]
+  end
 
   end_coords = case route.destination
-               when /San Francisco/i then [-122.4194, 37.7749]
-               when /Los Angeles/i then [-118.2437, 34.0522]
-               when /New York/i then [-74.0060, 40.7128]
-               when /Chicago/i then [-87.6298, 41.8781]
-               when /Zürich/i then [8.5417, 47.3769]
-               when /München/i then [11.5820, 48.1351]
-               else [0.0, 0.0]
-               end
+  when /San Francisco/i then [ -122.4194, 37.7749 ]
+  when /Los Angeles/i then [ -118.2437, 34.0522 ]
+  when /New York/i then [ -74.0060, 40.7128 ]
+  when /Chicago/i then [ -87.6298, 41.8781 ]
+  when /Zürich/i then [ 8.5417, 47.3769 ]
+  when /München/i then [ 11.5820, 48.1351 ]
+  else [ 0.0, 0.0 ]
+  end
 
   # Generate a few intermediate points between start and end
   [
     start_coords,
-    [start_coords[0] * 0.7 + end_coords[0] * 0.3, start_coords[1] * 0.7 + end_coords[1] * 0.3],
-    [start_coords[0] * 0.3 + end_coords[0] * 0.7, start_coords[1] * 0.3 + end_coords[1] * 0.7],
+    [ start_coords[0] * 0.7 + end_coords[0] * 0.3, start_coords[1] * 0.7 + end_coords[1] * 0.3 ],
+    [ start_coords[0] * 0.3 + end_coords[0] * 0.7, start_coords[1] * 0.3 + end_coords[1] * 0.7 ],
     end_coords
   ]
 end
@@ -216,11 +216,11 @@ RSpec.configure do |config|
     # Stub GPX service methods to return properly structured GPX XML
     allow_any_instance_of(RouteGpxGenerator).to receive(:generate) do |instance|
       route = instance.instance_variable_get(:@route)
-      
+
       # Try to get route data, preferring test-specific stubs
       start_coords = get_coordinates(route.starting_location)
       end_coords = get_coordinates(route.destination)
-      
+
       # Check if geocoding is stubbed to return nil
       geocoding_failed = false
       begin
@@ -239,7 +239,7 @@ RSpec.configure do |config|
         # Try fetch_route_data first (preferred by some tests)
         begin
           route_data = instance.send(:fetch_route_data, start_coords, end_coords)
-          
+
           # Check if route_data is nil (OSRM unavailable scenario)
           if route_data.nil?
             generate_dynamic_gpx_generator(route, :osrm_unavailable)
@@ -247,9 +247,9 @@ RSpec.configure do |config|
             # Convert from fetch_route_data format to OSRM format if needed
             if route_data.is_a?(Hash) && route_data[:geometry]
               osrm_response = [
-                [:geometry, route_data[:geometry]],
-                [:distance, route_data[:distance]],
-                [:duration, route_data[:duration]]
+                [ :geometry, route_data[:geometry] ],
+                [ :distance, route_data[:distance] ],
+                [ :duration, route_data[:duration] ]
               ]
             else
               osrm_response = route_data
@@ -267,10 +267,10 @@ RSpec.configure do |config|
         end
       end
     end
-    
+
     allow_any_instance_of(RouteGpxExporter).to receive(:generate) do |instance|
       route = instance.instance_variable_get(:@route)
-      
+
       # Try to get OSRM route points if the method exists and is stubbed
       begin
         route_points = instance.send(:fetch_osrm_route)
@@ -279,10 +279,10 @@ RSpec.configure do |config|
         generate_dynamic_gpx(route)
       end
     end
-    
+
     # Don't stub generate_with_validation - let the real method handle validation
     # The real method will call our stubbed generate method and then validate it
-    
+
     # Don't stub fetch_osrm_route globally - let individual tests control it
     # The generate stub will handle both cases - with or without fetch_osrm_route stub
   end
