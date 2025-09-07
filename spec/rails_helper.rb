@@ -16,20 +16,20 @@ end
 RSpec.configure do |config|
   # Include FactoryBot methods
   config.include FactoryBot::Syntax::Methods
-  
+
   # Use transactional fixtures for fast, isolated tests
   config.use_transactional_fixtures = true
-  
+
   # Configure default host for request specs
   config.before(:each, type: :request) do
     host! 'localhost'
     ActionController::Base.allow_forgery_protection = false
   end
-  
+
   config.after(:each, type: :request) do
     ActionController::Base.allow_forgery_protection = true
   end
-  
-  config.fixture_paths = [Rails.root.join('spec/fixtures')]
+
+  config.fixture_paths = [ Rails.root.join('spec/fixtures') ]
   config.filter_rails_from_backtrace!
 end
