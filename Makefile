@@ -1,4 +1,4 @@
-.PHONY: build up down logs bash console reset-db clean css-build css-watch lint lint-fix importmap
+.PHONY: build up down logs bash console reset-db clean test rspec rspec-fast rspec-requests rspec-models css-build css-watch lint lint-fix importmap
 
 # Build Docker images
 build:
@@ -43,7 +43,23 @@ clean:
 
 # Run tests
 test:
-	docker compose exec web bin/rails test
+	docker compose exec web bundle exec rspec
+
+# Run RSpec tests (explicit alias)
+rspec:
+	docker compose exec web bundle exec rspec
+
+# Run RSpec tests excluding system specs for faster feedback
+rspec-fast:
+	docker compose exec web bundle exec rspec --exclude-pattern "spec/system/**/*_spec.rb"
+
+# Run only request specs
+rspec-requests:
+	docker compose exec web bundle exec rspec spec/requests
+
+# Run only model specs
+rspec-models:
+	docker compose exec web bundle exec rspec spec/models
 
 # Check routes
 routes:
