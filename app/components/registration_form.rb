@@ -30,6 +30,7 @@ class RegistrationForm < ApplicationComponent
               form.text_field :username,
                              required: true,
                              autofocus: true,
+                             autocomplete: "username",
                              class: field_classes(:username, "appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"),
                              placeholder: "Enter your username (min. 3 characters)"
             end
@@ -40,6 +41,7 @@ class RegistrationForm < ApplicationComponent
               end
               form.password_field :password,
                                  required: true,
+                                 autocomplete: "new-password",
                                  class: field_classes(:password, "appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"),
                                  placeholder: "Enter your password (min. 8 chars with letters & numbers)"
             end
@@ -50,6 +52,7 @@ class RegistrationForm < ApplicationComponent
               end
               form.password_field :password_confirmation,
                                  required: true,
+                                 autocomplete: "new-password",
                                  class: field_classes(:password_confirmation, "appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"),
                                  placeholder: "Confirm your password"
             end
