@@ -1,6 +1,13 @@
 #!/bin/bash
 set -e
 
+# Check if gems need to be installed by comparing Gemfile.lock timestamp
+# or if bundle check fails (missing gems)
+if [ -f Gemfile ] && ! bundle check > /dev/null 2>&1; then
+  echo "Installing Ruby gems..."
+  bundle install
+fi
+
 # Install npm dependencies if package.json exists and node_modules doesn't
 if [ -f package.json ] && [ ! -d node_modules ]; then
   echo "Installing npm dependencies..."
