@@ -6,7 +6,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
   title: 'Roadtrip Planner Documentation',
-  tagline: 'Your adventure starts here - Rails 8 application for planning and managing road trips',
+  tagline: 'A Rails 8 application for planning and managing road trips',
   favicon: 'img/favicon.ico',
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future

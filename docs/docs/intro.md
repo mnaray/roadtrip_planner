@@ -1,6 +1,6 @@
 # Welcome to Roadtrip Planner Documentation
 
-Roadtrip Planner is a **Rails 8 application** for planning and managing road trips, built with modern web technologies and containerized for easy development. Your adventure starts here! 🚗
+Roadtrip Planner is a **Rails 8 application** for planning and managing road trips, built with modern web technologies and containerized for easy development.
 
 ## What is Roadtrip Planner?
 
@@ -10,7 +10,6 @@ This application provides users with the ability to:
 - **Manage Routes**: Define starting locations, destinations, and timing for each leg of the journey  
 - **Track Progress**: Monitor trip progress and manage route details
 - **Export Data**: Generate GPX files for use with GPS devices and mapping applications
-- **Secure Authentication**: User registration and login with secure password handling
 
 ## Key Features
 
