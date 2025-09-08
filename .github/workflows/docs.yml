@@ -3,15 +3,6 @@ name: Deploy Documentation to GitHub Pages
 on:
   # Manual trigger only as requested
   workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Deployment environment'
-        required: true
-        default: 'production'
-        type: choice
-        options:
-          - production
-          - staging
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
