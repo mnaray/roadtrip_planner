@@ -19,14 +19,9 @@ function HomepageHeader() {
         <p className="hero__subtitle">{siteConfig.tagline}</p>
         <div className={styles.buttons}>
           <Link
-            className="button button--primary button--lg"
+            className="button button--secondary button--lg"
             to="/docs/intro">
-            Get Started 🚗
-          </Link>
-          <Link
-            className="button button--secondary button--lg margin-left--md"
-            to="/docs/development-setup">
-            Setup Development
+            Docusaurus Tutorial - 5min ⏱️
           </Link>
         </div>
       </div>
@@ -38,8 +33,8 @@ export default function Home(): ReactNode {
   const {siteConfig} = useDocusaurusContext();
   return (
     <Layout
-      title={`${siteConfig.title} - Documentation`}
-      description="Complete documentation for Roadtrip Planner, a Rails 8 application for planning and managing road trips with modern web technologies.">
+      title={`Hello from ${siteConfig.title}`}
+      description="Description will go into a meta tag in <head />">
       <HomepageHeader />
       <main>
         <HomepageFeatures />

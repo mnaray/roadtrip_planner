@@ -70,15 +70,10 @@ docker compose up -d
 ```
 
 The first run will automatically:
-- Install Ruby gems (via automatic `bundle install` check)
-- Install Node.js packages (if `node_modules` is missing)
+- Install Ruby gems
+- Install Node.js packages  
 - Create and migrate the database
-- Build Tailwind CSS assets
 - Start the Rails server
-
-:::tip Automatic Dependency Management
-The application now features **automatic dependency installation**! The Docker entrypoint script checks if gems are missing using `bundle check` and installs them automatically. This ensures your `make down; make build; make up` workflow always works reliably, even after dependency changes.
-:::
 
 ### 4. Access the Application
 
