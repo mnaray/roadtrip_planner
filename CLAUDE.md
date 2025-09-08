@@ -159,6 +159,25 @@ docker compose exec web rspec spec/requests/
 docker compose exec web rubocop
 ```
 
+### Dependency Management
+The Docker setup automatically handles dependency installation:
+
+1. **Standard Workflow**: `make down; make build; make up`
+   - Always works reliably for dependency changes
+   - The `bin/docker-entrypoint` script automatically runs `bundle install` if gems are missing
+   - Volume caching preserves performance while ensuring dependencies are current
+
+2. **How It Works**:
+   - On container startup, `bundle check` verifies all gems are installed
+   - If gems are missing, `bundle install` runs automatically
+   - Same logic applies to npm dependencies with `node_modules` check
+
+3. **Manual Dependency Installation**:
+   ```bash
+   docker compose run --rm web bundle install
+   docker compose run --rm web npm install
+   ```
+
 ## Performance Considerations
 
 - Use Stimulus for JavaScript interactions (already set up)
