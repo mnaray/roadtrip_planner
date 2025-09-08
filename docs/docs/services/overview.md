@@ -49,10 +49,6 @@ graph TB
 
 ### Core Route Services
 
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 20px 0;">
-
-<div style="border: 1px solid #e1e4e8; border-radius: 8px; padding: 16px;">
-
 #### 📍 [RouteDistanceCalculator](./route-distance-calculator)
 
 Calculates driving distances and travel times between locations using geocoding and routing APIs.
@@ -68,9 +64,7 @@ Calculates driving distances and travel times between locations using geocoding 
 - Trip duration estimates
 - Distance validation
 
-</div>
-
-<div style="border: 1px solid #e1e4e8; border-radius: 8px; padding: 16px;">
+---
 
 #### 📄 [RouteGpxExporter](./route-gpx-exporter)
 
@@ -87,9 +81,7 @@ Generates standards-compliant GPX 1.1 files with full metadata, elevation data, 
 - Professional navigation
 - Route archiving
 
-</div>
-
-<div style="border: 1px solid #e1e4e8; border-radius: 8px; padding: 16px;">
+---
 
 #### 🚀 [RouteGpxGenerator](./route-gpx-generator)
 
@@ -105,10 +97,6 @@ Provides lightweight GPX generation for quick sharing and basic navigation needs
 - Quick sharing
 - Mobile apps
 - Preview generation
-
-</div>
-
-</div>
 
 ## Service Design Patterns
 
