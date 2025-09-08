@@ -51,8 +51,8 @@ graph LR
 
 | Feature | RouteGpxGenerator | RouteGpxExporter |
 |---------|-------------------|------------------|
-| **File Size** | Small (~5-50 KB) | Large (~50-500 KB) |
-| **Generation Speed** | Fast (<100ms) | Slower (~500ms-2s) |
+| **File Size** | Small (5-50 KB) | Large (50-500 KB) |
+| **Generation Speed** | Fast (under 100ms) | Slower (500ms-2s) |
 | **Elevation Data** | No | Yes |
 | **Garmin Extensions** | No | Yes |
 | **Track Points** | Limited | Full resolution |
