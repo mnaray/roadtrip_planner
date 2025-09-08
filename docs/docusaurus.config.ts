@@ -7,7 +7,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 const config: Config = {
   title: 'Roadtrip Planner Documentation',
   tagline: 'A Rails 8 application for planning and managing road trips',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/favicon.svg',
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
@@ -56,8 +56,8 @@ const config: Config = {
   ],
 
   themeConfig: {
-    // Replace with your project's social card
-    image: 'img/docusaurus-social-card.jpg',
+    // Custom social card for road trip planner
+    image: 'img/roadtrip-social-card.svg',
     navbar: {
       title: 'Roadtrip Planner',
       logo: {

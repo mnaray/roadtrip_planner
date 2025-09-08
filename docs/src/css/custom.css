@@ -1,30 +1,104 @@
 /**
- * Any CSS included here will be global. The classic template
- * bundles Infima by default. Infima is a CSS framework designed to
- * work well for content-centric websites.
+ * Custom CSS for Roadtrip Planner Documentation
+ * Matching the Rails application's blue-purple theme
  */
 
-/* You can override the default Infima variables here. */
+/* Import Inter font to match Rails app */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Light theme - matching Rails primary colors (sky blue palette) */
 :root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
+  /* Primary colors based on Rails primary.500 (#0ea5e9) */
+  --ifm-color-primary: #0ea5e9;
+  --ifm-color-primary-dark: #0284c7;
+  --ifm-color-primary-darker: #0369a1;
+  --ifm-color-primary-darkest: #075985;
+  --ifm-color-primary-light: #38bdf8;
+  --ifm-color-primary-lighter: #7dd3fc;
+  --ifm-color-primary-lightest: #bae6fd;
+  
+  /* Accent colors for highlights and secondary elements */
+  --ifm-color-secondary: #d946ef;
+  --ifm-color-secondary-dark: #c026d3;
+  --ifm-color-secondary-darker: #a21caf;
+  --ifm-color-secondary-darkest: #86198f;
+  --ifm-color-secondary-light: #e879f9;
+  --ifm-color-secondary-lighter: #f0abfc;
+  --ifm-color-secondary-lightest: #f5d0fe;
+  
+  /* Typography */
+  --ifm-font-family-base: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --ifm-line-height-base: 1.6;
+  
+  /* Background gradients matching Rails app */
+  --ifm-hero-background-color: linear-gradient(135deg, #38bdf8 0%, #d946ef 100%);
+  --ifm-background-color: #f8fafc;
+  --ifm-background-surface-color: #ffffff;
+  
+  /* Code highlighting */
+  --docusaurus-highlighted-code-line-bg: rgba(14, 165, 233, 0.1);
+  
+  /* Custom properties for glass effects */
+  --glass-bg: rgba(255, 255, 255, 0.25);
+  --glass-border: rgba(255, 255, 255, 0.2);
 }
 
-/* For readability concerns, you should choose a lighter palette in dark mode. */
+/* Dark theme - using deeper variants for better contrast */
 [data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  /* Primary colors - lighter variants for dark mode accessibility */
+  --ifm-color-primary: #7dd3fc;
+  --ifm-color-primary-dark: #38bdf8;
+  --ifm-color-primary-darker: #0ea5e9;
+  --ifm-color-primary-darkest: #0284c7;
+  --ifm-color-primary-light: #bae6fd;
+  --ifm-color-primary-lighter: #e0f2fe;
+  --ifm-color-primary-lightest: #f0f9ff;
+  
+  /* Accent colors for dark mode */
+  --ifm-color-secondary: #f0abfc;
+  --ifm-color-secondary-dark: #e879f9;
+  --ifm-color-secondary-darker: #d946ef;
+  --ifm-color-secondary-darkest: #c026d3;
+  --ifm-color-secondary-light: #f5d0fe;
+  --ifm-color-secondary-lighter: #fae8ff;
+  --ifm-color-secondary-lightest: #fdf4ff;
+  
+  /* Dark mode backgrounds */
+  --ifm-background-color: #0f172a;
+  --ifm-background-surface-color: #1e293b;
+  
+  /* Code highlighting for dark mode */
+  --docusaurus-highlighted-code-line-bg: rgba(125, 211, 252, 0.2);
+  
+  /* Glass effects for dark mode */
+  --glass-bg: rgba(30, 41, 59, 0.25);
+  --glass-border: rgba(148, 163, 184, 0.2);
+}
+
+/* Custom utility classes matching Rails app */
+.glass-effect {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+}
+
+.gradient-bg {
+  background: linear-gradient(135deg, var(--ifm-color-primary) 0%, var(--ifm-color-secondary) 100%);
+}
+
+/* Hero section styling */
+.hero {
+  background: var(--ifm-hero-background-color);
+  color: white;
+}
+
+.hero__title {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Smooth focus states matching Rails app */
+*:focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
 }

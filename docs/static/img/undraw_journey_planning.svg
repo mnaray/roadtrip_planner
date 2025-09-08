@@ -1,0 +1,130 @@
+<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="planningGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0ea5e9;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#d946ef;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="mapGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#f8fafc;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e2e8f0;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="400" height="300" fill="#f1f5f9"/>
+  
+  <!-- Map/Planning board -->
+  <rect x="50" y="50" width="300" height="200" rx="10" fill="url(#mapGradient)" stroke="#cbd5e1" stroke-width="2"/>
+  
+  <!-- Route lines on map -->
+  <path d="M 80 100 Q 150 80, 220 120 Q 290 160, 320 140" stroke="url(#planningGradient)" stroke-width="4" fill="none" stroke-linecap="round"/>
+  
+  <!-- Location pins -->
+  <g transform="translate(80, 100)">
+    <circle cx="0" cy="8" r="8" fill="#dc2626"/>
+    <circle cx="0" cy="8" r="4" fill="#ffffff"/>
+    <path d="M 0 0 L -6 8 L 6 8 Z" fill="#dc2626"/>
+    <text x="0" y="25" text-anchor="middle" font-family="Arial" font-size="10" fill="#374151" font-weight="bold">A</text>
+  </g>
+  
+  <g transform="translate(170, 110)">
+    <circle cx="0" cy="8" r="8" fill="#f59e0b"/>
+    <circle cx="0" cy="8" r="4" fill="#ffffff"/>
+    <path d="M 0 0 L -6 8 L 6 8 Z" fill="#f59e0b"/>
+    <text x="0" y="25" text-anchor="middle" font-family="Arial" font-size="10" fill="#374151" font-weight="bold">B</text>
+  </g>
+  
+  <g transform="translate(250, 140)">
+    <circle cx="0" cy="8" r="8" fill="#8b5cf6"/>
+    <circle cx="0" cy="8" r="4" fill="#ffffff"/>
+    <path d="M 0 0 L -6 8 L 6 8 Z" fill="#8b5cf6"/>
+    <text x="0" y="25" text-anchor="middle" font-family="Arial" font-size="10" fill="#374151" font-weight="bold">C</text>
+  </g>
+  
+  <g transform="translate(320, 140)">
+    <circle cx="0" cy="8" r="8" fill="#16a34a"/>
+    <circle cx="0" cy="8" r="4" fill="#ffffff"/>
+    <path d="M 0 0 L -6 8 L 6 8 Z" fill="#16a34a"/>
+    <text x="0" y="25" text-anchor="middle" font-family="Arial" font-size="10" fill="#374151" font-weight="bold">D</text>
+  </g>
+  
+  <!-- Planning tools -->
+  <!-- Compass -->
+  <g transform="translate(120, 80)">
+    <circle cx="0" cy="0" r="12" fill="#ffffff" stroke="#0ea5e9" stroke-width="2"/>
+    <path d="M 0 -8 L -3 3 L 0 0 L 3 3 Z" fill="#dc2626"/>
+    <path d="M 0 8 L -3 -3 L 0 0 L 3 -3 Z" fill="#374151"/>
+    <text x="0" y="-20" text-anchor="middle" font-family="Arial" font-size="8" fill="#0ea5e9">N</text>
+  </g>
+  
+  <!-- Distance markers -->
+  <text x="125" y="95" font-family="Arial" font-size="8" fill="#6b7280">125 mi</text>
+  <text x="205" y="125" font-family="Arial" font-size="8" fill="#6b7280">89 mi</text>
+  <text x="285" y="150" font-family="Arial" font-size="8" fill="#6b7280">67 mi</text>
+  
+  <!-- Planning checklist -->
+  <g transform="translate(60, 180)">
+    <rect x="0" y="0" width="120" height="60" rx="5" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+    <text x="10" y="15" font-family="Arial" font-size="10" fill="#374151" font-weight="bold">Trip Checklist:</text>
+    
+    <!-- Checkboxes -->
+    <rect x="10" y="25" width="8" height="8" fill="#16a34a" rx="1"/>
+    <path d="M 12 27 L 14 29 L 17 26" stroke="#ffffff" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <text x="25" y="32" font-family="Arial" font-size="8" fill="#374151">Route planned</text>
+    
+    <rect x="10" y="38" width="8" height="8" fill="#16a34a" rx="1"/>
+    <path d="M 12 40 L 14 42 L 17 39" stroke="#ffffff" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <text x="25" y="45" font-family="Arial" font-size="8" fill="#374151">Hotels booked</text>
+    
+    <rect x="10" y="51" width="8" height="8" fill="#e5e7eb" rx="1"/>
+    <text x="25" y="58" font-family="Arial" font-size="8" fill="#6b7280">Pack luggage</text>
+  </g>
+  
+  <!-- Calendar -->
+  <g transform="translate(200, 180)">
+    <rect x="0" y="0" width="60" height="50" rx="3" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+    <rect x="0" y="0" width="60" height="12" rx="3" fill="url(#planningGradient)"/>
+    <text x="30" y="8" text-anchor="middle" font-family="Arial" font-size="8" fill="#ffffff" font-weight="bold">MAR 2024</text>
+    
+    <!-- Calendar grid -->
+    <g stroke="#e5e7eb" stroke-width="0.5">
+      <line x1="10" y1="12" x2="10" y2="50"/>
+      <line x1="20" y1="12" x2="20" y2="50"/>
+      <line x1="30" y1="12" x2="30" y2="50"/>
+      <line x1="40" y1="12" x2="40" y2="50"/>
+      <line x1="50" y1="12" x2="50" y2="50"/>
+      <line x1="0" y1="22" x2="60" y2="22"/>
+      <line x1="0" y1="32" x2="60" y2="32"/>
+      <line x1="0" y1="42" x2="60" y2="42"/>
+    </g>
+    
+    <!-- Highlighted dates -->
+    <circle cx="15" cy="27" r="4" fill="#0ea5e9" opacity="0.3"/>
+    <text x="15" y="30" text-anchor="middle" font-family="Arial" font-size="7" fill="#0ea5e9" font-weight="bold">15</text>
+    
+    <circle cx="35" cy="37" r="4" fill="#d946ef" opacity="0.3"/>
+    <text x="35" y="40" text-anchor="middle" font-family="Arial" font-size="7" fill="#d946ef" font-weight="bold">22</text>
+  </g>
+  
+  <!-- Planning tools/icons -->
+  <g transform="translate(280, 190)">
+    <!-- Fuel icon -->
+    <rect x="0" y="10" width="8" height="15" rx="2" fill="#ef4444"/>
+    <rect x="2" y="7" width="4" height="5" rx="1" fill="#dc2626"/>
+    <text x="15" y="20" font-family="Arial" font-size="8" fill="#6b7280">Fuel</text>
+    
+    <!-- Food icon -->
+    <g transform="translate(0, 25)">
+      <circle cx="4" cy="4" r="4" fill="#f59e0b"/>
+      <rect x="2" y="6" width="4" height="6" rx="1" fill="#d97706"/>
+      <text x="15" y="8" font-family="Arial" font-size="8" fill="#6b7280">Food</text>
+    </g>
+  </g>
+  
+  <!-- Decorative elements -->
+  <g transform="translate(30, 30)">
+    <rect x="0" y="0" width="12" height="2" rx="1" fill="#0ea5e9"/>
+    <rect x="0" y="4" width="8" height="2" rx="1" fill="#d946ef"/>
+    <rect x="0" y="8" width="10" height="2" rx="1" fill="#16a34a"/>
+  </g>
+</svg>

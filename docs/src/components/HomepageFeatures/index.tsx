@@ -12,7 +12,7 @@ type FeatureItem = {
 const FeatureList: FeatureItem[] = [
   {
     title: 'Modern Rails Architecture',
-    Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
+    Svg: require('@site/static/img/undraw_travel_mode.svg').default,
     description: (
       <>
         Built with Rails 8 and Ruby 3.4, featuring Phlex components, Tailwind CSS v4, 
@@ -22,7 +22,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     title: 'Plan Your Adventure',
-    Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
+    Svg: require('@site/static/img/undraw_journey_planning.svg').default,
     description: (
       <>
         Create detailed road trip plans with multiple routes, manage destinations and timing, 
@@ -31,12 +31,12 @@ const FeatureList: FeatureItem[] = [
     ),
   },
   {
-    title: 'Component-Driven Development',
-    Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
+    title: 'Hit the Road',
+    Svg: require('@site/static/img/undraw_road_trip.svg').default,
     description: (
       <>
-        Leveraging Phlex components for type-safe, reusable UI elements with comprehensive 
-        testing coverage and modern development practices throughout the codebase.
+        Experience the freedom of the open road with comprehensive trip management, 
+        real-time updates, and seamless collaboration features for unforgettable journeys.
       </>
     ),
   },
