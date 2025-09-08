@@ -222,29 +222,29 @@ RSpec.describe RouteGpxExporter, type: :service do
       # Mock geocoding
       allow_any_instance_of(RouteGpxExporter).to receive(:geocode)
         .with("San Francisco, CA")
-        .and_return([37.7749, -122.4194])
+        .and_return([ 37.7749, -122.4194 ])
       allow_any_instance_of(RouteGpxExporter).to receive(:geocode)
         .with("Los Angeles, CA")
-        .and_return([34.0522, -118.2437])
-      
+        .and_return([ 34.0522, -118.2437 ])
+
       # Mock OSRM route with realistic intermediate points (small increments)
       # SF to LA is about 600km, we need points every ~8km to stay under 10km limit
       # Generate 100 intermediate points for smooth route
       mock_coordinates = []
       lat_start, lon_start = 37.7749, -122.4194
       lat_end, lon_end = 34.0522, -118.2437
-      
+
       100.times do |i|
         progress = i / 99.0
         lat = lat_start + (lat_end - lat_start) * progress
         lon = lon_start + (lon_end - lon_start) * progress
-        mock_coordinates << [lon, lat]
+        mock_coordinates << [ lon, lat ]
       end
-      
+
       allow_any_instance_of(RouteGpxExporter).to receive(:fetch_osrm_route)
         .and_return(mock_coordinates)
     end
-    
+
     it "generates GPX that validates against the route" do
       gpx_content = exporter.generate
 
