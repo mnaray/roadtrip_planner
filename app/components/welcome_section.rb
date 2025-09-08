@@ -62,7 +62,8 @@ class WelcomeSection < ApplicationComponent
               p class: "text-gray-600" do
                 "Ready to plan your next adventure?"
               end
-              button class: "group relative inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white transition-all duration-300 bg-gradient-to-r from-primary-600 to-accent-600 rounded-full hover:from-primary-700 hover:to-accent-700 hover:shadow-2xl hover:scale-105 focus:outline-none focus:ring-4 focus:ring-primary-300" do
+              link_to new_road_trip_path,
+                     class: "group relative inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white transition-all duration-300 bg-gradient-to-r from-primary-600 to-accent-600 rounded-full hover:from-primary-700 hover:to-accent-700 hover:shadow-2xl hover:scale-105 focus:outline-none focus:ring-4 focus:ring-primary-300" do
                 span class: "relative z-10" do
                   "Start Planning"
                 end
