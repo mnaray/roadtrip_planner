@@ -1,0 +1,102 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0ea5e9;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#d946ef;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="cardGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.95" />
+      <stop offset="100%" style="stop-color:#f8fafc;stop-opacity:0.9" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGradient)"/>
+  
+  <!-- Overlay pattern for texture -->
+  <defs>
+    <pattern id="dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+      <circle cx="10" cy="10" r="1" fill="#ffffff" opacity="0.1"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="url(#dots)"/>
+  
+  <!-- Main content card -->
+  <rect x="100" y="100" width="1000" height="430" rx="20" fill="url(#cardGradient)" opacity="0.95"/>
+  
+  <!-- Logo section -->
+  <g transform="translate(150, 200) scale(1.5)">
+    <!-- Road -->
+    <path d="M 0 30 Q 30 10, 60 25 Q 90 40, 120 20" stroke="url(#bgGradient)" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M 0 30 Q 30 10, 60 25 Q 90 40, 120 20" stroke="#ffffff" stroke-width="5" fill="none" stroke-linecap="round"/>
+    
+    <!-- Road markings -->
+    <path d="M 15 27 L 25 23" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
+    <path d="M 45 18 L 55 20" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
+    <path d="M 75 32 L 85 28" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
+    <path d="M 105 22 L 115 18" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
+    
+    <!-- Car -->
+    <g transform="translate(90, 22) rotate(-8) scale(1.2)">
+      <rect x="-8" y="-4" width="16" height="8" rx="3" fill="url(#bgGradient)"/>
+      <rect x="-5" y="-2" width="4" height="4" rx="1" fill="#e0f2fe"/>
+      <circle cx="-5" cy="5" r="2" fill="#374151"/>
+      <circle cx="5" cy="5" r="2" fill="#374151"/>
+      <circle cx="8" cy="-1" r="1" fill="#fbbf24"/>
+      <circle cx="8" cy="1" r="1" fill="#fbbf24"/>
+    </g>
+    
+    <!-- Location pins -->
+    <g transform="translate(10, 15)">
+      <circle cx="0" cy="8" r="6" fill="#dc2626"/>
+      <circle cx="0" cy="8" r="3" fill="#ffffff"/>
+      <path d="M 0 0 L -4 8 L 4 8 Z" fill="#dc2626"/>
+    </g>
+    
+    <g transform="translate(110, 10)">
+      <circle cx="0" cy="8" r="6" fill="#16a34a"/>
+      <circle cx="0" cy="8" r="3" fill="#ffffff"/>
+      <path d="M 0 0 L -4 8 L 4 8 Z" fill="#16a34a"/>
+    </g>
+  </g>
+  
+  <!-- Main heading -->
+  <text x="500" y="280" font-family="Inter, sans-serif" font-size="72" font-weight="700" fill="#1e293b" text-anchor="left">Roadtrip Planner</text>
+  <text x="500" y="330" font-family="Inter, sans-serif" font-size="32" font-weight="400" fill="#64748b" text-anchor="left">Documentation</text>
+  
+  <!-- Subtitle -->
+  <text x="500" y="380" font-family="Inter, sans-serif" font-size="24" fill="#475569" text-anchor="left">A Rails 8 application for planning and managing road trips</text>
+  
+  <!-- Technology badges -->
+  <g transform="translate(500, 420)">
+    <!-- Rails badge -->
+    <rect x="0" y="0" width="80" height="30" rx="15" fill="#dc2626"/>
+    <text x="40" y="20" font-family="Inter, sans-serif" font-size="14" font-weight="600" fill="#ffffff" text-anchor="middle">Rails 8</text>
+    
+    <!-- Phlex badge -->
+    <rect x="90" y="0" width="70" height="30" rx="15" fill="#8b5cf6"/>
+    <text x="125" y="20" font-family="Inter, sans-serif" font-size="14" font-weight="600" fill="#ffffff" text-anchor="middle">Phlex</text>
+    
+    <!-- Tailwind badge -->
+    <rect x="170" y="0" width="90" height="30" rx="15" fill="#06b6d4"/>
+    <text x="215" y="20" font-family="Inter, sans-serif" font-size="14" font-weight="600" fill="#ffffff" text-anchor="middle">Tailwind</text>
+    
+    <!-- Docker badge -->
+    <rect x="270" y="0" width="80" height="30" rx="15" fill="#2496ed"/>
+    <text x="310" y="20" font-family="Inter, sans-serif" font-size="14" font-weight="600" fill="#ffffff" text-anchor="middle">Docker</text>
+  </g>
+  
+  <!-- Decorative elements -->
+  <!-- Mountains in background -->
+  <g opacity="0.1">
+    <path d="M 800 500 L 900 350 L 1000 500 Z" fill="#1e293b"/>
+    <path d="M 900 500 L 1000 380 L 1100 500 Z" fill="#334155"/>
+    <path d="M 1000 500 L 1100 360 L 1200 500 Z" fill="#1e293b"/>
+  </g>
+  
+  <!-- Sun/Circle accent -->
+  <circle cx="950" cy="200" r="40" fill="#fbbf24" opacity="0.3"/>
+  
+  <!-- URL at bottom -->
+  <text x="600" y="570" font-family="Inter, sans-serif" font-size="18" fill="#64748b" text-anchor="middle">mnaray.github.io/roadtrip_planner</text>
+</svg>

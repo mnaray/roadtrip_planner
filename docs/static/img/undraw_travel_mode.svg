@@ -1,0 +1,153 @@
+<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="travelGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#38bdf8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f0abfc;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="vehicleGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#0ea5e9;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0284c7;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="400" height="300" fill="#f8fafc"/>
+  
+  <!-- Ground/Horizon -->
+  <ellipse cx="200" cy="280" rx="250" ry="30" fill="#e2e8f0" opacity="0.5"/>
+  
+  <!-- Main vehicle (SUV/Car) -->
+  <g transform="translate(200, 180) scale(2)">
+    <rect x="-25" y="-12" width="50" height="24" rx="8" fill="url(#vehicleGradient)"/>
+    
+    <!-- Windshield and windows -->
+    <rect x="-18" y="-8" width="10" height="16" rx="2" fill="#e0f2fe" opacity="0.8"/>
+    <rect x="-5" y="-8" width="12" height="16" rx="2" fill="#e0f2fe" opacity="0.8"/>
+    <rect x="10" y="-8" width="8" height="16" rx="2" fill="#e0f2fe" opacity="0.8"/>
+    
+    <!-- Wheels -->
+    <circle cx="-15" cy="15" r="6" fill="#374151"/>
+    <circle cx="15" cy="15" r="6" fill="#374151"/>
+    <circle cx="-15" cy="15" r="3" fill="#6b7280"/>
+    <circle cx="15" cy="15" r="3" fill="#6b7280"/>
+    
+    <!-- Headlights -->
+    <circle cx="25" cy="-6" r="2.5" fill="#fef3c7"/>
+    <circle cx="25" cy="6" r="2.5" fill="#fef3c7"/>
+    
+    <!-- Roof rack -->
+    <rect x="-20" y="-15" width="40" height="2" rx="1" fill="#64748b"/>
+    <rect x="-18" y="-17" width="4" height="4" rx="1" fill="#f59e0b"/> <!-- Luggage -->
+    <rect x="-10" y="-17" width="6" height="4" rx="1" fill="#dc2626"/> <!-- Luggage -->
+    <rect x="8" y="-17" width="5" height="4" rx="1" fill="#16a34a"/> <!-- Luggage -->
+  </g>
+  
+  <!-- Travel accessories around the car -->
+  
+  <!-- Suitcases -->
+  <g transform="translate(100, 220)">
+    <rect x="0" y="0" width="20" height="15" rx="2" fill="#dc2626"/>
+    <rect x="2" y="2" width="16" height="2" rx="1" fill="#b91c1c"/>
+    <circle cx="10" cy="18" r="2" fill="#374151"/>
+    <rect x="8" y="-3" width="4" height="3" rx="1" fill="#991b1b"/>
+  </g>
+  
+  <g transform="translate(120, 235)">
+    <rect x="0" y="0" width="15" height="12" rx="2" fill="#f59e0b"/>
+    <rect x="2" y="2" width="11" height="2" rx="1" fill="#d97706"/>
+    <circle cx="8" cy="15" r="2" fill="#374151"/>
+    <rect x="6" y="-2" width="3" height="2" rx="1" fill="#b45309"/>
+  </g>
+  
+  <!-- Camera -->
+  <g transform="translate(300, 210)">
+    <rect x="0" y="0" width="18" height="12" rx="3" fill="#6b7280"/>
+    <circle cx="9" cy="6" r="4" fill="#374151"/>
+    <circle cx="9" cy="6" r="2" fill="#1f2937"/>
+    <rect x="15" y="2" width="3" height="3" rx="1" fill="#ef4444"/>
+    <rect x="6" y="-2" width="6" height="2" rx="1" fill="#4b5563"/>
+  </g>
+  
+  <!-- Backpack -->
+  <g transform="translate(320, 225)">
+    <ellipse cx="8" cy="10" rx="8" ry="12" fill="#16a34a"/>
+    <rect x="4" y="5" width="8" height="8" rx="2" fill="#15803d"/>
+    <rect x="0" y="8" width="4" height="6" rx="1" fill="#166534"/> <!-- Side pocket -->
+    <rect x="12" y="8" width="4" height="6" rx="1" fill="#166534"/> <!-- Side pocket -->
+    <path d="M 6 2 Q 8 0, 10 2" stroke="#15803d" stroke-width="2" fill="none"/> <!-- Handle -->
+  </g>
+  
+  <!-- Map -->
+  <g transform="translate(80, 150)">
+    <rect x="0" y="0" width="30" height="20" rx="2" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
+    <!-- Map grid -->
+    <g stroke="#cbd5e1" stroke-width="0.5">
+      <line x1="6" y1="0" x2="6" y2="20"/>
+      <line x1="12" y1="0" x2="12" y2="20"/>
+      <line x1="18" y1="0" x2="18" y2="20"/>
+      <line x1="24" y1="0" x2="24" y2="20"/>
+      <line x1="0" y1="5" x2="30" y2="5"/>
+      <line x1="0" y1="10" x2="30" y2="10"/>
+      <line x1="0" y1="15" x2="30" y2="15"/>
+    </g>
+    <!-- Route line -->
+    <path d="M 3 15 Q 10 8, 18 12 Q 25 16, 27 10" stroke="#0ea5e9" stroke-width="2" fill="none"/>
+    <!-- Location pins -->
+    <circle cx="3" cy="15" r="2" fill="#dc2626"/>
+    <circle cx="27" cy="10" r="2" fill="#16a34a"/>
+  </g>
+  
+  <!-- GPS/Phone -->
+  <g transform="translate(310, 120)">
+    <rect x="0" y="0" width="12" height="18" rx="3" fill="#1f2937"/>
+    <rect x="1" y="2" width="10" height="14" rx="2" fill="#0ea5e9"/>
+    <circle cx="6" cy="16" r="1" fill="#ffffff"/>
+    <!-- GPS arrow -->
+    <path d="M 6 5 L 4 9 L 6 8 L 8 9 Z" fill="#ffffff"/>
+    <text x="6" y="13" text-anchor="middle" font-family="Arial" font-size="3" fill="#ffffff">GPS</text>
+  </g>
+  
+  <!-- Road signs -->
+  <g transform="translate(50, 80)">
+    <rect x="0" y="0" width="25" height="15" rx="3" fill="#ffffff" stroke="#0ea5e9" stroke-width="2"/>
+    <text x="12.5" y="6" text-anchor="middle" font-family="Arial" font-size="6" fill="#0ea5e9" font-weight="bold">HIGHWAY</text>
+    <text x="12.5" y="12" text-anchor="middle" font-family="Arial" font-size="6" fill="#0ea5e9" font-weight="bold">101</text>
+    <rect x="11" y="15" width="3" height="20" fill="#6b7280"/>
+  </g>
+  
+  <!-- Mile marker -->
+  <g transform="translate(350, 100)">
+    <rect x="0" y="0" width="12" height="20" rx="2" fill="#16a34a"/>
+    <text x="6" y="8" text-anchor="middle" font-family="Arial" font-size="4" fill="#ffffff" font-weight="bold">MILE</text>
+    <text x="6" y="14" text-anchor="middle" font-family="Arial" font-size="6" fill="#ffffff" font-weight="bold">247</text>
+    <rect x="5" y="20" width="2" height="15" fill="#6b7280"/>
+  </g>
+  
+  <!-- Clouds -->
+  <g transform="translate(120, 40)" opacity="0.8">
+    <circle cx="0" cy="0" r="8" fill="#ffffff"/>
+    <circle cx="12" cy="0" r="10" fill="#ffffff"/>
+    <circle cx="24" cy="0" r="8" fill="#ffffff"/>
+    <circle cx="6" cy="-6" r="6" fill="#ffffff"/>
+    <circle cx="18" cy="-6" r="6" fill="#ffffff"/>
+  </g>
+  
+  <g transform="translate(280, 30)" opacity="0.6">
+    <circle cx="0" cy="0" r="6" fill="#ffffff"/>
+    <circle cx="10" cy="0" r="8" fill="#ffffff"/>
+    <circle cx="20" cy="0" r="6" fill="#ffffff"/>
+  </g>
+  
+  <!-- Sun -->
+  <circle cx="60" cy="50" r="12" fill="#fbbf24"/>
+  <g transform="translate(60, 50)" opacity="0.8">
+    <line x1="-20" y1="0" x2="-15" y2="0" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
+    <line x1="15" y1="0" x2="20" y2="0" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
+    <line x1="0" y1="-20" x2="0" y2="-15" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
+    <line x1="0" y1="15" x2="0" y2="20" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
+    <line x1="-14" y1="-14" x2="-10" y2="-10" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
+    <line x1="10" y1="10" x2="14" y2="14" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
+    <line x1="14" y1="-14" x2="10" y2="-10" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
+    <line x1="-10" y1="10" x2="-14" y2="14" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
+  </g>
+</svg>
