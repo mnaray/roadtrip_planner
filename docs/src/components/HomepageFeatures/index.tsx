@@ -11,32 +11,32 @@ type FeatureItem = {
 
 const FeatureList: FeatureItem[] = [
   {
-    title: 'Easy to Use',
+    title: 'Modern Rails Architecture',
     Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        Built with Rails 8 and Ruby 3.4, featuring Phlex components, Tailwind CSS v4, 
+        and a completely containerized development environment for consistent deployment.
       </>
     ),
   },
   {
-    title: 'Focus on What Matters',
+    title: 'Plan Your Adventure',
     Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        Create detailed road trip plans with multiple routes, manage destinations and timing, 
+        and track your journey progress with an intuitive, responsive interface.
       </>
     ),
   },
   {
-    title: 'Powered by React',
+    title: 'Component-Driven Development',
     Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        Leveraging Phlex components for type-safe, reusable UI elements with comprehensive 
+        testing coverage and modern development practices throughout the codebase.
       </>
     ),
   },

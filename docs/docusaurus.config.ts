@@ -47,21 +47,7 @@ const config: Config = {
           editUrl:
             'https://github.com/mnaray/roadtrip_planner/tree/main/docs/',
         },
-        blog: {
-          showReadingTime: true,
-          feedOptions: {
-            type: ['rss', 'atom'],
-            xslt: true,
-          },
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/mnaray/roadtrip_planner/tree/main/docs/',
-          // Useful options to enforce blogging best practices
-          onInlineTags: 'warn',
-          onInlineAuthors: 'warn',
-          onUntruncatedBlogPosts: 'warn',
-        },
+        blog: false, // Disable blog functionality
         theme: {
           customCss: './src/css/custom.css',
         },
@@ -107,26 +93,47 @@ const config: Config = {
               to: '/docs/architecture/overview',
             },
             {
-              label: 'Development Setup',
-              to: '/docs/development-setup',
+              label: 'Technologies',
+              to: '/docs/technologies',
             },
           ],
         },
         {
-          title: 'More',
+          title: 'Development',
           items: [
             {
-              label: 'GitHub',
+              label: 'Contributing Guide',
+              to: '/docs/contributing',
+            },
+            {
+              label: 'Models Reference',
+              to: '/docs/models/overview',
+            },
+            {
+              label: 'Services Reference',
+              to: '/docs/services/overview',
+            },
+          ],
+        },
+        {
+          title: 'Community',
+          items: [
+            {
+              label: 'GitHub Repository',
               href: 'https://github.com/mnaray/roadtrip_planner',
             },
             {
-              label: 'Issues',
+              label: 'Issues & Bugs',
               href: 'https://github.com/mnaray/roadtrip_planner/issues',
+            },
+            {
+              label: 'Feature Requests',
+              href: 'https://github.com/mnaray/roadtrip_planner/issues/new?template=feature_request.md',
             },
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Roadtrip Planner. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Roadtrip Planner. Built with Rails 8 and Docusaurus.`,
     },
     prism: {
       theme: prismThemes.github,

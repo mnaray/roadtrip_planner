@@ -18,11 +18,24 @@ A Rails 8 application for planning and managing road trips, built with modern we
 
 ## Features
 
-- User authentication (registration, login, logout)
-- Component-based architecture using Phlex
-- Responsive design with Tailwind CSS v4
-- Dockerized development environment
-- PostgreSQL database with automatic setup
+### ✅ Implemented Features
+- **User Authentication**: Secure registration, login, and logout system
+- **Road Trip Management**: Create, edit, view, and delete road trip plans
+- **Route Planning**: Add individual route segments to road trips with starting location, destination, and timing
+- **Component-Based Architecture**: Modern UI built with Phlex components
+- **Responsive Design**: Mobile-friendly interface with Tailwind CSS v4
+- **Real-time Feedback**: Interactive forms with validation and user feedback
+- **Dockerized Environment**: Complete containerized development setup
+- **PostgreSQL Database**: Robust data storage with proper relationships
+
+### 🚧 Planned Features  
+- Route mapping integration with interactive maps
+- GPS/GPX export functionality for routes
+- Accommodation and activity planning
+- Expense tracking for trips
+- Trip sharing and collaboration
+- Photo galleries for trip memories
+- Offline mode support
 
 ## Prerequisites
 
@@ -110,21 +123,41 @@ The application supports live reloading:
 - CSS changes rebuild automatically in development
 - JavaScript changes are loaded via Importmaps
 
+### Documentation
+
+The project includes comprehensive documentation built with Docusaurus:
+
+```bash
+# View documentation locally
+cd docs
+npm install
+npm run start
+# Open http://localhost:3001 to view documentation
+```
+
+The documentation covers:
+- Complete setup and development guide
+- Architecture and design patterns
+- API reference and component documentation
+- Testing and deployment procedures
+
 ## Project Structure
 
 ```
 roadtrip_planner/
 ├── app/
-│   ├── components/     # Phlex view components
-│   ├── controllers/    # Rails controllers
-│   ├── models/         # ActiveRecord models
-│   └── javascript/     # Stimulus controllers
-├── config/            # Rails configuration
-├── db/                # Database migrations and schema
-├── spec/              # RSpec tests
-├── Dockerfile         # Container definition
-├── docker-compose.yml # Multi-container orchestration
-└── tailwind.config.js # Tailwind CSS v4 configuration
+│   ├── components/     # Phlex view components (HomePage, Navigation, Forms)
+│   ├── controllers/    # Rails controllers (Users, RoadTrips, Routes)
+│   ├── models/         # ActiveRecord models (User, RoadTrip, Route)
+│   └── javascript/     # Stimulus controllers and importmaps
+├── config/             # Rails configuration and routes
+├── db/                 # Database migrations and schema
+├── spec/               # RSpec tests with request specs and factories
+├── docs/               # Docusaurus documentation site
+├── Dockerfile          # Container definition
+├── docker-compose.yml  # Multi-container orchestration
+├── tailwind.config.js  # Tailwind CSS v4 configuration
+└── CLAUDE.md           # AI assistant project instructions
 ```
 
 ## Testing
