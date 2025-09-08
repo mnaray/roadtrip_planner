@@ -65,7 +65,7 @@ RSpec.describe "Pages", type: :request do
     it "clicking Start Planning redirects to new road trip page" do
       get root_path
       expect(response.body).to include('href="/road_trips/new"')
-      
+
       # Verify the new road trip page is accessible
       get new_road_trip_path
       expect(response).to have_http_status(:success)
@@ -74,7 +74,7 @@ RSpec.describe "Pages", type: :request do
 
     it "new road trip page requires authentication" do
       delete logout_path # Log out first
-      
+
       get new_road_trip_path
       expect(response).to redirect_to(login_path)
     end
