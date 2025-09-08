@@ -1,4 +1,4 @@
-.PHONY: build up down logs bash console reset-db clean test rspec rspec-fast rspec-requests rspec-models css-build css-watch lint lint-fix importmap
+.PHONY: build up down logs bash console reset-db clean test test-fast css-build css-watch lint lint-fix importmap
 
 # Build Docker images
 build:
@@ -41,25 +41,13 @@ clean:
 	docker compose down -v
 	docker rmi roadtrip_planner-web || true
 
-# Run tests
+# Run all tests
 test:
 	docker compose exec web bundle exec rspec
 
-# Run RSpec tests (explicit alias)
-rspec:
-	docker compose exec web bundle exec rspec
-
-# Run RSpec tests excluding system specs for faster feedback
-rspec-fast:
-	docker compose exec web bundle exec rspec --exclude-pattern "spec/system/**/*_spec.rb"
-
-# Run only request specs
-rspec-requests:
-	docker compose exec web bundle exec rspec spec/requests
-
-# Run only model specs
-rspec-models:
-	docker compose exec web bundle exec rspec spec/models
+# Run fast tests only (models)
+test-fast:
+	docker compose exec web bundle exec rspec spec/models/
 
 # Check routes
 routes:
