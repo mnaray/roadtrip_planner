@@ -19,8 +19,8 @@ RSpec.describe RouteGpxGenerator, type: :service do
     context "with valid route" do
       before do
         # Mock geocoding to return consistent coordinates
-        allow_any_instance_of(RouteGpxGenerator).to receive(:geocode).with("New York, NY").and_return([40.7128, -74.0060])
-        allow_any_instance_of(RouteGpxGenerator).to receive(:geocode).with("Boston, MA").and_return([42.3601, -71.0589])
+        allow_any_instance_of(RouteGpxGenerator).to receive(:geocode).with("New York, NY").and_return([ 40.7128, -74.0060 ])
+        allow_any_instance_of(RouteGpxGenerator).to receive(:geocode).with("Boston, MA").and_return([ 42.3601, -71.0589 ])
       end
 
       let(:gpx_content) { generator.generate }
@@ -77,8 +77,8 @@ RSpec.describe RouteGpxGenerator, type: :service do
 
         before do
           # Mock geocoding
-          allow_any_instance_of(RouteGpxGenerator).to receive(:geocode).with("New York, NY").and_return([40.7128, -74.0060])
-          allow_any_instance_of(RouteGpxGenerator).to receive(:geocode).with("Boston, MA").and_return([42.3601, -71.0589])
+          allow_any_instance_of(RouteGpxGenerator).to receive(:geocode).with("New York, NY").and_return([ 40.7128, -74.0060 ])
+          allow_any_instance_of(RouteGpxGenerator).to receive(:geocode).with("Boston, MA").and_return([ 42.3601, -71.0589 ])
           allow_any_instance_of(RouteGpxGenerator).to receive(:fetch_route_data).and_return(mock_route_data)
         end
 
@@ -161,8 +161,8 @@ RSpec.describe RouteGpxGenerator, type: :service do
       context "when OSRM is unavailable" do
         before do
           # Mock geocoding
-          allow_any_instance_of(RouteGpxGenerator).to receive(:geocode).with("New York, NY").and_return([40.7128, -74.0060])
-          allow_any_instance_of(RouteGpxGenerator).to receive(:geocode).with("Boston, MA").and_return([42.3601, -71.0589])
+          allow_any_instance_of(RouteGpxGenerator).to receive(:geocode).with("New York, NY").and_return([ 40.7128, -74.0060 ])
+          allow_any_instance_of(RouteGpxGenerator).to receive(:geocode).with("Boston, MA").and_return([ 42.3601, -71.0589 ])
           allow_any_instance_of(RouteGpxGenerator).to receive(:fetch_route_data).and_return(nil)
         end
 
@@ -213,8 +213,8 @@ RSpec.describe RouteGpxGenerator, type: :service do
 
       before do
         # Mock geocoding
-        allow_any_instance_of(RouteGpxGenerator).to receive(:geocode).with("New York, NY").and_return([40.7128, -74.0060])
-        allow_any_instance_of(RouteGpxGenerator).to receive(:geocode).with("Boston, MA").and_return([42.3601, -71.0589])
+        allow_any_instance_of(RouteGpxGenerator).to receive(:geocode).with("New York, NY").and_return([ 40.7128, -74.0060 ])
+        allow_any_instance_of(RouteGpxGenerator).to receive(:geocode).with("Boston, MA").and_return([ 42.3601, -71.0589 ])
         allow_any_instance_of(RouteGpxGenerator).to receive(:fetch_route_data).and_return(mock_route_data)
       end
 
@@ -277,8 +277,8 @@ RSpec.describe RouteGpxGenerator, type: :service do
 
     before do
       # Mock geocoding for both services
-      allow_any_instance_of(RouteGpxGenerator).to receive(:geocode).with("New York, NY").and_return([40.7128, -74.0060])
-      allow_any_instance_of(RouteGpxGenerator).to receive(:geocode).with("Boston, MA").and_return([42.3601, -71.0589])
+      allow_any_instance_of(RouteGpxGenerator).to receive(:geocode).with("New York, NY").and_return([ 40.7128, -74.0060 ])
+      allow_any_instance_of(RouteGpxGenerator).to receive(:geocode).with("Boston, MA").and_return([ 42.3601, -71.0589 ])
       # Mock route data for generator (exporter doesn't fetch external data)
       allow_any_instance_of(RouteGpxGenerator).to receive(:fetch_route_data).and_return({
         geometry: {
