@@ -47,7 +47,7 @@ Rails.application.configure do
   config.action_mailer.default_url_options = { host: "example.com" }
 
   # Disable host authorization for tests to avoid blocked host errors
-  config.hosts.clear
+  config.hosts = nil
 
   # Print deprecation notices to the stderr.
   config.active_support.deprecation = :stderr
