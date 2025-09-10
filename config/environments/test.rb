@@ -46,6 +46,9 @@ Rails.application.configure do
   # Set host to be used by links generated in mailer templates.
   config.action_mailer.default_url_options = { host: "example.com" }
 
+  # Disable host authorization for tests to avoid blocked host errors
+  config.hosts.clear
+
   # Print deprecation notices to the stderr.
   config.active_support.deprecation = :stderr
 

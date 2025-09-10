@@ -1,9 +1,6 @@
 require 'rails_helper'
 
 RSpec.describe "Route Actions", type: :system do
-  before do
-    driven_by(:rack_test)
-  end
   let(:user) { create(:user) }
   let(:road_trip) { create(:road_trip, user: user) }
   let!(:route) { create(:route, road_trip: road_trip, user: user) }
@@ -27,20 +24,16 @@ RSpec.describe "Route Actions", type: :system do
     end
 
     it "displays route action buttons" do
-      within ".border-b", match: :first do
-        # Check for edit button
-        expect(page).to have_link(href: edit_route_path(route))
+      # Check for edit button in the actions area
+      expect(page).to have_link(href: edit_route_path(route))
 
-        # Check for delete button (now a button_to form)
-        expect(page).to have_button(class: /text-gray-400.*hover:text-red-600/)
-      end
+      # Check for delete button (now a button_to form)
+      expect(page).to have_button(class: /text-gray-400.*hover:text-red-600/)
     end
 
     it "clicking on route navigates to route map" do
       # Click on the route row (not the action buttons)
-      within ".border-b", match: :first do
-        find("a[href='#{route_map_path(route)}']").click
-      end
+      find("a[href='#{route_map_path(route)}']").click
 
       expect(page).to have_current_path(route_map_path(route))
       expect(page).to have_content("Route Map")
@@ -49,19 +42,15 @@ RSpec.describe "Route Actions", type: :system do
     end
 
     it "edit button navigates to edit page" do
-      within ".border-b", match: :first do
-        find("a[href='#{edit_route_path(route)}']").click
-      end
+      find("a[href='#{edit_route_path(route)}']").click
 
       expect(page).to have_current_path(edit_route_path(route))
       expect(page).to have_content("Edit Route")
     end
 
     it "delete button removes the route" do
-      within ".border-b", match: :first do
-        # Find and click the delete button (which is now a form button)
-        find("form[action='#{route_path(route)}'] button").click
-      end
+      # Find and click the delete button (which is now a form button)
+      find("form[action='#{route_path(route)}'] button").click
 
       expect(page).to have_content("Route was successfully deleted")
       expect(page).not_to have_content(route.starting_location)

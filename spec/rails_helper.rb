@@ -30,6 +30,12 @@ RSpec.configure do |config|
     ActionController::Base.allow_forgery_protection = true
   end
 
+  # Configure system tests
+  config.before(:each, type: :system) do
+    driven_by :rack_test
+    Capybara.default_host = 'http://localhost'
+  end
+
   config.fixture_paths = [ Rails.root.join('spec/fixtures') ]
   config.filter_rails_from_backtrace!
 end

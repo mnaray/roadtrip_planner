@@ -63,7 +63,7 @@ class Routes::MapComponent < ApplicationComponent
                      stroke_linecap: "round",
                      stroke_linejoin: "round",
                      stroke_width: "2"
-            "Back to Road Trip"
+            span { "Back to Road Trip" }
           end
         end
 
@@ -144,7 +144,7 @@ class Routes::MapComponent < ApplicationComponent
                          stroke_linecap: "round",
                          stroke_linejoin: "round",
                          stroke_width: "2"
-                "Edit Route"
+                span { "Edit Route" }
               end
 
               link_to route_export_gpx_path(@route),
@@ -154,7 +154,7 @@ class Routes::MapComponent < ApplicationComponent
                          stroke_linecap: "round",
                          stroke_linejoin: "round",
                          stroke_width: "2"
-                "Download GPX"
+                span { "Download GPX" }
               end
 
               button_to route_path(@route),
@@ -167,7 +167,7 @@ class Routes::MapComponent < ApplicationComponent
                          stroke_linecap: "round",
                          stroke_linejoin: "round",
                          stroke_width: "2"
-                "Delete Route"
+                span { "Delete Route" }
               end
             end
 
