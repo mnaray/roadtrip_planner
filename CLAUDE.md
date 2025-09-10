@@ -54,6 +54,7 @@ When creating or modifying UI components:
 2. Inherit from `ApplicationComponent`
 3. Use semantic HTML and Tailwind utilities
 4. Keep components focused and reusable
+5. When combining SVG icons with text, wrap text in span elements for proper rendering
 
 Example pattern:
 ```ruby
@@ -64,7 +65,10 @@ class ButtonComponent < ApplicationComponent
   end
 
   def view_template
-    button(class: button_classes) { @text }
+    button(class: button_classes) do
+      svg_icon path_d: "...", class: "w-4 h-4 mr-2"
+      span { @text }  # Wrap text in span for proper rendering
+    end
   end
 
   private
@@ -89,9 +93,11 @@ end
 
 ### Testing Best Practices
 - Write request specs for new features
+- Use system specs for UI interactions and user flows
 - Use factories instead of fixtures
 - Test user interactions, not implementation
 - Keep specs focused and readable
+- For delete buttons, use `button_to` with proper Turbo confirmation
 
 ## Current Application State
 
@@ -133,6 +139,7 @@ app/
 spec/
 ├── components/      # Component specs
 ├── requests/        # Request/integration specs
+├── system/         # System/UI specs with Capybara
 ├── models/         # Model specs
 └── factories/      # FactoryBot definitions
 ```
@@ -144,8 +151,9 @@ spec/
 2. Add model with validations and associations
 3. Create Phlex components for UI
 4. Add controller actions
-5. Write request specs
-6. Add routes
+5. Write request specs for API/controller logic
+6. Write system specs for UI interactions
+7. Add routes
 
 ### Modifying Styles
 1. Edit `tailwind.config.js` for theme customization
@@ -154,8 +162,15 @@ spec/
 
 ### Running Tests
 ```bash
+# Run all tests
 docker compose exec web rspec
-docker compose exec web rspec spec/requests/
+
+# Run specific test types
+docker compose exec web rspec spec/requests/     # Request specs
+docker compose exec web rspec spec/system/      # System/UI specs
+docker compose exec web rspec spec/models/      # Model specs
+
+# Linting
 docker compose exec web rubocop
 ```
 
