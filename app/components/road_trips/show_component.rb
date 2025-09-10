@@ -191,10 +191,11 @@ class RoadTrips::ShowComponent < ApplicationComponent
                      stroke_width: "2"
           end
 
-          link_to route_path(route),
-                  method: :delete,
-                  class: "inline-flex items-center p-1.5 border border-transparent rounded-md text-gray-400 hover:text-red-600",
-                  data: { confirm: "Are you sure you want to delete this route?" } do
+          button_to route_path(route),
+                    method: :delete,
+                    class: "inline-flex items-center p-1.5 border border-transparent rounded-md text-gray-400 hover:text-red-600",
+                    data: { turbo_confirm: "Are you sure you want to delete this route?" },
+                    form: { class: "inline" } do
             svg_icon path_d: "M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16",
                      class: "w-4 h-4",
                      stroke_linecap: "round",
