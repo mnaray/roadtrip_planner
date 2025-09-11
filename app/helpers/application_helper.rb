@@ -7,9 +7,9 @@ module ApplicationHelper
     when :short
       datetime.strftime("%d.%m.%Y")
     when :long
-      datetime.strftime("%d.%m.%Y um %H:%M Uhr")
+      datetime.strftime("%d.%m.%Y at %H:%M")
     when :with_day
-      datetime.strftime("%A, %d. %B %Y um %H:%M Uhr")
+      datetime.strftime("%A, %d. %B %Y at %H:%M")
     else
       datetime.strftime("%d.%m.%Y %H:%M")
     end

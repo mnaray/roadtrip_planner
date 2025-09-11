@@ -13,20 +13,20 @@ RSpec.describe ApplicationHelper, type: :helper do
     end
 
     context 'with long format' do
-      it 'returns date in DD.MM.YYYY um HH:MM Uhr format' do
-        expect(helper.swiss_date_format(test_datetime, :long)).to eq('15.03.2025 um 14:30 Uhr')
+      it 'returns date in DD.MM.YYYY at HH:MM format' do
+        expect(helper.swiss_date_format(test_datetime, :long)).to eq('15.03.2025 at 14:30')
       end
     end
 
     context 'with with_day format' do
       it 'returns date with day name in Swiss format' do
-        expect(helper.swiss_date_format(test_datetime, :with_day)).to eq('Saturday, 15. March 2025 um 14:30 Uhr')
+        expect(helper.swiss_date_format(test_datetime, :with_day)).to eq('Saturday, 15. March 2025 at 14:30')
       end
     end
 
     context 'with default format (defaults to :long)' do
-      it 'returns date in DD.MM.YYYY um HH:MM Uhr format' do
-        expect(helper.swiss_date_format(test_datetime)).to eq('15.03.2025 um 14:30 Uhr')
+      it 'returns date in DD.MM.YYYY at HH:MM format' do
+        expect(helper.swiss_date_format(test_datetime)).to eq('15.03.2025 at 14:30')
       end
     end
 
