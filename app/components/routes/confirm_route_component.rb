@@ -44,6 +44,13 @@ class Routes::ConfirmRouteComponent < ApplicationComponent
                         method: :post,
                         local: true,
                         class: "space-y-4" do |form|
+                # Create a temporary form object to pass to our component
+                temp_form_object = OpenStruct.new(
+                  errors: @route&.errors || {},
+                  datetime: 1.hour.from_now
+                )
+                temp_form = ActionView::Helpers::FormBuilder.new(:route, temp_form_object, self, {})
+
                 div do
                   form.label :datetime,
                              class: "block text-sm font-medium text-gray-700 mb-2" do
@@ -53,7 +60,13 @@ class Routes::ConfirmRouteComponent < ApplicationComponent
                   form.datetime_local_field :datetime,
                                             class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
                                             required: true,
-                                            value: 1.hour.from_now.strftime("%Y-%m-%dT%H:%M")
+                                            value: 1.hour.from_now.strftime("%Y-%m-%dT%H:%M"),
+                                            placeholder: "DD/MM/YYYY HH:MM"
+
+                  # Display format hint for users
+                  p class: "mt-1 text-xs text-gray-500" do
+                    "Format: DD/MM/YYYY HH:MM"
+                  end
 
                   if @route&.errors&.[](:datetime)&.any?
                     div class: "mt-1 text-sm text-red-600" do

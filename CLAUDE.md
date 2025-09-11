@@ -46,6 +46,13 @@ Custom authentication implementation using:
 - Responsive design patterns
 - Dark mode ready (infrastructure in place)
 
+### Date and Time Handling
+- Application configured for Swiss timezone (Europe/Bern)
+- Date format follows Swiss standard: DD.MM.YYYY or DD/MM/YYYY
+- All date inputs use `Shared::DateInputComponent` for consistent formatting
+- Date displays use `swiss_date_format` helper method for proper formatting
+- HTML5 datetime-local inputs include format hints for user guidance
+
 ## Development Guidelines
 
 ### Working with Phlex Components
