@@ -8,7 +8,7 @@ class AboutPage < Phlex::HTML
   def view_template
     render ApplicationLayout.new(title: "About - Roadtrip Planner", current_user: @current_user) do
       div class: "max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12" do
-        article class: "prose prose-lg max-w-none" do
+        article class: "prose prose-lg" do
           raw markdown_content.html_safe
         end
       end
