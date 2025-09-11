@@ -15,7 +15,7 @@ class Navigation < ApplicationComponent
 
             link_to "About",
                    about_path,
-                   class: "text-gray-700 hover:text-gray-900 text-sm font-medium transition-colors"
+                   class: "inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
           end
 
           # Navigation Links
