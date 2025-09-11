@@ -113,7 +113,7 @@ RSpec.describe PackingListItem, type: :model do
       it 'returns items of the specified category' do
         clothes_items_from_test = packing_list.packing_list_items.by_category("clothes")
         tools_items_from_test = packing_list.packing_list_items.by_category("tools")
-        
+
         expect(clothes_items_from_test).to contain_exactly(clothes_item)
         expect(tools_items_from_test).to contain_exactly(tools_item)
       end

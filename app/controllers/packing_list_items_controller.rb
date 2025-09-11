@@ -6,20 +6,20 @@ class PackingListItemsController < ApplicationController
   def index
     packing_list_items = safe_packing_list_items
     resources = safe_resources.merge(packing_list_items: packing_list_items)
-    
+
     render PackingListItems::IndexComponent.new(**resources)
   end
 
   def show
     resources = safe_resources
-    
+
     render PackingListItems::ShowComponent.new(**resources)
   end
 
   def new
     @packing_list_item = @packing_list.packing_list_items.build
     resources = safe_resources
-    
+
     render PackingListItems::NewComponent.new(**resources)
   end
 
@@ -30,14 +30,14 @@ class PackingListItemsController < ApplicationController
       redirect_to [ @road_trip, @packing_list ], notice: "Item was successfully added to packing list."
     else
       resources = safe_resources
-      
+
       render PackingListItems::NewComponent.new(**resources), status: :unprocessable_entity
     end
   end
 
   def edit
     resources = safe_resources
-    
+
     render PackingListItems::EditComponent.new(**resources)
   end
 
@@ -46,7 +46,7 @@ class PackingListItemsController < ApplicationController
       redirect_to [ @road_trip, @packing_list ], notice: "Item was successfully updated."
     else
       resources = safe_resources
-      
+
       render PackingListItems::EditComponent.new(**resources), status: :unprocessable_entity
     end
   end
