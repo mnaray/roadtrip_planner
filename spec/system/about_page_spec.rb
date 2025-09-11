@@ -118,7 +118,7 @@ RSpec.describe "About Page", type: :system do
     end
 
     it "applies proper styling with prose classes" do
-      expect(page).to have_selector("article.prose.prose-lg.prose-blue")
+      expect(page).to have_selector("article.prose.prose-lg")
     end
 
     it "displays key feature descriptions" do

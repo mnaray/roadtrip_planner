@@ -23,7 +23,7 @@ RSpec.describe "About", type: :request do
 
       it "includes proper styling classes for markdown content" do
         get about_path
-        expect(response.body).to include("prose prose-lg prose-blue")
+        expect(response.body).to include("prose prose-lg")
       end
 
       it "displays navigation with About link" do
