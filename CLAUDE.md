@@ -117,6 +117,8 @@ end
 - Tailwind CSS v4 integration
 - RSpec test suite setup
 - Basic navigation and layout components
+- Road trip management with route planning
+- Packing list functionality with categories and progress tracking
 
 ### 🚧 In Progress
 - None currently
@@ -135,20 +137,23 @@ These features are planned but not yet implemented:
 
 ```
 app/
-├── components/        # Phlex view components
-│   ├── layouts/      # Layout components
-│   ├── shared/       # Shared/common components
-│   └── features/     # Feature-specific components
-├── controllers/      # Rails controllers
-├── models/          # ActiveRecord models
-└── javascript/      # Stimulus controllers
+├── components/            # Phlex view components
+│   ├── layouts/          # Layout components
+│   ├── shared/           # Shared/common components
+│   ├── road_trips/       # Road trip components
+│   ├── routes/           # Route components
+│   ├── packing_lists/    # Packing list components
+│   └── packing_list_items/ # Packing list item components
+├── controllers/          # Rails controllers
+├── models/              # ActiveRecord models
+└── javascript/          # Stimulus controllers
 
 spec/
-├── components/      # Component specs
-├── requests/        # Request/integration specs
-├── system/         # System/UI specs with Capybara
-├── models/         # Model specs
-└── factories/      # FactoryBot definitions
+├── components/          # Component specs
+├── requests/            # Request/integration specs
+├── system/             # System/UI specs with Capybara
+├── models/             # Model specs
+└── factories/          # FactoryBot definitions
 ```
 
 ## Common Tasks
