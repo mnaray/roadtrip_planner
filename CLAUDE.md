@@ -25,6 +25,10 @@ Roadtrip Planner is a Rails 8 application for planning and managing road trips. 
 - **FactoryBot**: Test data generation
 - **Rubocop**: Ruby style guide enforcement
 
+### Content Management
+- **CommonMarker**: GitHub-flavored markdown processing for content pages
+- **Tailwind Typography**: Beautiful prose styling for markdown content
+
 ## Architecture Decisions
 
 ### Component-Based Views
@@ -52,6 +56,13 @@ Custom authentication implementation using:
 - All date inputs use `Shared::DateInputComponent` for consistent formatting
 - Date displays use `swiss_date_format` helper method for proper formatting
 - HTML5 datetime-local inputs include format hints for user guidance
+
+### Markdown Content Management
+- **Content Storage**: Markdown files stored in `app/content/` directory
+- **Processing**: CommonMarker gem converts markdown to HTML with GitHub-flavored features
+- **Styling**: Tailwind Typography plugin provides beautiful prose styling
+- **Security**: Safe HTML rendering with `html_safe` for trusted content
+- **Features**: Supports tables, strikethroughs, autolinks, and emoji
 
 ## Development Guidelines
 
@@ -82,6 +93,34 @@ class ButtonComponent < ApplicationComponent
 
   def button_classes
     # Tailwind classes based on variant
+  end
+end
+```
+
+### Working with Markdown Content
+When creating or modifying markdown-based pages:
+1. Store markdown files in `app/content/` directory
+2. Use CommonMarker for processing with GitHub-flavored features
+3. Apply Tailwind Typography classes (`prose prose-lg prose-blue`) for styling
+4. Always use `html_safe` when rendering markdown HTML in Phlex components
+5. Test both request and system specs for content rendering
+
+Example pattern:
+```ruby
+class ContentPage < Phlex::HTML
+  private
+
+  def markdown_content
+    markdown_file_path = Rails.root.join("app", "content", "example.md")
+    markdown_text = File.read(markdown_file_path)
+    
+    Commonmarker.to_html(
+      markdown_text,
+      options: {
+        parse: { unsafe: false, smart: true },
+        render: { unsafe: false, github_pre_lang: true }
+      }
+    )
   end
 end
 ```
@@ -117,6 +156,8 @@ end
 - Tailwind CSS v4 integration
 - RSpec test suite setup
 - Basic navigation and layout components
+- About page with markdown content rendering
+- CommonMarker integration for GitHub-flavored markdown
 
 ### 🚧 In Progress
 - None currently
@@ -139,6 +180,7 @@ app/
 │   ├── layouts/      # Layout components
 │   ├── shared/       # Shared/common components
 │   └── features/     # Feature-specific components
+├── content/          # Markdown content files
 ├── controllers/      # Rails controllers
 ├── models/          # ActiveRecord models
 └── javascript/      # Stimulus controllers

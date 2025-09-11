@@ -20,6 +20,9 @@ gem "jbuilder"
 # Phlex for component-based views [https://phlex.fun]
 gem "phlex-rails"
 
+# Markdown processing with GitHub-flavored markdown support
+gem "commonmarker"
+
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 gem "bcrypt", "~> 3.1.7"
 

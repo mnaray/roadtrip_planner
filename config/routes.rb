@@ -16,6 +16,9 @@ Rails.application.routes.draw do
   post "login", to: "sessions#create"
   delete "logout", to: "sessions#destroy", as: :logout
 
+  # About page
+  get "about", to: "about#index", as: :about
+
   # Road trip planning routes
   resources :road_trips do
     resources :routes, except: [ :index ], shallow: true
