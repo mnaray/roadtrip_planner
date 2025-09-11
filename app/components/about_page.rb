@@ -9,7 +9,7 @@ class AboutPage < Phlex::HTML
     render ApplicationLayout.new(title: "About - Roadtrip Planner", current_user: @current_user) do
       div class: "max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12" do
         div class: "bg-white p-8 rounded-lg shadow-sm" do
-          article class: "prose prose-lg prose-gray mx-auto prose-headings:font-bold prose-h1:text-3xl prose-h2:text-xl prose-h2:font-semibold prose-h3:text-lg prose-h3:font-semibold prose-h4:text-base prose-h4:font-medium" do
+          div class: "prose prose-lg prose-gray mx-auto markdown-content" do
             raw markdown_content.html_safe
           end
         end
@@ -24,7 +24,7 @@ class AboutPage < Phlex::HTML
     markdown_text = File.read(markdown_file_path)
 
     # Configure Commonmarker with GitHub-flavored markdown features
-    Commonmarker.to_html(
+    html = Commonmarker.to_html(
       markdown_text,
       options: {
         parse: {
@@ -34,8 +34,18 @@ class AboutPage < Phlex::HTML
         render: {
           unsafe: false,
           github_pre_lang: true
+        },
+        extension: {
+          autolink: true,
+          table: true,
+          strikethrough: true,
+          tagfilter: false,
+          tasklist: false
         }
       }
     )
+
+    # Remove empty anchor links that CommonMarker adds to headers
+    html.gsub(/<a href="#[^"]*" aria-hidden="true" class="anchor" id="[^"]*"><\/a>/, '')
   end
 end

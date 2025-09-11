@@ -118,7 +118,7 @@ RSpec.describe "About Page", type: :system do
     end
 
     it "applies proper styling with prose classes" do
-      expect(page).to have_selector("article.prose.prose-lg")
+      expect(page).to have_selector("div.prose.prose-lg.markdown-content")
     end
 
     it "displays key feature descriptions" do
@@ -174,8 +174,8 @@ RSpec.describe "About Page", type: :system do
       expect(page).to have_selector("div.max-w-4xl.mx-auto.px-4")
     end
 
-    it "has proper article structure for content" do
-      expect(page).to have_selector("article.prose")
+    it "has proper div structure for content" do
+      expect(page).to have_selector("div.prose.markdown-content")
     end
   end
 

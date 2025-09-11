@@ -45,3 +45,22 @@
     outline-offset: 2px;
   }
 }
+
+/* Markdown content custom styling */
+@layer components {
+  .markdown-content h1 {
+    @apply text-3xl font-bold !important;
+  }
+  
+  .markdown-content h2 {
+    @apply text-xl font-semibold !important;
+  }
+  
+  .markdown-content h3 {
+    @apply text-lg font-semibold !important;
+  }
+  
+  .markdown-content h4 {
+    @apply text-base font-medium !important;
+  }
+}
