@@ -1,4 +1,5 @@
 class PackingListItems::EditComponent < ApplicationComponent
+  include Phlex::Rails::Helpers::OptionsForSelect
   def initialize(road_trip:, packing_list:, packing_list_item:, current_user:)
     @road_trip = road_trip
     @packing_list = packing_list
