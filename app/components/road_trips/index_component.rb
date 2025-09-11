@@ -42,10 +42,10 @@ class RoadTrips::IndexComponent < ApplicationComponent
 
   def render_road_trip_card(road_trip)
     link_to road_trip_path(road_trip),
-            class: "block bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all duration-200" do
-      div class: "p-6" do
+            class: "block bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all duration-200 overflow-hidden" do
+      div class: "p-6 overflow-hidden" do
         # Trip name and stats
-        div class: "flex justify-between items-start mb-4" do
+        div class: "flex justify-between items-start mb-4 overflow-hidden" do
           h3 class: "text-lg font-semibold text-gray-900 truncate mr-4" do
             road_trip.name
           end
@@ -83,15 +83,21 @@ class RoadTrips::IndexComponent < ApplicationComponent
               "Latest routes:"
             end
 
-            div class: "space-y-1" do
+            div class: "space-y-2 overflow-hidden" do
               road_trip.routes.ordered_by_datetime.limit(2).each do |route|
-                div class: "text-sm text-gray-700" do
-                  span class: "font-medium" do
-                    route.starting_location
+                div class: "flex items-center text-sm text-gray-700 leading-relaxed overflow-hidden" do
+                  div class: "overflow-hidden max-w-[45%] flex-shrink-0" do
+                    span class: "font-medium truncate block" do
+                      route.starting_location
+                    end
                   end
-                  " → "
-                  span class: "font-medium" do
-                    route.destination
+                  span class: "mx-2 text-gray-400 flex-shrink-0" do
+                    "→"
+                  end
+                  div class: "overflow-hidden max-w-[45%] flex-shrink-0" do
+                    span class: "font-medium truncate block" do
+                      route.destination
+                    end
                   end
                 end
               end

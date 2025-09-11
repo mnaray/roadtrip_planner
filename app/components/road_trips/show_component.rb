@@ -104,7 +104,7 @@ class RoadTrips::ShowComponent < ApplicationComponent
         end
 
         # Routes list
-        div class: "bg-white rounded-lg shadow-sm border border-gray-200" do
+        div class: "bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden" do
           div class: "px-6 py-4 border-b border-gray-200" do
             h2 class: "text-lg font-semibold text-gray-900" do
               "Routes"
@@ -155,7 +155,7 @@ class RoadTrips::ShowComponent < ApplicationComponent
     div class: "#{border_class}" do
       div class: "flex items-center justify-between" do
         # Main clickable area for route content
-        link_to route_map_path(route), class: "flex items-center space-x-4 flex-1 p-6 hover:bg-gray-50 no-underline text-inherit transition-colors" do
+        link_to route_map_path(route), class: "flex items-center space-x-4 flex-1 p-6 hover:bg-gray-50 no-underline text-inherit transition-colors overflow-hidden" do
           # Sequence number
           div class: "flex-shrink-0" do
             span class: "inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 text-sm font-medium" do
@@ -164,8 +164,8 @@ class RoadTrips::ShowComponent < ApplicationComponent
           end
 
           # Route details
-          div class: "flex-1 min-w-0" do
-            div class: "flex items-center space-x-2 mb-1" do
+          div class: "flex-1 min-w-0 overflow-hidden" do
+            div class: "flex items-center space-x-2 mb-1 overflow-hidden" do
               span class: "text-sm font-semibold text-gray-900 truncate" do
                 route.starting_location
               end
