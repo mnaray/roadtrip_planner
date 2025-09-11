@@ -10,6 +10,11 @@ RSpec.describe RoadTrip, type: :model do
       expect(RoadTrip.reflect_on_association(:routes).macro).to eq(:has_many)
       expect(RoadTrip.reflect_on_association(:routes).options[:dependent]).to eq(:destroy)
     end
+
+    it 'has many packing lists with dependent destroy' do
+      expect(RoadTrip.reflect_on_association(:packing_lists).macro).to eq(:has_many)
+      expect(RoadTrip.reflect_on_association(:packing_lists).options[:dependent]).to eq(:destroy)
+    end
   end
 
   describe 'validations' do

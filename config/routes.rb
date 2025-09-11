@@ -19,6 +19,13 @@ Rails.application.routes.draw do
   # Road trip planning routes
   resources :road_trips do
     resources :routes, except: [ :index ], shallow: true
+    resources :packing_lists do
+      resources :packing_list_items do
+        member do
+          patch :toggle_packed
+        end
+      end
+    end
   end
 
   # Special route flow for confirmation and approval

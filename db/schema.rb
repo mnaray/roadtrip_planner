@@ -10,9 +10,28 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_01_091821) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_11_134246) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "packing_list_items", force: :cascade do |t|
+    t.string "name", null: false
+    t.integer "quantity", default: 1, null: false
+    t.string "category", null: false
+    t.boolean "packed", default: false, null: false
+    t.bigint "packing_list_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["packing_list_id"], name: "index_packing_list_items_on_packing_list_id"
+  end
+
+  create_table "packing_lists", force: :cascade do |t|
+    t.string "name"
+    t.bigint "road_trip_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["road_trip_id"], name: "index_packing_lists_on_road_trip_id"
+  end
 
   create_table "road_trips", force: :cascade do |t|
     t.string "name"
@@ -44,6 +63,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_01_091821) do
     t.index ["username"], name: "index_users_on_username", unique: true
   end
 
+  add_foreign_key "packing_list_items", "packing_lists"
+  add_foreign_key "packing_lists", "road_trips"
   add_foreign_key "road_trips", "users"
   add_foreign_key "routes", "road_trips"
   add_foreign_key "routes", "users"

@@ -1,6 +1,7 @@
 class RoadTrip < ApplicationRecord
   belongs_to :user
   has_many :routes, dependent: :destroy
+  has_many :packing_lists, dependent: :destroy
 
   validates :name, presence: true, length: { minimum: 1, maximum: 100 }
 
