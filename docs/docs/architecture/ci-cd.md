@@ -8,7 +8,10 @@ The CI/CD pipeline consists of several automated workflows that run on different
 
 ### 1. Continuous Integration (CI)
 
-**Trigger**: Pull requests and pushes to `main` branch  
+**Trigger**: 
+- Pull requests (excluding draft PRs)
+- Pushes to `main` branch
+- Manual workflow dispatch  
 **File**: `.github/workflows/ci.yml`
 
 ```mermaid
@@ -43,6 +46,21 @@ graph LR
 
 ## CI Workflow Details
 
+### Draft PR Behavior
+
+**Important**: CI workflows automatically skip execution on draft pull requests to save CI minutes. This behavior applies to all jobs in the CI workflow. Workflows can still be manually triggered on draft PRs using the "Actions" tab in GitHub.
+
+**Condition Applied**: Each job includes the following condition:
+```yaml
+if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+```
+
+This ensures:
+- Workflows run on all push events to main branch
+- Workflows run on ready (non-draft) pull requests
+- Workflows skip draft pull requests automatically
+- Manual workflow_dispatch triggers always work
+
 ### Job: `scan_ruby`
 
 **Purpose**: Security vulnerability scanning for Ruby dependencies
@@ -50,6 +68,7 @@ graph LR
 ```yaml
 scan_ruby:
   runs-on: ubuntu-latest
+  if: github.event_name != 'pull_request' || !github.event.pull_request.draft
   steps:
     - name: Checkout code
       uses: actions/checkout@v5
@@ -82,6 +101,7 @@ scan_ruby:
 ```yaml
 scan_js:
   runs-on: ubuntu-latest
+  if: github.event_name != 'pull_request' || !github.event.pull_request.draft
   steps:
     - name: Checkout code
       uses: actions/checkout@v5
@@ -113,6 +133,7 @@ scan_js:
 ```yaml
 lint:
   runs-on: ubuntu-latest
+  if: github.event_name != 'pull_request' || !github.event.pull_request.draft
   steps:
     - name: Checkout code
       uses: actions/checkout@v5
@@ -144,6 +165,7 @@ lint:
 ```yaml
 test:
   runs-on: ubuntu-latest
+  if: github.event_name != 'pull_request' || !github.event.pull_request.draft
   
   services:
     postgres:
@@ -249,9 +271,10 @@ env:
 
 ```yaml
 on:
-  pull_request:     # All PR events
+  pull_request:     # All PR events (but draft PRs are skipped via job conditions)
   push:
     branches: [main] # Only main branch pushes
+  workflow_dispatch: # Manual trigger available
 ```
 
 ### Job Dependencies
