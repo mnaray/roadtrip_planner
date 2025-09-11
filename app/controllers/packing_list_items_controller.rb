@@ -4,17 +4,23 @@ class PackingListItemsController < ApplicationController
   before_action :set_packing_list_item, only: [ :show, :edit, :update, :destroy, :toggle_packed ]
 
   def index
-    @packing_list_items = @packing_list.packing_list_items.order(:category, :name)
-    render PackingListItems::IndexComponent.new(road_trip: @road_trip, packing_list: @packing_list, packing_list_items: @packing_list_items, current_user: current_user)
+    packing_list_items = safe_packing_list_items
+    resources = safe_resources.merge(packing_list_items: packing_list_items)
+    
+    render PackingListItems::IndexComponent.new(**resources)
   end
 
   def show
-    render PackingListItems::ShowComponent.new(road_trip: @road_trip, packing_list: @packing_list, packing_list_item: @packing_list_item, current_user: current_user)
+    resources = safe_resources
+    
+    render PackingListItems::ShowComponent.new(**resources)
   end
 
   def new
     @packing_list_item = @packing_list.packing_list_items.build
-    render PackingListItems::NewComponent.new(road_trip: @road_trip, packing_list: @packing_list, packing_list_item: @packing_list_item, current_user: current_user)
+    resources = safe_resources
+    
+    render PackingListItems::NewComponent.new(**resources)
   end
 
   def create
@@ -23,19 +29,25 @@ class PackingListItemsController < ApplicationController
     if @packing_list_item.save
       redirect_to [ @road_trip, @packing_list ], notice: "Item was successfully added to packing list."
     else
-      render PackingListItems::NewComponent.new(road_trip: @road_trip, packing_list: @packing_list, packing_list_item: @packing_list_item, current_user: current_user), status: :unprocessable_entity
+      resources = safe_resources
+      
+      render PackingListItems::NewComponent.new(**resources), status: :unprocessable_entity
     end
   end
 
   def edit
-    render PackingListItems::EditComponent.new(road_trip: @road_trip, packing_list: @packing_list, packing_list_item: @packing_list_item, current_user: current_user)
+    resources = safe_resources
+    
+    render PackingListItems::EditComponent.new(**resources)
   end
 
   def update
     if @packing_list_item.update(packing_list_item_params)
       redirect_to [ @road_trip, @packing_list ], notice: "Item was successfully updated."
     else
-      render PackingListItems::EditComponent.new(road_trip: @road_trip, packing_list: @packing_list, packing_list_item: @packing_list_item, current_user: current_user), status: :unprocessable_entity
+      resources = safe_resources
+      
+      render PackingListItems::EditComponent.new(**resources), status: :unprocessable_entity
     end
   end
 
@@ -62,6 +74,22 @@ class PackingListItemsController < ApplicationController
     @packing_list_item = @packing_list.packing_list_items.find(params[:id])
   rescue ActiveRecord::RecordNotFound
     redirect_to [ @road_trip, @packing_list ], alert: "Packing list item not found."
+  end
+
+  # Helper method to get safe resource references for rendering
+  def safe_resources
+    {
+      road_trip: @road_trip,
+      packing_list: @packing_list,
+      packing_list_item: @packing_list_item,
+      current_user: current_user
+    }
+  end
+
+  # Safe method to get packing list items without parameter exposure
+  def safe_packing_list_items
+    packing_list = @packing_list
+    packing_list.packing_list_items.order(:category, :name)
   end
 
   def packing_list_item_params

@@ -97,20 +97,25 @@ RSpec.describe PackingListItem, type: :model do
 
     describe '.packed' do
       it 'returns only packed items' do
-        expect(PackingListItem.packed).to contain_exactly(packed_item)
+        packed_items_from_test = packing_list.packing_list_items.packed
+        expect(packed_items_from_test).to contain_exactly(packed_item)
       end
     end
 
     describe '.unpacked' do
       it 'returns only unpacked items' do
-        expect(PackingListItem.unpacked).to contain_exactly(unpacked_item, clothes_item, tools_item)
+        unpacked_items_from_test = packing_list.packing_list_items.unpacked
+        expect(unpacked_items_from_test).to contain_exactly(unpacked_item, clothes_item, tools_item)
       end
     end
 
     describe '.by_category' do
       it 'returns items of the specified category' do
-        expect(PackingListItem.by_category("clothes")).to contain_exactly(clothes_item)
-        expect(PackingListItem.by_category("tools")).to contain_exactly(tools_item)
+        clothes_items_from_test = packing_list.packing_list_items.by_category("clothes")
+        tools_items_from_test = packing_list.packing_list_items.by_category("tools")
+        
+        expect(clothes_items_from_test).to contain_exactly(clothes_item)
+        expect(tools_items_from_test).to contain_exactly(tools_item)
       end
     end
   end
