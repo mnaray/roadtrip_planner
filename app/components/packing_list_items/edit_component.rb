@@ -1,5 +1,4 @@
 class PackingListItems::EditComponent < ApplicationComponent
-  include Phlex::Rails::Helpers::OptionsForSelect
   def initialize(road_trip:, packing_list:, packing_list_item:, current_user:)
     @road_trip = road_trip
     @packing_list = packing_list
@@ -130,7 +129,7 @@ class PackingListItems::EditComponent < ApplicationComponent
                 end
 
                 form.select :category,
-                            options_for_select([
+                            [
                               [ "Tools", "tools" ],
                               [ "Clothes", "clothes" ],
                               [ "Hygiene", "hygiene" ],
@@ -140,8 +139,8 @@ class PackingListItems::EditComponent < ApplicationComponent
                               [ "Medicine", "medicine" ],
                               [ "Entertainment", "entertainment" ],
                               [ "Other", "other" ]
-                            ], @packing_list_item.category),
-                            {},
+                            ],
+                            { selected: @packing_list_item.category },
                             { class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm", required: true }
 
                 if @packing_list_item.errors[:category].any?
