@@ -1,7 +1,7 @@
 class PackingListsController < ApplicationController
   before_action :require_login
   before_action :set_road_trip
-  before_action :set_packing_list, only: [:show, :edit, :update, :destroy]
+  before_action :set_packing_list, only: [ :show, :edit, :update, :destroy ]
 
   def index
     @packing_lists = @road_trip.packing_lists.includes(:packing_list_items)
@@ -22,7 +22,7 @@ class PackingListsController < ApplicationController
     @packing_list = @road_trip.packing_lists.build(packing_list_params)
 
     if @packing_list.save
-      redirect_to [@road_trip, @packing_list], notice: "Packing list was successfully created."
+      redirect_to [ @road_trip, @packing_list ], notice: "Packing list was successfully created."
     else
       render PackingLists::NewComponent.new(road_trip: @road_trip, packing_list: @packing_list, current_user: current_user), status: :unprocessable_entity
     end
@@ -34,7 +34,7 @@ class PackingListsController < ApplicationController
 
   def update
     if @packing_list.update(packing_list_params)
-      redirect_to [@road_trip, @packing_list], notice: "Packing list was successfully updated."
+      redirect_to [ @road_trip, @packing_list ], notice: "Packing list was successfully updated."
     else
       render PackingLists::EditComponent.new(road_trip: @road_trip, packing_list: @packing_list, current_user: current_user), status: :unprocessable_entity
     end
@@ -42,7 +42,7 @@ class PackingListsController < ApplicationController
 
   def destroy
     @packing_list.destroy!
-    redirect_to [@road_trip, :packing_lists], notice: "Packing list was successfully deleted."
+    redirect_to [ @road_trip, :packing_lists ], notice: "Packing list was successfully deleted."
   end
 
   private
@@ -56,7 +56,7 @@ class PackingListsController < ApplicationController
   def set_packing_list
     @packing_list = @road_trip.packing_lists.find(params[:id])
   rescue ActiveRecord::RecordNotFound
-    redirect_to [@road_trip, :packing_lists], alert: "Packing list not found."
+    redirect_to [ @road_trip, :packing_lists ], alert: "Packing list not found."
   end
 
   def packing_list_params

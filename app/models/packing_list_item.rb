@@ -4,11 +4,11 @@ class PackingListItem < ApplicationRecord
   validates :name, presence: true, length: { minimum: 1, maximum: 100 }
   validates :quantity, presence: true, numericality: { greater_than: 0, only_integer: true }
   validates :category, presence: true
-  validates :packed, inclusion: { in: [true, false] }
+  validates :packed, inclusion: { in: [ true, false ] }
 
-  enum category: {
+  enum :category, {
     tools: "tools",
-    clothes: "clothes", 
+    clothes: "clothes",
     hygiene: "hygiene",
     electronics: "electronics",
     food: "food",

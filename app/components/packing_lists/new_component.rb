@@ -69,7 +69,7 @@ class PackingLists::NewComponent < ApplicationComponent
 
         # Form
         div class: "bg-white rounded-lg shadow-sm border border-gray-200 p-6" do
-          form_with model: [@road_trip, @packing_list], local: true, class: "space-y-6" do |form|
+          form_with model: [ @road_trip, @packing_list ], local: true, class: "space-y-6" do |form|
             div do
               form.label :name, class: "block text-sm font-medium text-gray-700 mb-2" do
                 "Packing List Name"

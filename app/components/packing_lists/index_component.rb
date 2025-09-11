@@ -113,9 +113,8 @@ class PackingLists::IndexComponent < ApplicationComponent
     div class: "#{border_class}" do
       div class: "flex items-center justify-between" do
         # Main clickable area
-        link_to road_trip_packing_list_path(@road_trip, packing_list), 
+        link_to road_trip_packing_list_path(@road_trip, packing_list),
                 class: "flex items-center space-x-4 flex-1 p-6 hover:bg-gray-50 no-underline text-inherit transition-colors" do
-          
           # List details
           div class: "flex-1 min-w-0" do
             h3 class: "text-lg font-semibold text-gray-900 truncate mb-2" do

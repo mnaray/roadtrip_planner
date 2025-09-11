@@ -83,7 +83,7 @@ class PackingListItems::NewComponent < ApplicationComponent
 
         # Form
         div class: "bg-white rounded-lg shadow-sm border border-gray-200 p-6" do
-          form_with model: [@road_trip, @packing_list, @packing_list_item], local: true, class: "space-y-6" do |form|
+          form_with model: [ @road_trip, @packing_list, @packing_list_item ], local: true, class: "space-y-6" do |form|
             # Item name
             div do
               form.label :name, class: "block text-sm font-medium text-gray-700 mb-2" do
@@ -131,15 +131,15 @@ class PackingListItems::NewComponent < ApplicationComponent
 
                 form.select :category,
                             options_for_select([
-                              ["Tools", "tools"],
-                              ["Clothes", "clothes"],
-                              ["Hygiene", "hygiene"],
-                              ["Electronics", "electronics"],
-                              ["Food", "food"],
-                              ["Documents", "documents"],
-                              ["Medicine", "medicine"],
-                              ["Entertainment", "entertainment"],
-                              ["Other", "other"]
+                              [ "Tools", "tools" ],
+                              [ "Clothes", "clothes" ],
+                              [ "Hygiene", "hygiene" ],
+                              [ "Electronics", "electronics" ],
+                              [ "Food", "food" ],
+                              [ "Documents", "documents" ],
+                              [ "Medicine", "medicine" ],
+                              [ "Entertainment", "entertainment" ],
+                              [ "Other", "other" ]
                             ], @packing_list_item.category),
                             { prompt: "Select a category" },
                             { class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm", required: true }
