@@ -86,14 +86,18 @@ class RoadTrips::IndexComponent < ApplicationComponent
             div class: "space-y-2" do
               road_trip.routes.ordered_by_datetime.limit(2).each do |route|
                 div class: "flex items-center text-sm text-gray-700 leading-relaxed" do
-                  span class: "font-medium truncate flex-shrink-0 max-w-[45%]" do
-                    route.starting_location
+                  div class: "overflow-hidden max-w-[45%] flex-shrink-0" do
+                    span class: "font-medium whitespace-nowrap" do
+                      route.starting_location
+                    end
                   end
                   span class: "mx-2 text-gray-400 flex-shrink-0" do
                     "→"
                   end
-                  span class: "font-medium truncate flex-shrink-0 max-w-[45%]" do
-                    route.destination
+                  div class: "overflow-hidden max-w-[45%] flex-shrink-0" do
+                    span class: "font-medium whitespace-nowrap" do
+                      route.destination
+                    end
                   end
                 end
               end
