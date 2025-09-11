@@ -34,6 +34,9 @@ Rails.application.routes.draw do
   get "routes/:id/map", to: "routes#map", as: :route_map
   get "routes/:id/export_gpx", to: "routes#export_gpx", as: :route_export_gpx
 
+  # Static pages
+  get "about", to: "pages#about", as: :about
+
   # Defines the root path route ("/")
   root "pages#home"
 end

@@ -38,17 +38,31 @@ class WelcomeSection < ApplicationComponent
           )
         end
 
-        # Technology stack info
+        # Learn more section
         div class: "glass-effect rounded-2xl p-8 backdrop-blur-lg border border-white/20 shadow-xl animate-slide-up animate-delay-600" do
           h3 class: "text-2xl font-semibold mb-6 text-gray-800" do
-            "Powered by Modern Technology"
+            "Learn More"
           end
 
-          div class: "grid grid-cols-2 md:grid-cols-4 gap-4 text-sm" do
-            tech_badge("Rails #{Rails.version}", "bg-red-100 text-red-700")
-            tech_badge("Ruby #{RUBY_VERSION}", "bg-red-100 text-red-700")
-            tech_badge("Phlex Components", "bg-purple-100 text-purple-700")
-            tech_badge("Tailwind CSS v4", "bg-blue-100 text-blue-700")
+          p class: "text-gray-600 mb-6" do
+            "Want to know more about what Roadtrip Planner can do for you?"
+          end
+
+          link_to about_path,
+                 class: "inline-flex items-center justify-center px-6 py-3 text-base font-medium text-blue-600 transition-all duration-300 bg-white/80 border border-blue-600 rounded-full hover:bg-blue-50 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-300 mb-6" do
+            "About This App"
+          end
+
+          div class: "border-t border-gray-200 pt-6" do
+            h4 class: "text-sm font-medium text-gray-700 mb-4" do
+              "Powered by Modern Technology"
+            end
+            div class: "grid grid-cols-2 md:grid-cols-4 gap-4 text-sm" do
+              tech_badge("Rails #{Rails.version}", "bg-red-100 text-red-700")
+              tech_badge("Ruby #{RUBY_VERSION}", "bg-red-100 text-red-700")
+              tech_badge("Phlex Components", "bg-purple-100 text-purple-700")
+              tech_badge("Tailwind CSS v4", "bg-blue-100 text-blue-700")
+            end
           end
         end
 
