@@ -175,7 +175,7 @@ class RoadTrips::ShowComponent < ApplicationComponent
                        stroke_linecap: "round",
                        stroke_linejoin: "round",
                        stroke_width: "2"
-              route.datetime.strftime("%B %d, %Y at %l:%M %p")
+              swiss_date_format(route.datetime, :long)
             end
           end
         end
