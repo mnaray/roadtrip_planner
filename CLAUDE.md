@@ -119,6 +119,7 @@ end
 - Basic navigation and layout components
 - Road trip management with route planning
 - Packing list functionality with categories and progress tracking
+- About page with feature descriptions and user onboarding
 
 ### 🚧 In Progress
 - None currently
