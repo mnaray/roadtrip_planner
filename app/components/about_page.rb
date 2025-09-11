@@ -29,52 +29,34 @@ class AboutPage < ApplicationComponent
           end
 
           # Features section
-          div class: "mb-10" do
+          div class: "mb-10 pt-4" do
             h2 class: "text-2xl font-semibold text-gray-800 mb-6" do
               "Main Features"
             end
-            ul class: "space-y-3 text-gray-700" do
-              li class: "flex items-start" do
-                div class: "w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"
-                span do
-                  "Create and manage multiple road trips with custom names and descriptions"
-                end
+            ul class: "space-y-3 text-gray-700 list-disc list-inside" do
+              li do
+                "Create and manage multiple road trips with custom names and descriptions"
               end
-              li class: "flex items-start" do
-                div class: "w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"
-                span do
-                  "Plan detailed routes with waypoints and destinations"
-                end
+              li do
+                "Plan detailed routes with waypoints and destinations"
               end
-              li class: "flex items-start" do
-                div class: "w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"
-                span do
-                  "Create packing lists organized by categories (clothes, electronics, documents, etc.)"
-                end
+              li do
+                "Create packing lists organized by categories (clothes, electronics, documents, etc.)"
               end
-              li class: "flex items-start" do
-                div class: "w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"
-                span do
-                  "Track packing progress with checkboxes for each item"
-                end
+              li do
+                "Track packing progress with checkboxes for each item"
               end
-              li class: "flex items-start" do
-                div class: "w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"
-                span do
-                  "Export route data for use with GPS devices and mapping apps"
-                end
+              li do
+                "Export route data for use with GPS devices and mapping apps"
               end
-              li class: "flex items-start" do
-                div class: "w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"
-                span do
-                  "View routes on interactive maps"
-                end
+              li do
+                "View routes on interactive maps"
               end
             end
           end
 
           # Getting started section
-          div class: "mb-8" do
+          div class: "mb-8 pt-4" do
             h2 class: "text-2xl font-semibold text-gray-800 mb-6" do
               "Getting Started"
             end
