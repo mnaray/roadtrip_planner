@@ -85,4 +85,4 @@ production:
   <<: *default
   database: roadtrip_planner_production
   username: roadtrip_planner
-  password: <%= ENV["ROADTRIP_PLANNER_DATABASE_PASSWORD"] %>
+  password: <%= ENV['POSTGRES_PASSWORD'] %>
