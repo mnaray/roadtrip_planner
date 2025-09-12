@@ -314,33 +314,28 @@ This section covers deploying the Roadtrip Planner application to production env
 
 ### Deploying Updates Without Data Loss
 
-For seamless updates with zero data loss, use the provided deployment script:
+To update your production deployment to a newer version:
 
-1. **Download the deployment script:**
-   ```bash
-   curl -o deploy.sh \
-     https://raw.githubusercontent.com/mnaray/roadtrip_planner/main/deploy.sh
-   chmod +x deploy.sh
+1. **Update the Docker image version:**
+   Edit your `docker-compose.production.yml` file and change the image tag:
+   ```yaml
+   web:
+     image: mnaray/roadtrip-planner:v1.2.3  # Update to desired version
    ```
 
-2. **Run the deployment script:**
+2. **Apply the update:**
    ```bash
-   # Deploy a specific version
-   ./deploy.sh v1.2.3
+   # Pull the new image
+   docker compose -f docker-compose.production.yml pull web
    
-   # Or specify a custom compose file path
-   ./deploy.sh v1.2.3 ./path/to/your/docker-compose.production.yml
+   # Gracefully restart the web service
+   docker compose -f docker-compose.production.yml up -d web
+   
+   # Run database migrations if needed
+   docker compose -f docker-compose.production.yml exec web rails db:migrate
    ```
 
-The deployment script will:
-- Pull the new Docker image
-- Gracefully stop current services
-- Update the compose file with the new version
-- Start services with zero data loss
-- Run database migrations
-- Verify deployment success
-
-**Important:** The script accepts a mandatory version argument. The Docker image will be pulled as `mnaray/roadtrip-planner:v1.2.3` (replace v1.2.3 with your desired version).
+**Note:** This approach ensures database persistence while updating the application. Replace `v1.2.3` with your desired version.
 
 ### Production Environment Configuration
 
@@ -367,7 +362,7 @@ PORT=3000  # Change if port 3000 is not available
 
 ```bash
 # Generate SECRET_KEY_BASE
-docker run --rm mnaray/roadtrip-planner:latest rails secret
+docker run --rm mnaray/roadtrip-planner:v1.0.0 rails secret
 
 # RAILS_MASTER_KEY is found in your Rails app's config/master.key file
 ```

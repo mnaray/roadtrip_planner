@@ -29,7 +29,7 @@ services:
       - roadtrip_network
 
   web:
-    image: mnaray/roadtrip-planner:latest
+    image: mnaray/roadtrip-planner:v1.0.0
     restart: unless-stopped
     ports:
       - "${PORT:-3000}:3000"

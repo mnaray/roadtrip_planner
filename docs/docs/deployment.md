@@ -100,38 +100,40 @@ docker compose -f docker-compose.production.yml logs -f web
 
 Navigate to `http://your-server-ip:3000` in your web browser.
 
-### 3. Zero-Downtime Updates
+### 3. Updating Production Deployments
 
-For production environments requiring minimal downtime, use our automated deployment script.
+For production environments, updating to newer versions is straightforward with Docker Compose.
 
-#### Step 1: Get the Deployment Script
+#### Step 1: Update the Image Version
 
-```bash
-curl -o deploy.sh \
-  https://raw.githubusercontent.com/mnaray/roadtrip_planner/main/deploy.sh
-chmod +x deploy.sh
+Edit your `docker-compose.production.yml` file and change the image tag:
+
+```yaml
+web:
+  image: mnaray/roadtrip-planner:v1.2.3  # Update to desired version
 ```
 
-#### Step 2: Run the Deployment
+#### Step 2: Apply the Update
 
 ```bash
-# Deploy a specific version
-./deploy.sh v1.2.3
+# Pull the new image
+docker compose -f docker-compose.production.yml pull web
 
-# Or specify a custom compose file path
-./deploy.sh v1.2.3 ./path/to/your/docker-compose.production.yml
+# Gracefully restart the web service
+docker compose -f docker-compose.production.yml up -d web
+
+# Run database migrations if needed
+docker compose -f docker-compose.production.yml exec web rails db:migrate
 ```
 
-:::info What the Script Does
-- Pulls the new Docker image
-- Gracefully stops current services
-- Updates compose file with new version
-- Starts services with zero data loss
-- Runs database migrations automatically  
-- Verifies deployment success
+:::info Update Process
+- Database data persists during the update
+- Minimal downtime during service restart
+- Automatic migration execution ensures schema compatibility
+- Rollback possible by reverting to previous image version
 :::
 
-The script requires a version argument corresponding to a Docker Hub tag (e.g., `v1.2.3` pulls `mnaray/roadtrip-planner:v1.2.3`).
+Replace `v1.2.3` with your desired version tag from Docker Hub.
 
 ## Environment Configuration
 
@@ -156,7 +158,7 @@ The script requires a version argument corresponding to a Docker Hub tag (e.g., 
 
 #### SECRET_KEY_BASE
 ```bash
-docker run --rm mnaray/roadtrip-planner:latest rails secret
+docker run --rm mnaray/roadtrip-planner:v1.0.0 rails secret
 ```
 
 #### RAILS_MASTER_KEY
