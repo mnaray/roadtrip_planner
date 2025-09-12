@@ -60,7 +60,13 @@ class RoutesController < ApplicationController
     route_data = session[:route_data]
     return redirect_to road_trips_path, alert: "No route data found." unless route_data
 
-    road_trip = current_user.road_trips.find(route_data["road_trip_id"])
+    road_trip = RoadTrip.find(route_data["road_trip_id"])
+
+    # Check if user has access to this road trip
+    unless road_trip.can_access?(current_user)
+      redirect_to road_trips_path, alert: "You don't have access to this road trip."
+      return
+    end
     @route = road_trip.routes.build(
       starting_location: route_data["starting_location"],
       destination: route_data["destination"],
@@ -97,13 +103,23 @@ class RoutesController < ApplicationController
   private
 
   def set_road_trip
-    @road_trip = current_user.road_trips.find(params[:road_trip_id])
+    @road_trip = RoadTrip.find(params[:road_trip_id])
+
+    # Check if user has access (is owner or participant)
+    unless @road_trip.can_access?(current_user)
+      redirect_to road_trips_path, alert: "You don't have access to this road trip."
+    end
   rescue ActiveRecord::RecordNotFound
     redirect_to road_trips_path, alert: "Road trip not found."
   end
 
   def set_route
-    @route = current_user.routes.find(params[:id])
+    @route = Route.find(params[:id])
+
+    # Check if user has access to the road trip containing this route
+    unless @route.road_trip.can_access?(current_user)
+      redirect_to road_trips_path, alert: "You don't have access to this route."
+    end
   rescue ActiveRecord::RecordNotFound
     redirect_to road_trips_path, alert: "Route not found."
   end

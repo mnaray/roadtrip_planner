@@ -34,7 +34,7 @@ RSpec.describe "Routes", type: :request do
           get new_road_trip_route_path(other_users_road_trip)
           expect(response).to redirect_to(road_trips_path)
           follow_redirect!
-          expect(response.body).to include("Road trip not found")
+          expect(response.body).to include("You don&#39;t have access to this road trip.")
         end
       end
     end
@@ -319,7 +319,7 @@ RSpec.describe "Routes", type: :request do
           get route_path(other_users_route)
           expect(response).to redirect_to(road_trips_path)
           follow_redirect!
-          expect(response.body).to include("Route not found")
+          expect(response.body).to include("You don&#39;t have access to this route.")
         end
       end
     end

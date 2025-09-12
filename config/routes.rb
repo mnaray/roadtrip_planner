@@ -26,7 +26,7 @@ Rails.application.routes.draw do
         end
       end
     end
-    resources :participants, only: [ :create, :destroy ]
+    resources :participants, only: [ :index, :create, :destroy ]
     member do
       delete :leave
     end

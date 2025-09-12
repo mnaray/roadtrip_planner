@@ -77,8 +77,9 @@ class Route < ApplicationRecord
   def user_matches_road_trip_user
     return unless road_trip && user
 
-    if road_trip.user_id != user_id
-      errors.add(:user, "must match the road trip's user")
+    # Allow route creation if user is either the road trip owner or a participant
+    unless road_trip.can_access?(user)
+      errors.add(:user, "must be the road trip owner or a participant")
     end
   end
 end

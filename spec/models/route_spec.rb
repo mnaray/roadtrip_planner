@@ -170,12 +170,20 @@ RSpec.describe Route, type: :model do
         expect(route).to be_valid
       end
 
-      it 'is invalid when user does not match road trip user' do
+      it 'is invalid when user does not match road trip user and is not a participant' do
         other_user = create(:user)
         route = build(:route, road_trip: road_trip, user: other_user)
 
         expect(route).not_to be_valid
-        expect(route.errors[:user]).to include("must match the road trip's user")
+        expect(route.errors[:user]).to include("must be the road trip owner or a participant")
+      end
+
+      it 'is valid when user is a participant of the road trip' do
+        participant_user = create(:user)
+        road_trip.participants << participant_user
+        route = build(:route, road_trip: road_trip, user: participant_user)
+
+        expect(route).to be_valid
       end
     end
   end
