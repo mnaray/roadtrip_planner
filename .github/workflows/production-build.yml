@@ -1,0 +1,245 @@
+name: Production Docker Image Build
+
+# This workflow builds production-ready Docker images with semantic versioning
+# 
+# Setup Instructions:
+# 1. Create Docker Hub account and repository
+# 2. Generate Docker Hub access token (Settings > Security > Access Tokens)
+# 3. Add the following secrets to your GitHub repository:
+#    - DOCKER_HUB_USERNAME: Your Docker Hub username
+#    - DOCKER_HUB_TOKEN: Your Docker Hub access token (NOT password)
+# 4. Optional: Set DOCKER_HUB_REPOSITORY variable (defaults to repository name)
+#
+# Usage:
+# - Manually trigger this workflow from GitHub Actions tab
+# - Select version increment type: major, minor, or patch
+# - The workflow will determine the next version automatically based on existing git tags
+# - Images are tagged with semantic versioning (v1.0.0) and stored as artifacts
+# - Push job can be run independently to publish to Docker Hub
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_increment:
+        description: 'Version increment type'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+        default: 'patch'
+
+env:
+  # Default Docker Hub repository name (can be overridden with repository variable)
+  DOCKER_REPOSITORY: ${{ vars.DOCKER_HUB_REPOSITORY || github.event.repository.name }}
+
+jobs:
+  # Job 1: Calculate next semantic version based on git tags
+  calculate-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.semver.outputs.version }}
+      tag: ${{ steps.semver.outputs.tag }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # Fetch all history for tags
+
+      - name: Calculate semantic version
+        id: semver
+        run: |
+          # Get the latest tag, default to v0.0.0 if no tags exist
+          LATEST_TAG=$(git tag --list --sort=-version:refname | head -n1 || echo "v0.0.0")
+          echo "Latest tag: $LATEST_TAG"
+          
+          # Remove 'v' prefix for calculation
+          VERSION=${LATEST_TAG#v}
+          
+          # Split version into components
+          IFS='.' read -ra VERSION_PARTS <<< "$VERSION"
+          MAJOR=${VERSION_PARTS[0]:-0}
+          MINOR=${VERSION_PARTS[1]:-0}
+          PATCH=${VERSION_PARTS[2]:-0}
+          
+          # Calculate new version based on increment type
+          case "${{ github.event.inputs.version_increment }}" in
+            major)
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            minor)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            patch)
+              PATCH=$((PATCH + 1))
+              ;;
+          esac
+          
+          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          NEW_TAG="v${NEW_VERSION}"
+          
+          echo "New version: $NEW_VERSION"
+          echo "New tag: $NEW_TAG"
+          
+          # Set outputs for other jobs
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$NEW_TAG" >> $GITHUB_OUTPUT
+
+  # Job 2: Build Docker image with full test validation
+  build:
+    needs: calculate-version
+    runs-on: ubuntu-latest
+    outputs:
+      image-digest: ${{ steps.build.outputs.digest }}
+      image-tag: ${{ needs.calculate-version.outputs.tag }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Set up Ruby for testing
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Set up test database
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y postgresql-client
+          
+          # Start PostgreSQL service
+          sudo systemctl start postgresql
+          
+          # Create test user and database
+          sudo -u postgres createuser -s runner
+          sudo -u postgres createdb roadtrip_planner_test -O runner
+
+      - name: Prepare test database
+        env:
+          RAILS_ENV: test
+          DATABASE_URL: postgres://runner@localhost:5432/roadtrip_planner_test
+        run: |
+          bundle exec rails db:schema:load
+          bundle exec rails db:test:prepare
+
+      - name: Run security scans
+        run: |
+          echo "Running security scans..."
+          bin/brakeman --no-pager
+          bin/importmap audit
+
+      - name: Run code quality checks
+        run: |
+          echo "Running linting..."
+          bin/rubocop -f github
+
+      - name: Run full test suite
+        env:
+          RAILS_ENV: test
+          DATABASE_URL: postgres://runner@localhost:5432/roadtrip_planner_test
+        run: |
+          echo "Running complete test suite..."
+          bundle exec rspec --format progress --format RspecJunitFormatter --out tmp/rspec.xml
+          
+          # Fail the build if tests failed
+          if [ $? -ne 0 ]; then
+            echo "❌ Tests failed! Build cannot proceed."
+            exit 1
+          fi
+          
+          echo "✅ All tests passed!"
+
+      - name: Build production Docker image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false  # Don't push yet, just build and store
+          tags: |
+            ${{ env.DOCKER_REPOSITORY }}:${{ needs.calculate-version.outputs.tag }}
+            ${{ env.DOCKER_REPOSITORY }}:${{ needs.calculate-version.outputs.version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          outputs: type=docker,dest=/tmp/docker-image.tar
+
+      - name: Upload Docker image as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-image-${{ needs.calculate-version.outputs.version }}
+          path: /tmp/docker-image.tar
+          retention-days: 7
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ needs.calculate-version.outputs.version }}
+          path: tmp/rspec.xml
+
+      - name: Image build summary
+        run: |
+          echo "🚀 Production image built successfully!"
+          echo "📦 Version: ${{ needs.calculate-version.outputs.version }}"
+          echo "🏷️  Tag: ${{ needs.calculate-version.outputs.tag }}"
+          echo "📸 Image stored as artifact for push job"
+
+  # Job 3: Push Docker image to Docker Hub (depends on successful build)
+  push:
+    needs: [calculate-version, build]
+    runs-on: ubuntu-latest
+    if: success()  # Only run if build job succeeded
+    steps:
+      - name: Download Docker image artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image-${{ needs.calculate-version.outputs.version }}
+          path: /tmp
+
+      - name: Load Docker image from artifact
+        run: docker load --input /tmp/docker-image.tar
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Push Docker image to Docker Hub
+        run: |
+          # Push both version tags
+          docker push ${{ env.DOCKER_REPOSITORY }}:${{ needs.calculate-version.outputs.tag }}
+          docker push ${{ env.DOCKER_REPOSITORY }}:${{ needs.calculate-version.outputs.version }}
+          
+          echo "✅ Successfully pushed images to Docker Hub:"
+          echo "  - ${{ env.DOCKER_REPOSITORY }}:${{ needs.calculate-version.outputs.tag }}"
+          echo "  - ${{ env.DOCKER_REPOSITORY }}:${{ needs.calculate-version.outputs.version }}"
+
+      - name: Create GitHub release tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Create and push the new tag
+          git tag ${{ needs.calculate-version.outputs.tag }}
+          git push origin ${{ needs.calculate-version.outputs.tag }}
+          
+          echo "🏷️  Created and pushed git tag: ${{ needs.calculate-version.outputs.tag }}"
+
+      - name: Deployment summary
+        run: |
+          echo "🎉 Production deployment completed!"
+          echo "📦 Version: ${{ needs.calculate-version.outputs.version }}"
+          echo "🏷️  Git Tag: ${{ needs.calculate-version.outputs.tag }}"
+          echo "🐳 Docker Images:"
+          echo "  - ${{ env.DOCKER_REPOSITORY }}:${{ needs.calculate-version.outputs.tag }}"
+          echo "  - ${{ env.DOCKER_REPOSITORY }}:${{ needs.calculate-version.outputs.version }}"
+          echo ""
+          echo "🚀 Ready for production deployment!"
