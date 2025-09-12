@@ -246,6 +246,155 @@ docker compose build --no-cache
 docker compose up
 ```
 
+## Deployment
+
+This section covers deploying the Roadtrip Planner application to production environments.
+
+### Prerequisites for Production Deployment
+
+- Docker Engine and Docker Compose installed on your production server
+- At least 2GB RAM and 10GB disk space available
+- Port 3000 available (or configure a different port)
+- Internet connectivity to pull Docker images
+
+### Building a New Image Locally
+
+**Note:** Building locally is only required if you want to use the development version in production or need to customize the image.
+
+1. **Build the Docker image:**
+   ```bash
+   docker build -t mnaray/roadtrip-planner:v1.0.0 .
+   ```
+
+2. **Push the image to Docker Hub:** (Replace with your Docker Hub username)
+   ```bash
+   # Login to Docker Hub
+   docker login
+   
+   # Push the image
+   docker push mnaray/roadtrip-planner:v1.0.0
+   ```
+
+### Deploying an Existing Image to Production
+
+1. **Download the production Docker Compose file:**
+   ```bash
+   # Download the production compose file
+   curl -o docker-compose.production.yml \
+     https://raw.githubusercontent.com/mnaray/roadtrip_planner/main/docker-compose.production.yml
+   ```
+
+2. **Configure your credentials:**
+   Edit the downloaded `docker-compose.production.yml` file and replace the following placeholders:
+   - Replace `REPLACE_WITH_YOUR_SECURE_DATABASE_PASSWORD` with your secure database password
+   - Replace `REPLACE_WITH_YOUR_SECRET_KEY_BASE` with your secret key base (generate using the command below)
+   - Replace `REPLACE_WITH_YOUR_RAILS_MASTER_KEY` with your Rails master key from `config/master.key`
+
+3. **Start the application:**
+   ```bash
+   # Start all services
+   docker compose -f docker-compose.production.yml up -d
+   
+   # Check service status
+   docker compose -f docker-compose.production.yml ps
+   
+   # View logs
+   docker compose -f docker-compose.production.yml logs -f
+   ```
+
+4. **Open the application:**
+   Navigate to `http://your-server-ip:3000` in your web browser.
+
+### Deploying Updates Without Data Loss
+
+To update your production deployment to a newer version:
+
+1. **Update the Docker image version:**
+   Edit your `docker-compose.production.yml` file and change the image tag:
+   ```yaml
+   web:
+     image: mnaray/roadtrip-planner:v1.2.3  # Update to desired version
+   ```
+
+2. **Apply the update:**
+   ```bash
+   # Pull the new image
+   docker compose -f docker-compose.production.yml pull web
+   
+   # Gracefully restart the web service
+   docker compose -f docker-compose.production.yml up -d web
+   
+   # Run database migrations if needed
+   docker compose -f docker-compose.production.yml exec web rails db:migrate
+   ```
+
+**Note:** This approach ensures database persistence while updating the application. Replace `v1.2.3` with your desired version.
+
+### Generating Secret Keys
+
+When configuring your production deployment, you'll need to generate a secret key base:
+
+```bash
+# Generate SECRET_KEY_BASE
+docker run --rm mnaray/roadtrip-planner:v1.0.0 rails secret
+```
+
+The `RAILS_MASTER_KEY` is found in your Rails application's `config/master.key` file.
+
+### Monitoring and Maintenance
+
+#### View Application Logs
+```bash
+docker compose -f docker-compose.production.yml logs -f web
+```
+
+#### Database Backup
+```bash
+# Create database backup
+docker compose -f docker-compose.production.yml exec db pg_dump \
+  -U roadtrip_planner roadtrip_planner_production > backup.sql
+```
+
+#### Restart Services
+```bash
+# Restart all services
+docker compose -f docker-compose.production.yml restart
+
+# Restart only web service
+docker compose -f docker-compose.production.yml restart web
+```
+
+#### Stop Services
+```bash
+docker compose -f docker-compose.production.yml down
+```
+
+### Troubleshooting Production Issues
+
+#### Check Service Health
+```bash
+docker compose -f docker-compose.production.yml ps
+docker compose -f docker-compose.production.yml logs web
+```
+
+#### Database Connection Issues
+```bash
+# Check database logs
+docker compose -f docker-compose.production.yml logs db
+
+# Test database connection
+docker compose -f docker-compose.production.yml exec web rails db:version
+```
+
+#### Performance Monitoring
+```bash
+# Monitor resource usage
+docker stats
+
+# Check application health endpoint
+curl http://your-server:3000/up
+```
+
 ## Contributing
 
 1. Fork the repository
