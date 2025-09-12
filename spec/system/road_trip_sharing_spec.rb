@@ -14,16 +14,17 @@ RSpec.describe 'Road Trip Sharing', type: :system do
     before do
       login_as(owner)
       visit road_trip_path(road_trip)
+      click_link 'Participants'
     end
 
     it 'allows owner to add participants' do
       within('.participants') do
-        expect(page).to have_content('Participants')
+        expect(page).to have_content('Trip Members')
         expect(page).to have_content(owner.username)
-        expect(page).to have_content('Owner')
+        expect(page).to have_content('Trip Owner')
 
         fill_in 'username', with: participant.username
-        click_button 'Add User'
+        click_button 'Add Participant'
       end
 
       expect(page).to have_content("#{participant.username} has been added to the road trip")
@@ -37,7 +38,7 @@ RSpec.describe 'Road Trip Sharing', type: :system do
     it 'shows error for non-existent user' do
       within('.participants') do
         fill_in 'username', with: 'nonexistent'
-        click_button 'Add User'
+        click_button 'Add Participant'
       end
 
       expect(page).to have_content("User 'nonexistent' not found")
@@ -46,7 +47,7 @@ RSpec.describe 'Road Trip Sharing', type: :system do
     it 'prevents adding owner as participant' do
       within('.participants') do
         fill_in 'username', with: owner.username
-        click_button 'Add User'
+        click_button 'Add Participant'
       end
 
       expect(page).to have_content('Cannot add the owner as a participant')
@@ -54,11 +55,11 @@ RSpec.describe 'Road Trip Sharing', type: :system do
 
     it 'prevents duplicate participants' do
       road_trip.participants << participant
-      visit road_trip_path(road_trip)
+      visit road_trip_participants_path(road_trip)
 
       within('.participants') do
         fill_in 'username', with: participant.username
-        click_button 'Add User'
+        click_button 'Add Participant'
       end
 
       expect(page).to have_content("#{participant.username} is already a participant")
@@ -70,6 +71,7 @@ RSpec.describe 'Road Trip Sharing', type: :system do
       road_trip.participants << participant
       login_as(owner)
       visit road_trip_path(road_trip)
+      click_link 'Participants'
     end
 
     it 'allows owner to remove participants' do
@@ -112,6 +114,7 @@ RSpec.describe 'Road Trip Sharing', type: :system do
     it 'allows participants to leave road trip' do
       login_as(participant)
       visit road_trip_path(road_trip)
+      click_link 'Participants'
 
       within('.participants') do
         click_button 'Leave Road Trip'
@@ -144,9 +147,10 @@ RSpec.describe 'Road Trip Sharing', type: :system do
       road_trip.participants << participant
       login_as(participant)
       visit road_trip_path(road_trip)
+      click_link 'Participants'
 
       within('.participants') do
-        expect(page).not_to have_content('Add Participant')
+        expect(page).not_to have_content('Add New Participant')
         expect(page).not_to have_field('username')
       end
     end
