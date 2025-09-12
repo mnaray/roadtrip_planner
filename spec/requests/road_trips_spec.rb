@@ -21,15 +21,25 @@ RSpec.describe "RoadTrips", type: :request do
         expect(response).to have_http_status(:success)
       end
 
-      it "displays only user's road trips" do
-        user_road_trip = create(:road_trip, user: user, name: "User's Trip")
-        other_road_trip = create(:road_trip, user: other_user, name: "Other's Trip")
+      it "displays user's owned and participating road trips" do
+        owned_trip = create(:road_trip, user: user, name: "User's Owned Trip")
+        shared_trip = create(:road_trip, user: other_user, name: "Shared Trip")
+        private_trip = create(:road_trip, user: other_user, name: "Private Trip")
+        
+        # Add user as participant to shared_trip
+        shared_trip.participants << user
 
         get road_trips_path
 
-        # Check for HTML-escaped version since apostrophes are escaped in HTML
-        expect(response.body).to include(CGI.escapeHTML(user_road_trip.name))
-        expect(response.body).not_to include(CGI.escapeHTML(other_road_trip.name))
+        # Should show owned and shared trips
+        expect(response.body).to include(CGI.escapeHTML(owned_trip.name))
+        expect(response.body).to include(CGI.escapeHTML(shared_trip.name))
+        # Should not show private trip
+        expect(response.body).not_to include(CGI.escapeHTML(private_trip.name))
+        
+        # Should show sections
+        expect(response.body).to include("My Road Trips")
+        expect(response.body).to include("Shared with Me")
       end
     end
 
@@ -62,12 +72,30 @@ RSpec.describe "RoadTrips", type: :request do
         end
       end
 
-      context "when road trip does not belong to user" do
-        it "redirects with error message" do
+      context "when road trip does not belong to user and user is not a participant" do
+        it "redirects with access denied message" do
           get road_trip_path(other_users_road_trip)
           expect(response).to redirect_to(road_trips_path)
           follow_redirect!
-          expect(response.body).to include("Road trip not found")
+          expect(response.body).to include("You don't have access to this road trip")
+        end
+      end
+
+      context "when user is a participant" do
+        let(:shared_road_trip) { create(:road_trip, user: other_user) }
+        
+        before do
+          shared_road_trip.participants << user
+        end
+
+        it "allows access to shared road trip" do
+          get road_trip_path(shared_road_trip)
+          expect(response).to have_http_status(:success)
+        end
+
+        it "does not show edit button for participants" do
+          get road_trip_path(shared_road_trip)
+          expect(response.body).not_to include('href="' + edit_road_trip_path(shared_road_trip) + '"')
         end
       end
     end
@@ -248,13 +276,59 @@ RSpec.describe "RoadTrips", type: :request do
       end
 
       context "when road trip does not belong to user" do
-        it "redirects with error message and does not delete" do
-          other_users_road_trip # create the road trip
+        it "redirects with owner-only error message and does not delete" do
+          other_users_road_trip.participants << user # Add user as participant
           expect {
             delete road_trip_path(other_users_road_trip)
           }.not_to change(RoadTrip, :count)
-          expect(response).to redirect_to(road_trips_path)
+          expect(response).to redirect_to(road_trip_path(other_users_road_trip))
+          follow_redirect!
+          expect(response.body).to include("Only the owner can perform this action")
         end
+      end
+    end
+  end
+
+  describe "DELETE /road_trips/:id/leave" do
+    let(:shared_road_trip) { create(:road_trip, user: other_user) }
+
+    context "when user is logged in and is a participant" do
+      before do
+        sign_in_user(user)
+        shared_road_trip.participants << user
+      end
+
+      it "removes user from participants" do
+        expect {
+          delete leave_road_trip_path(shared_road_trip)
+        }.to change { shared_road_trip.participants.count }.by(-1)
+        
+        expect(shared_road_trip.participants).not_to include(user)
+      end
+
+      it "redirects to road trips index with success message" do
+        delete leave_road_trip_path(shared_road_trip)
+        expect(response).to redirect_to(road_trips_path)
+        follow_redirect!
+        expect(response.body).to include("You have left the road trip")
+      end
+    end
+
+    context "when user is not a participant" do
+      before { sign_in_user(user) }
+
+      it "shows error message" do
+        delete leave_road_trip_path(shared_road_trip)
+        expect(response).to redirect_to(road_trips_path)
+        follow_redirect!
+        expect(response.body).to include("You are not a participant of this road trip")
+      end
+    end
+
+    context "when user is not logged in" do
+      it "redirects to login" do
+        delete leave_road_trip_path(shared_road_trip)
+        expect(response).to redirect_to(login_path)
       end
     end
   end
