@@ -1,5 +1,8 @@
 name: CI
 
+# This workflow runs on pull requests and pushes to main
+# Jobs are automatically skipped when PRs are in draft state
+# to save CI minutes and avoid unnecessary runs
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
@@ -10,6 +13,8 @@ on:
 jobs:
   scan_ruby:
     runs-on: ubuntu-latest
+    # Skip this job if the PR is in draft state
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
 
     steps:
       - name: Checkout code
@@ -26,6 +31,8 @@ jobs:
 
   scan_js:
     runs-on: ubuntu-latest
+    # Skip this job if the PR is in draft state
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
 
     steps:
       - name: Checkout code
@@ -42,6 +49,8 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
+    # Skip this job if the PR is in draft state
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -57,6 +66,8 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    # Skip this job if the PR is in draft state
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
 
     services:
       postgres:
