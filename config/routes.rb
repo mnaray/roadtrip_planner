@@ -26,6 +26,10 @@ Rails.application.routes.draw do
         end
       end
     end
+    resources :participants, only: [ :create, :destroy ]
+    member do
+      delete :leave
+    end
   end
 
   # Special route flow for confirmation and approval

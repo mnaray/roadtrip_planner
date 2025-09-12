@@ -1,6 +1,7 @@
 class RoadTrips::IndexComponent < ApplicationComponent
-  def initialize(road_trips:, current_user:)
-    @road_trips = road_trips
+  def initialize(owned_road_trips:, participating_road_trips:, current_user:)
+    @owned_road_trips = owned_road_trips
+    @participating_road_trips = participating_road_trips
     @current_user = current_user
   end
 
@@ -24,14 +25,36 @@ class RoadTrips::IndexComponent < ApplicationComponent
           end
         end
 
-        # Road trips grid
-        if @road_trips.any?
-          div class: "grid gap-6 md:grid-cols-2 lg:grid-cols-3" do
-            @road_trips.each do |road_trip|
-              render_road_trip_card(road_trip)
+        # My Road Trips Section
+        if @owned_road_trips.any?
+          div class: "mb-8" do
+            h2 class: "text-xl font-semibold text-gray-900 mb-4" do
+              "My Road Trips"
+            end
+            div class: "grid gap-6 md:grid-cols-2 lg:grid-cols-3" do
+              @owned_road_trips.each do |road_trip|
+                render_road_trip_card(road_trip, is_owner: true)
+              end
             end
           end
-        else
+        end
+
+        # Participating Road Trips Section
+        if @participating_road_trips.any?
+          div class: "mb-8" do
+            h2 class: "text-xl font-semibold text-gray-900 mb-4" do
+              "Shared with Me"
+            end
+            div class: "grid gap-6 md:grid-cols-2 lg:grid-cols-3" do
+              @participating_road_trips.each do |road_trip|
+                render_road_trip_card(road_trip, is_owner: false)
+              end
+            end
+          end
+        end
+
+        # Empty state
+        unless @owned_road_trips.any? || @participating_road_trips.any?
           render_empty_state
         end
       end
@@ -40,7 +63,7 @@ class RoadTrips::IndexComponent < ApplicationComponent
 
   private
 
-  def render_road_trip_card(road_trip)
+  def render_road_trip_card(road_trip, is_owner: true)
     link_to road_trip_path(road_trip),
             class: "block bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all duration-200 overflow-hidden" do
       div class: "p-6 overflow-hidden" do
@@ -50,8 +73,16 @@ class RoadTrips::IndexComponent < ApplicationComponent
             road_trip.name
           end
 
-          span class: "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800" do
-            "#{road_trip.routes.count} routes"
+          div class: "flex space-x-2 flex-shrink-0" do
+            unless is_owner
+              span class: "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800" do
+                "Shared"
+              end
+            end
+            
+            span class: "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800" do
+              "#{road_trip.routes.count} routes"
+            end
           end
         end
 
