@@ -42,6 +42,8 @@ A Rails 8 application for planning and managing road trips, built with modern we
 - Docker Desktop or Docker Engine with Docker Compose
 - Git
 
+**Note:** This application is designed to run in Docker containers. All development should be done using Docker to ensure consistency across different development environments.
+
 ## Getting Started
 
 ### 1. Clone the repository
@@ -87,6 +89,8 @@ Open your browser and navigate to: `http://localhost:3000`
 
 ## Development
 
+**Important:** All development commands should be run inside the Docker container. Never run Ruby, Rails, or Node.js directly on your host machine for this application.
+
 ### Running commands in the container
 
 ```bash
@@ -105,7 +109,7 @@ docker compose exec web bash
 
 ### Using the Makefile (optional)
 
-A Makefile is provided for common tasks:
+A Makefile is provided for common Docker tasks:
 
 ```bash
 make build    # Build Docker images
@@ -116,23 +120,27 @@ make bash     # Access container shell
 make reset-db # Reset database
 ```
 
+**Note:** The Makefile commands are mostly shortcuts for Docker Compose operations. All actual execution happens inside containers.
+
 ### Live Reloading
 
-The application supports live reloading:
-- Rails code changes are automatically reflected
+The application supports live reloading within the Docker container:
+- Rails code changes are automatically reflected (volume-mounted)
 - CSS changes rebuild automatically in development
 - JavaScript changes are loaded via Importmaps
+- All file watching happens inside the container
 
 ### Documentation
 
 The project includes comprehensive documentation built with Docusaurus:
 
 ```bash
-# View documentation locally
-cd docs
-npm install
-npm run start
+# View documentation locally (runs in Docker)
+docker compose exec web bash -c "cd docs && npm install && npm run start"
 # Open http://localhost:3001 to view documentation
+
+# Or run the documentation in a separate container
+docker run --rm -it -v $(pwd)/docs:/app -w /app -p 3001:3000 node:20 bash -c "npm install && npm run start"
 ```
 
 The documentation covers:
@@ -162,7 +170,7 @@ roadtrip_planner/
 
 ## Testing
 
-The application uses RSpec for testing:
+All tests must be run inside the Docker container using RSpec:
 
 ```bash
 # Run all tests
@@ -175,10 +183,14 @@ docker compose exec web rspec spec/requests/user_registration_spec.rb
 docker compose exec web rspec --format documentation
 ```
 
+**Never install RSpec or testing tools on your host machine for this application.** The Docker container includes all necessary testing dependencies.
+
 ## Database Management
 
+All database operations are recommended to be run through Docker to ensure environmental consistency. The PostgreSQL database runs in its own container:
+
 ```bash
-# Create database (usually automatic)
+# Create database (usually automatic on first run)
 docker compose exec web rails db:create
 
 # Run migrations
@@ -189,7 +201,12 @@ docker compose exec web rails db:seed
 
 # Reset database
 docker compose exec web rails db:reset
+
+# Access PostgreSQL console
+docker compose exec db psql -U roadtrip_planner -d roadtrip_planner_development
 ```
+
+**Important:** Never install PostgreSQL on your host machine. The database runs entirely in a Docker container.
 
 ## Troubleshooting
 
