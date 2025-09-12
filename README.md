@@ -313,6 +313,8 @@ The update script performs the following steps:
 - Database migrations are run before updating containers
 - Failed migrations will prevent the update from proceeding
 - A backup of the deployment state is saved with timestamp
+- **"latest" tag handling**: The script uses `--force-recreate` to ensure containers are updated even when the tag name hasn't changed
+- **Image verification**: The script attempts to verify image updates using Docker manifest digests
 
 ### Production Best Practices
 

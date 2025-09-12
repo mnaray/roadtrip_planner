@@ -174,6 +174,37 @@ The script will:
 - **Prevents updates** if migrations fail
 - **Creates backups** of deployment state with timestamps
 - **Supports rollback** if issues occur
+- **Verifies image updates** using Docker manifest digests when possible
+- **Forces container recreation** to ensure new images are used
+
+### Important Notes About Image Tags
+
+#### The "latest" Tag Problem
+
+When using Docker's `latest` tag, a common issue occurs where:
+
+1. You push a new version tagged as `latest` to your registry
+2. You run `docker pull yourimage:latest` on the server
+3. Docker downloads the new image
+4. But `docker compose up -d` doesn't recreate containers because the tag name hasn't changed
+
+**Solution**: The update script uses `--force-recreate` to ensure containers are rebuilt with the newly pulled image, regardless of tag name.
+
+#### Image Verification Process
+
+The script attempts to verify if updates are available by:
+
+1. **Checking local image digest**: Gets the RepoDigest of your current image
+2. **Fetching remote manifest**: Uses `docker manifest inspect` to get the registry digest
+3. **Comparing digests**: If they differ, a new version is available
+4. **Fallback behavior**: If verification fails, the script continues anyway
+
+#### Production Best Practices for Tags
+
+- **Use specific version tags** (e.g., `v1.2.3`) instead of `latest` for predictable deployments
+- **Always force recreation** when using `latest` tag
+- **Test deployments** in staging environments first
+- **Monitor digest changes** to track when updates occur
 
 ## Production Architecture
 

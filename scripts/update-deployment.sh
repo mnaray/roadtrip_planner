@@ -68,13 +68,46 @@ echo ""
 # Step 1: Record current state
 backup_info
 
+# Check if we can verify image updates using digests
+echo -e "${YELLOW}Checking for image updates...${NC}"
+
+# Get local image digest (RepoDigest) if it exists
+LOCAL_DIGEST=$(docker inspect --format='{{if .RepoDigests}}{{index .RepoDigests 0}}{{end}}' "roadtrip_planner:$IMAGE_TAG" 2>/dev/null || echo "none")
+
+# Try to get remote manifest digest (requires Docker to be logged in to the registry)
+REMOTE_DIGEST="none"
+if command -v docker manifest &> /dev/null; then
+    # Extract registry URL from image name if provided
+    if [[ "$DOCKER_IMAGE" == *"/"* ]]; then
+        REMOTE_DIGEST=$(docker manifest inspect "$DOCKER_IMAGE" -v 2>/dev/null | grep -o '"digest":"[^"]*"' | head -1 | cut -d'"' -f4 || echo "none")
+    fi
+fi
+
+if [ "$LOCAL_DIGEST" != "none" ] && [ "$REMOTE_DIGEST" != "none" ]; then
+    if [[ "$LOCAL_DIGEST" == *"$REMOTE_DIGEST"* ]] || [[ "$REMOTE_DIGEST" == *"${LOCAL_DIGEST#*@}"* ]]; then
+        echo -e "${GREEN}Local image is up-to-date with registry.${NC}"
+        echo -e "${YELLOW}Will continue with deployment to ensure container is recreated.${NC}"
+    else
+        echo -e "${YELLOW}New image version available in registry!${NC}"
+    fi
+else
+    echo -e "${YELLOW}Unable to verify image version. Will pull and update anyway.${NC}"
+fi
+
 # Step 2: Pull new image
-echo -e "${YELLOW}Pulling new Docker image...${NC}"
+echo -e "${YELLOW}Pulling Docker image from registry...${NC}"
 docker pull "roadtrip_planner:$IMAGE_TAG" || {
     echo -e "${RED}Failed to pull image. Make sure the image exists in your registry.${NC}"
-    echo -e "${YELLOW}If building locally, run: docker build -t roadtrip_planner:$IMAGE_TAG .${NC}"
+    echo -e "${YELLOW}Note: Images must be pushed to a registry before deployment.${NC}"
+    echo -e "${YELLOW}Example: docker push yourusername/roadtrip_planner:$IMAGE_TAG${NC}"
     exit 1
 }
+
+# Verify the pull was successful
+NEW_DIGEST=$(docker inspect --format='{{if .RepoDigests}}{{index .RepoDigests 0}}{{end}}' "roadtrip_planner:$IMAGE_TAG" 2>/dev/null || echo "none")
+if [ "$NEW_DIGEST" != "none" ] && [ "$NEW_DIGEST" != "$LOCAL_DIGEST" ]; then
+    echo -e "${GREEN}Successfully pulled new image version!${NC}"
+fi
 
 # Step 3: Update the compose file environment if needed
 if grep -q "DOCKER_IMAGE=" "$COMPOSE_FILE" 2>/dev/null; then
@@ -97,8 +130,10 @@ docker compose -f "$COMPOSE_FILE" run --rm web bundle exec rails assets:precompi
 }
 
 # Step 6: Recreate containers with zero downtime
-echo -e "${YELLOW}Updating containers (zero-downtime)...${NC}"
-docker compose -f "$COMPOSE_FILE" up -d --no-deps --build web
+echo -e "${YELLOW}Recreating containers with new image...${NC}"
+# IMPORTANT: Use --force-recreate to ensure container uses the newly pulled image
+# This is critical when using 'latest' tag or when the tag name doesn't change
+docker compose -f "$COMPOSE_FILE" up -d --no-deps --force-recreate web
 
 # Step 7: Wait for services to be healthy
 echo -e "${YELLOW}Waiting for services to become healthy...${NC}"
@@ -126,5 +161,9 @@ echo "  3. Access the application in your browser"
 echo ""
 echo -e "${YELLOW}If you encounter issues:${NC}"
 echo "  - Review the backup info in deployment_backup_*.txt"
-echo "  - Check logs for errors"
+echo "  - Check logs for errors: docker compose -f $COMPOSE_FILE logs web"
 echo "  - Roll back if needed: docker compose -f $COMPOSE_FILE up -d --force-recreate"
+echo ""
+echo -e "${YELLOW}Note about 'latest' tag:${NC}"
+echo "  Using 'latest' requires --force-recreate to update containers."
+echo "  For production, consider using specific version tags instead."
