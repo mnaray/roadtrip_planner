@@ -65,13 +65,13 @@ class PackingListItemsController < ApplicationController
 
   def set_road_trip_and_packing_list
     @road_trip = RoadTrip.find(params[:road_trip_id])
-    
+
     # Check if user has access (is owner or participant)
     unless @road_trip.can_access?(current_user)
       redirect_to road_trips_path, alert: "You don't have access to this road trip."
       return
     end
-    
+
     @packing_list = @road_trip.packing_lists.find(params[:packing_list_id])
   rescue ActiveRecord::RecordNotFound
     redirect_to road_trips_path, alert: "Road trip or packing list not found."

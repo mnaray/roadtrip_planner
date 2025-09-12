@@ -61,7 +61,7 @@ class RoutesController < ApplicationController
     return redirect_to road_trips_path, alert: "No route data found." unless route_data
 
     road_trip = RoadTrip.find(route_data["road_trip_id"])
-    
+
     # Check if user has access to this road trip
     unless road_trip.can_access?(current_user)
       redirect_to road_trips_path, alert: "You don't have access to this road trip."
@@ -104,7 +104,7 @@ class RoutesController < ApplicationController
 
   def set_road_trip
     @road_trip = RoadTrip.find(params[:road_trip_id])
-    
+
     # Check if user has access (is owner or participant)
     unless @road_trip.can_access?(current_user)
       redirect_to road_trips_path, alert: "You don't have access to this road trip."
@@ -115,7 +115,7 @@ class RoutesController < ApplicationController
 
   def set_route
     @route = Route.find(params[:id])
-    
+
     # Check if user has access to the road trip containing this route
     unless @route.road_trip.can_access?(current_user)
       redirect_to road_trips_path, alert: "You don't have access to this route."

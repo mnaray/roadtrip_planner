@@ -174,7 +174,7 @@ class RoadTrips::Participants::IndexComponent < ApplicationComponent
                 h3 class: "text-lg font-medium text-gray-900 mb-4" do
                   "Add New Participant"
                 end
-                
+
                 div class: "bg-gray-50 p-4 rounded-lg" do
                   form_with url: road_trip_participants_path(@road_trip),
                             class: "flex space-x-3",
@@ -187,7 +187,7 @@ class RoadTrips::Participants::IndexComponent < ApplicationComponent
                     form.submit "Add Participant",
                               class: "inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   end
-                  
+
                   p class: "mt-2 text-xs text-gray-600" do
                     "Enter the exact username of the person you want to add to this road trip."
                   end
