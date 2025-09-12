@@ -208,6 +208,124 @@ docker compose exec db psql -U roadtrip_planner -d roadtrip_planner_development
 
 **Important:** Never install PostgreSQL on your host machine. The database runs entirely in a Docker container.
 
+## Deployment
+
+### Building a new image locally
+
+To build a Docker image for deployment:
+
+```bash
+# Build the Docker image with a specific tag
+docker build -t roadtrip_planner:latest .
+
+# Or build with a version tag
+docker build -t roadtrip_planner:v1.0.0 .
+
+# Push the image to Docker Hub (replace 'yourusername' with your Docker Hub username)
+docker tag roadtrip_planner:latest yourusername/roadtrip_planner:latest
+docker push yourusername/roadtrip_planner:latest
+```
+
+### Deploying an existing image to the production environment
+
+1. **Copy the production Docker Compose file** to your server:
+   
+   Copy the `docker-compose.production.yml` file to your production server. This file is configured for production use with:
+   - Persistent volumes for data preservation
+   - Production-optimized PostgreSQL settings
+   - Environment-based configuration
+   - Health checks and restart policies
+
+2. **Create production environment file**:
+   
+   Create a `.env.production` file on your server with the following variables:
+   ```bash
+   # Database Configuration
+   POSTGRES_DB=roadtrip_planner_production
+   POSTGRES_USER=roadtrip_planner_prod
+   POSTGRES_PASSWORD=your_very_secure_password
+   
+   # Rails Configuration
+   SECRET_KEY_BASE=your_secret_key_base_here
+   
+   # Docker Configuration
+   DOCKER_IMAGE=yourusername/roadtrip_planner:latest
+   PORT=3000
+   ```
+   
+   Generate a secure secret key base:
+   ```bash
+   docker run --rm roadtrip_planner:latest bundle exec rails secret
+   ```
+
+3. **Start the application**:
+   ```bash
+   # Pull the latest image
+   docker pull yourusername/roadtrip_planner:latest
+   
+   # Start the containers
+   docker compose -f docker-compose.production.yml up -d
+   
+   # Run database migrations
+   docker compose -f docker-compose.production.yml exec web bundle exec rails db:create db:migrate
+   ```
+
+4. **Access the application**:
+   
+   Once the containers are running, access your application at `http://your-server-ip:3000` or configure a reverse proxy (nginx/Apache) to serve it on port 80/443.
+
+### Deploying updates without data loss
+
+A shell script is provided to safely update your deployment without data loss. The script (`scripts/update-deployment.sh`) handles:
+- Database migrations
+- Asset precompilation
+- Zero-downtime container updates
+- Automatic rollback on failure
+
+**To make the script executable**:
+```bash
+chmod +x scripts/update-deployment.sh
+```
+
+**Usage**:
+```bash
+# Update to the latest image
+./scripts/update-deployment.sh
+
+# Update to a specific version
+./scripts/update-deployment.sh v1.2.0
+
+# The script will prompt you for the compose file location
+# Default: ../docker-compose.production.yml
+```
+
+The update script performs the following steps:
+1. Records the current deployment state for backup
+2. Pulls the new Docker image
+3. Runs database migrations safely
+4. Precompiles assets
+5. Updates containers with zero downtime
+6. Verifies service health
+7. Cleans up old images
+
+**Important Notes**:
+- The script preserves all data in Docker volumes
+- Database migrations are run before updating containers
+- Failed migrations will prevent the update from proceeding
+- A backup of the deployment state is saved with timestamp
+
+### Production Best Practices
+
+1. **Use environment variables** for all sensitive configuration
+2. **Set up regular backups** of the PostgreSQL data volume
+3. **Configure a reverse proxy** (nginx/Apache) for SSL termination
+4. **Monitor logs** regularly:
+   ```bash
+   docker compose -f docker-compose.production.yml logs -f
+   ```
+5. **Set up health monitoring** for the application endpoints
+6. **Use specific version tags** instead of 'latest' for production stability
+
 ## Troubleshooting
 
 ### Port already in use
