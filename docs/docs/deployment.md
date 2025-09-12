@@ -62,25 +62,18 @@ curl -o docker-compose.production.yml \
   https://raw.githubusercontent.com/mnaray/roadtrip_planner/main/docker-compose.production.yml
 ```
 
-#### Step 2: Configure Environment
+#### Step 2: Configure Credentials
 
-Create your production environment file:
+Edit the downloaded `docker-compose.production.yml` file and replace these placeholders with your actual values:
 
-```bash
-cat > .env << EOF
-POSTGRES_DB=roadtrip_planner_production
-POSTGRES_USER=roadtrip_planner
-POSTGRES_PASSWORD=your_secure_database_password_here
-SECRET_KEY_BASE=your_secret_key_base_here
-RAILS_MASTER_KEY=your_rails_master_key_here
-PORT=3000
-EOF
-```
+- `REPLACE_WITH_YOUR_SECURE_DATABASE_PASSWORD` → Your secure database password
+- `REPLACE_WITH_YOUR_SECRET_KEY_BASE` → Generated secret key (see [Generating Secret Keys](#generating-secret-keys))
+- `REPLACE_WITH_YOUR_RAILS_MASTER_KEY` → Your Rails master key from `config/master.key`
 
 :::warning Security
-- Use strong, unique passwords for `POSTGRES_PASSWORD`
-- Generate new keys using the methods described in [Environment Configuration](#environment-configuration)
-- Never commit the `.env` file to version control
+- Use strong, unique passwords for the database
+- Generate new secret keys for production
+- Never commit sensitive credentials to version control
 :::
 
 #### Step 3: Deploy the Application
@@ -135,24 +128,7 @@ docker compose -f docker-compose.production.yml exec web rails db:migrate
 
 Replace `v1.2.3` with your desired version tag from Docker Hub.
 
-## Environment Configuration
-
-### Required Environment Variables
-
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `POSTGRES_DB` | Production database name | `roadtrip_planner_production` |
-| `POSTGRES_USER` | Database user | `roadtrip_planner` |
-| `POSTGRES_PASSWORD` | Database password | `secure_password_123` |
-| `SECRET_KEY_BASE` | Rails secret key | Generate using `rails secret` |
-| `RAILS_MASTER_KEY` | Rails master key | From `config/master.key` |
-
-### Optional Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `PORT` | Application port | `3000` |
-| `RAILS_ENV` | Rails environment | `production` |
+## Configuration
 
 ### Generating Secret Keys
 

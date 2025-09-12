@@ -284,18 +284,11 @@ This section covers deploying the Roadtrip Planner application to production env
      https://raw.githubusercontent.com/mnaray/roadtrip_planner/main/docker-compose.production.yml
    ```
 
-2. **Create environment variables file:**
-   ```bash
-   # Create .env file with production settings
-   cat > .env << EOF
-   POSTGRES_DB=roadtrip_planner_production
-   POSTGRES_USER=roadtrip_planner
-   POSTGRES_PASSWORD=your_secure_database_password_here
-   SECRET_KEY_BASE=your_secret_key_base_here
-   RAILS_MASTER_KEY=your_rails_master_key_here
-   PORT=3000
-   EOF
-   ```
+2. **Configure your credentials:**
+   Edit the downloaded `docker-compose.production.yml` file and replace the following placeholders:
+   - Replace `REPLACE_WITH_YOUR_SECURE_DATABASE_PASSWORD` with your secure database password
+   - Replace `REPLACE_WITH_YOUR_SECRET_KEY_BASE` with your secret key base (generate using the command below)
+   - Replace `REPLACE_WITH_YOUR_RAILS_MASTER_KEY` with your Rails master key from `config/master.key`
 
 3. **Start the application:**
    ```bash
@@ -337,35 +330,16 @@ To update your production deployment to a newer version:
 
 **Note:** This approach ensures database persistence while updating the application. Replace `v1.2.3` with your desired version.
 
-### Production Environment Configuration
+### Generating Secret Keys
 
-#### Environment Variables
-
-Create a `.env` file with the following required variables:
-
-```bash
-# Database Configuration
-POSTGRES_DB=roadtrip_planner_production
-POSTGRES_USER=roadtrip_planner
-POSTGRES_PASSWORD=your_secure_password
-
-# Rails Configuration
-SECRET_KEY_BASE=your_secret_key_base
-RAILS_MASTER_KEY=your_rails_master_key
-RAILS_ENV=production
-
-# Optional Configuration
-PORT=3000  # Change if port 3000 is not available
-```
-
-#### Generating Secret Keys
+When configuring your production deployment, you'll need to generate a secret key base:
 
 ```bash
 # Generate SECRET_KEY_BASE
 docker run --rm mnaray/roadtrip-planner:v1.0.0 rails secret
-
-# RAILS_MASTER_KEY is found in your Rails app's config/master.key file
 ```
+
+The `RAILS_MASTER_KEY` is found in your Rails application's `config/master.key` file.
 
 ### Monitoring and Maintenance
 
