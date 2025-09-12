@@ -23,6 +23,7 @@ const sidebars: SidebarsConfig = {
         'contributing',
         'technologies',
         'development-setup',
+        'deployment',
       ],
     },
     {
