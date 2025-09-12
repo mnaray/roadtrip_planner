@@ -1,0 +1,69 @@
+services:
+  db:
+    image: postgres:17-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # Production optimizations for PostgreSQL
+    command: >
+      postgres
+      -c shared_buffers=512MB
+      -c effective_cache_size=2GB
+      -c maintenance_work_mem=128MB
+      -c work_mem=8MB
+      -c max_connections=200
+      -c random_page_cost=1.1
+      -c log_statement=none
+      -c log_duration=off
+      -c checkpoint_completion_target=0.9
+      -c wal_buffers=16MB
+      -c effective_io_concurrency=200
+    networks:
+      - roadtrip_network
+
+  web:
+    image: ${DOCKER_IMAGE:-roadtrip_planner:latest}
+    restart: always
+    command: ["./bin/docker-entrypoint", "bundle", "exec", "rails", "server", "-b", "0.0.0.0"]
+    ports:
+      - "${PORT:-3000}:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env.production
+    environment:
+      DATABASE_HOST: db
+      RAILS_ENV: production
+      RAILS_SERVE_STATIC_FILES: "true"
+      RAILS_LOG_TO_STDOUT: "true"
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+    volumes:
+      - rails_storage:/app/storage
+      - rails_logs:/app/log
+      - rails_tmp:/app/tmp
+    networks:
+      - roadtrip_network
+
+volumes:
+  postgres_data:
+    driver: local
+  rails_storage:
+    driver: local
+  rails_logs:
+    driver: local
+  rails_tmp:
+    driver: local
+
+networks:
+  roadtrip_network:
+    driver: bridge
