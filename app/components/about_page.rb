@@ -12,7 +12,7 @@ class AboutPage < ApplicationComponent
             "About Roadtrip Planner"
           end
           p class: "text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed" do
-            "Your companion for planning and organizing memorable road trips"
+            "Your collaborative companion for planning and organizing memorable road trips with friends and family"
           end
         end
 
@@ -24,7 +24,7 @@ class AboutPage < ApplicationComponent
               "What is Roadtrip Planner?"
             end
             p class: "text-gray-700 text-lg leading-relaxed" do
-              "Roadtrip Planner is a web application that helps you organize and plan road trips from start to finish. Whether you're planning a weekend getaway or a cross-country adventure, this tool helps you keep track of your routes, destinations, and everything you need to bring along."
+              "Roadtrip Planner is a collaborative web application that helps you organize and plan road trips from start to finish. Whether you're planning a weekend getaway or a cross-country adventure, you can work together with friends and family to keep track of routes, destinations, and everything you need to bring along."
             end
           end
 
@@ -38,10 +38,13 @@ class AboutPage < ApplicationComponent
                 "Create and manage multiple road trips with custom names and descriptions"
               end
               li do
-                "Plan detailed routes with waypoints and destinations"
+                "Share road trips with friends and family for collaborative planning"
               end
               li do
-                "Create packing lists organized by categories (clothes, electronics, documents, etc.)"
+                "Plan detailed routes with waypoints and destinations together"
+              end
+              li do
+                "Create and manage shared packing lists with your travel companions"
               end
               li do
                 "Track packing progress with checkboxes for each item"
