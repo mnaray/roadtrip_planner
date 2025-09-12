@@ -120,6 +120,7 @@ end
 - Road trip management with route planning
 - Packing list functionality with categories and progress tracking
 - About page with feature descriptions and user onboarding
+- Road trip sharing with other users (add participants, leave functionality, access control)
 
 ### 🚧 In Progress
 - None currently
