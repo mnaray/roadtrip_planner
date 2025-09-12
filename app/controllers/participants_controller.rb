@@ -1,5 +1,5 @@
 class ParticipantsController < ApplicationController
-  before_action :authenticate_user!
+  before_action :require_login
   before_action :load_road_trip
   before_action :authorize_owner!, only: [:create, :destroy]
 

@@ -6,8 +6,13 @@ RSpec.describe ParticipantsController, type: :request do
   let(:other_user) { create(:user) }
   let(:road_trip) { create(:road_trip, user: owner) }
 
+  # Helper to sign in user
+  def sign_in_user(user)
+    post login_path, params: { username: user.username, password: "password123" }
+  end
+
   before do
-    login_as(owner)
+    sign_in_user(owner)
   end
 
   describe 'POST /road_trips/:road_trip_id/participants' do
@@ -53,18 +58,19 @@ RSpec.describe ParticipantsController, type: :request do
     end
 
     context 'when user is not the owner' do
-      before { login_as(participant) }
+      before { sign_in_user(participant) }
 
       it 'denies access' do
         post road_trip_participants_path(road_trip), params: { username: other_user.username }
         
         expect(response).to redirect_to(road_trip)
-        expect(flash[:alert]).to eq("Only the owner can manage participants")
+        follow_redirect!
+        expect(response.body).to include("Only the owner can manage participants")
       end
     end
 
     context 'when user is not logged in' do
-      before { logout }
+      before { delete logout_path }
 
       it 'redirects to login' do
         post road_trip_participants_path(road_trip), params: { username: participant.username }
@@ -90,13 +96,14 @@ RSpec.describe ParticipantsController, type: :request do
     end
 
     context 'when user is not the owner' do
-      before { login_as(participant) }
+      before { sign_in_user(participant) }
 
       it 'denies access' do
         delete road_trip_participant_path(road_trip, participant)
         
         expect(response).to redirect_to(road_trip)
-        expect(flash[:alert]).to eq("Only the owner can manage participants")
+        follow_redirect!
+        expect(response.body).to include("Only the owner can manage participants")
       end
     end
   end
