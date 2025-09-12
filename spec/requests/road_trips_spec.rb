@@ -77,7 +77,7 @@ RSpec.describe "RoadTrips", type: :request do
           get road_trip_path(other_users_road_trip)
           expect(response).to redirect_to(road_trips_path)
           follow_redirect!
-          expect(response.body).to include("You don't have access to this road trip")
+          expect(response.body).to include("You don&#39;t have access to this road trip.")
         end
       end
 

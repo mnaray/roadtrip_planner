@@ -11,12 +11,11 @@ RSpec.describe ParticipantsController, type: :request do
     post login_path, params: { username: user.username, password: "password123" }
   end
 
-  before do
-    sign_in_user(owner)
-  end
-
   describe 'POST /road_trips/:road_trip_id/participants' do
     context 'when user is the owner' do
+      before do
+        sign_in_user(owner)
+      end
       it 'adds a participant successfully' do
         post road_trip_participants_path(road_trip), params: { username: participant.username }
 
@@ -58,7 +57,11 @@ RSpec.describe ParticipantsController, type: :request do
     end
 
     context 'when user is not the owner' do
-      before { sign_in_user(participant) }
+      before do
+        # Make sure participant is a participant but not the owner
+        road_trip.participants << participant unless road_trip.participants.include?(participant)
+        sign_in_user(participant)
+      end
 
       it 'denies access' do
         post road_trip_participants_path(road_trip), params: { username: other_user.username }
@@ -86,6 +89,10 @@ RSpec.describe ParticipantsController, type: :request do
     end
 
     context 'when user is the owner' do
+      before do
+        sign_in_user(owner)
+      end
+
       it 'removes participant successfully' do
         delete road_trip_participant_path(road_trip, participant)
 
@@ -96,7 +103,11 @@ RSpec.describe ParticipantsController, type: :request do
     end
 
     context 'when user is not the owner' do
-      before { sign_in_user(participant) }
+      before do
+        # Ensure participant has access to the road trip but is not the owner
+        road_trip.participants << participant unless road_trip.participants.include?(participant)
+        sign_in_user(participant)
+      end
 
       it 'denies access' do
         delete road_trip_participant_path(road_trip, participant)

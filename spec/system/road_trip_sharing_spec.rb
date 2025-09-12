@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe 'Road Trip Sharing', type: :system, js: true do
+RSpec.describe 'Road Trip Sharing', type: :system do
   let(:owner) { create(:user, username: 'tripowner') }
   let(:participant) { create(:user, username: 'participant1') }
   let(:other_user) { create(:user, username: 'otheruser') }
@@ -75,9 +75,7 @@ RSpec.describe 'Road Trip Sharing', type: :system, js: true do
     it 'allows owner to remove participants' do
       within('.participants') do
         expect(page).to have_content(participant.username)
-        accept_confirm do
-          click_button 'Remove'
-        end
+        click_button 'Remove'
       end
 
       expect(page).to have_content("#{participant.username} has been removed from the road trip")
@@ -116,9 +114,7 @@ RSpec.describe 'Road Trip Sharing', type: :system, js: true do
       visit road_trip_path(road_trip)
 
       within('.participants') do
-        accept_confirm do
-          click_button 'Leave Road Trip'
-        end
+        click_button 'Leave Road Trip'
       end
 
       expect(page).to have_current_path(road_trips_path)

@@ -6,7 +6,7 @@ class RoadTrips::ParticipantsComponent < ApplicationComponent
   end
 
   def view_template
-    div class: "bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-8" do
+    div class: "participants bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-8" do
       div class: "px-6 py-4 border-b border-gray-200" do
         h2 class: "text-lg font-semibold text-gray-900" do
           "Participants"
@@ -70,7 +70,7 @@ class RoadTrips::ParticipantsComponent < ApplicationComponent
                     "Remove"
                   end
                 elsif participant == @current_user
-                  button_to road_trip_leave_path(@road_trip),
+                  button_to leave_road_trip_path(@road_trip),
                             method: :delete,
                             class: "inline-flex items-center px-2 py-1 text-xs font-medium text-red-600 hover:text-red-700",
                             data: { turbo_confirm: "Leave this road trip?" },
@@ -105,7 +105,7 @@ class RoadTrips::ParticipantsComponent < ApplicationComponent
         elsif @road_trip.participant?(@current_user)
           # Leave button for participants (shown at bottom)
           div class: "border-t pt-4" do
-            button_to road_trip_leave_path(@road_trip),
+            button_to leave_road_trip_path(@road_trip),
                       method: :delete,
                       class: "inline-flex items-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2",
                       data: { turbo_confirm: "Are you sure you want to leave this road trip?" },
