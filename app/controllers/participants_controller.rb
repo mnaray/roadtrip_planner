@@ -1,7 +1,7 @@
 class ParticipantsController < ApplicationController
   before_action :require_login
   before_action :load_road_trip
-  before_action :authorize_owner!, only: [:create, :destroy]
+  before_action :authorize_owner!, only: [ :create, :destroy ]
 
   def create
     username = params[:username]&.downcase
@@ -22,7 +22,7 @@ class ParticipantsController < ApplicationController
 
   def destroy
     participant = User.find(params[:id])
-    
+
     if @road_trip.remove_participant(participant)
       redirect_to @road_trip, notice: "#{participant.username} has been removed from the road trip"
     else

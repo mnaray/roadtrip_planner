@@ -21,13 +21,13 @@ RSpec.describe 'Road Trip Sharing', type: :system, js: true do
         expect(page).to have_content('Participants')
         expect(page).to have_content(owner.username)
         expect(page).to have_content('Owner')
-        
+
         fill_in 'username', with: participant.username
         click_button 'Add User'
       end
 
       expect(page).to have_content("#{participant.username} has been added to the road trip")
-      
+
       within('.participants') do
         expect(page).to have_content(participant.username)
         expect(page).to have_content('Participant')
@@ -81,7 +81,7 @@ RSpec.describe 'Road Trip Sharing', type: :system, js: true do
       end
 
       expect(page).to have_content("#{participant.username} has been removed from the road trip")
-      
+
       within('.participants') do
         expect(page).not_to have_content(participant.username)
       end

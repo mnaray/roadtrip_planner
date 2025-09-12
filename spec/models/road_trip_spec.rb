@@ -206,7 +206,7 @@ RSpec.describe RoadTrip, type: :model do
         expect {
           road_trip.add_participant(participant1)
         }.to change { road_trip.participants.count }.by(1)
-        
+
         expect(road_trip.participants).to include(participant1)
       end
 
@@ -218,11 +218,11 @@ RSpec.describe RoadTrip, type: :model do
 
       it 'does not add duplicate participants' do
         road_trip.add_participant(participant1)
-        
+
         expect {
           road_trip.add_participant(participant1)
         }.not_to change { road_trip.participants.count }
-        
+
         result = road_trip.add_participant(participant1)
         expect(result).to be false
       end
@@ -237,7 +237,7 @@ RSpec.describe RoadTrip, type: :model do
         expect {
           road_trip.remove_participant(participant1)
         }.to change { road_trip.participants.count }.by(-1)
-        
+
         expect(road_trip.participants).not_to include(participant1)
       end
 

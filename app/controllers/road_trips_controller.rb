@@ -64,7 +64,7 @@ class RoadTripsController < ApplicationController
 
   def set_road_trip
     @road_trip = RoadTrip.find(params[:id])
-    
+
     # Check if user has access (is owner or participant)
     unless @road_trip.can_access?(current_user)
       redirect_to road_trips_path, alert: "You don't have access to this road trip."

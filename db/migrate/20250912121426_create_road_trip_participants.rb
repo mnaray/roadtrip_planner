@@ -6,6 +6,6 @@ class CreateRoadTripParticipants < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :road_trip_participants, [:road_trip_id, :user_id], unique: true
+    add_index :road_trip_participants, [ :road_trip_id, :user_id ], unique: true
   end
 end

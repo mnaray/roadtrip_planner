@@ -19,7 +19,7 @@ RSpec.describe ParticipantsController, type: :request do
     context 'when user is the owner' do
       it 'adds a participant successfully' do
         post road_trip_participants_path(road_trip), params: { username: participant.username }
-        
+
         expect(response).to redirect_to(road_trip)
         expect(flash[:notice]).to eq("#{participant.username} has been added to the road trip")
         expect(road_trip.reload.participants).to include(participant)
@@ -27,21 +27,21 @@ RSpec.describe ParticipantsController, type: :request do
 
       it 'handles case insensitive usernames' do
         post road_trip_participants_path(road_trip), params: { username: participant.username.upcase }
-        
+
         expect(response).to redirect_to(road_trip)
         expect(road_trip.reload.participants).to include(participant)
       end
 
       it 'shows error for non-existent user' do
         post road_trip_participants_path(road_trip), params: { username: 'nonexistent' }
-        
+
         expect(response).to redirect_to(road_trip)
         expect(flash[:alert]).to eq("User 'nonexistent' not found")
       end
 
       it 'prevents adding owner as participant' do
         post road_trip_participants_path(road_trip), params: { username: owner.username }
-        
+
         expect(response).to redirect_to(road_trip)
         expect(flash[:alert]).to eq("Cannot add the owner as a participant")
         expect(road_trip.reload.participants).not_to include(owner)
@@ -49,9 +49,9 @@ RSpec.describe ParticipantsController, type: :request do
 
       it 'prevents duplicate participants' do
         road_trip.participants << participant
-        
+
         post road_trip_participants_path(road_trip), params: { username: participant.username }
-        
+
         expect(response).to redirect_to(road_trip)
         expect(flash[:alert]).to eq("#{participant.username} is already a participant")
       end
@@ -62,7 +62,7 @@ RSpec.describe ParticipantsController, type: :request do
 
       it 'denies access' do
         post road_trip_participants_path(road_trip), params: { username: other_user.username }
-        
+
         expect(response).to redirect_to(road_trip)
         follow_redirect!
         expect(response.body).to include("Only the owner can manage participants")
@@ -74,7 +74,7 @@ RSpec.describe ParticipantsController, type: :request do
 
       it 'redirects to login' do
         post road_trip_participants_path(road_trip), params: { username: participant.username }
-        
+
         expect(response).to redirect_to(login_path)
       end
     end
@@ -88,7 +88,7 @@ RSpec.describe ParticipantsController, type: :request do
     context 'when user is the owner' do
       it 'removes participant successfully' do
         delete road_trip_participant_path(road_trip, participant)
-        
+
         expect(response).to redirect_to(road_trip)
         expect(flash[:notice]).to eq("#{participant.username} has been removed from the road trip")
         expect(road_trip.reload.participants).not_to include(participant)
@@ -100,7 +100,7 @@ RSpec.describe ParticipantsController, type: :request do
 
       it 'denies access' do
         delete road_trip_participant_path(road_trip, participant)
-        
+
         expect(response).to redirect_to(road_trip)
         follow_redirect!
         expect(response.body).to include("Only the owner can manage participants")

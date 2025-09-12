@@ -25,7 +25,7 @@ RSpec.describe "RoadTrips", type: :request do
         owned_trip = create(:road_trip, user: user, name: "User's Owned Trip")
         shared_trip = create(:road_trip, user: other_user, name: "Shared Trip")
         private_trip = create(:road_trip, user: other_user, name: "Private Trip")
-        
+
         # Add user as participant to shared_trip
         shared_trip.participants << user
 
@@ -36,7 +36,7 @@ RSpec.describe "RoadTrips", type: :request do
         expect(response.body).to include(CGI.escapeHTML(shared_trip.name))
         # Should not show private trip
         expect(response.body).not_to include(CGI.escapeHTML(private_trip.name))
-        
+
         # Should show sections
         expect(response.body).to include("My Road Trips")
         expect(response.body).to include("Shared with Me")
@@ -83,7 +83,7 @@ RSpec.describe "RoadTrips", type: :request do
 
       context "when user is a participant" do
         let(:shared_road_trip) { create(:road_trip, user: other_user) }
-        
+
         before do
           shared_road_trip.participants << user
         end
@@ -302,7 +302,7 @@ RSpec.describe "RoadTrips", type: :request do
         expect {
           delete leave_road_trip_path(shared_road_trip)
         }.to change { shared_road_trip.participants.count }.by(-1)
-        
+
         expect(shared_road_trip.participants).not_to include(user)
       end
 

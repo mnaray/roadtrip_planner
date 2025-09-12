@@ -17,7 +17,7 @@ RSpec.describe RoadTripParticipant, type: :model do
 
     it 'prevents duplicate user-road_trip combinations' do
       create(:road_trip_participant, user: user, road_trip: road_trip)
-      
+
       expect {
         create(:road_trip_participant, user: user, road_trip: road_trip)
       }.to raise_error(ActiveRecord::RecordNotUnique)
