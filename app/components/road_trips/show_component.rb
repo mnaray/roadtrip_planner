@@ -39,14 +39,16 @@ class RoadTrips::ShowComponent < ApplicationComponent
           end
 
           div class: "flex items-center space-x-3" do
-            link_to edit_road_trip_path(@road_trip),
-                    class: "inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" do
-              svg_icon path_d: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z",
-                       class: "w-4 h-4 mr-1.5",
-                       stroke_linecap: "round",
-                       stroke_linejoin: "round",
-                       stroke_width: "2"
-              "Edit"
+            if @road_trip.owner?(@current_user)
+              link_to edit_road_trip_path(@road_trip),
+                      class: "inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" do
+                svg_icon path_d: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z",
+                         class: "w-4 h-4 mr-1.5",
+                         stroke_linecap: "round",
+                         stroke_linejoin: "round",
+                         stroke_width: "2"
+                "Edit"
+              end
             end
 
             link_to road_trip_packing_lists_path(@road_trip),
@@ -70,6 +72,9 @@ class RoadTrips::ShowComponent < ApplicationComponent
             end
           end
         end
+
+        # Participants section
+        render RoadTrips::ParticipantsComponent.new(road_trip: @road_trip, current_user: @current_user)
 
         # Trip summary
         div class: "bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8" do

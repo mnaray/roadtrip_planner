@@ -2,6 +2,8 @@ class User < ApplicationRecord
   has_secure_password
   has_many :road_trips, dependent: :destroy
   has_many :routes, dependent: :destroy
+  has_many :road_trip_participants, dependent: :destroy
+  has_many :participating_road_trips, through: :road_trip_participants, source: :road_trip
 
   validates :username, presence: true,
                       length: { minimum: 3 },

@@ -15,6 +15,17 @@ RSpec.describe RoadTrip, type: :model do
       expect(RoadTrip.reflect_on_association(:packing_lists).macro).to eq(:has_many)
       expect(RoadTrip.reflect_on_association(:packing_lists).options[:dependent]).to eq(:destroy)
     end
+
+    it 'has many road_trip_participants with dependent destroy' do
+      expect(RoadTrip.reflect_on_association(:road_trip_participants).macro).to eq(:has_many)
+      expect(RoadTrip.reflect_on_association(:road_trip_participants).options[:dependent]).to eq(:destroy)
+    end
+
+    it 'has many participants through road_trip_participants' do
+      expect(RoadTrip.reflect_on_association(:participants).macro).to eq(:has_many)
+      expect(RoadTrip.reflect_on_association(:participants).options[:through]).to eq(:road_trip_participants)
+      expect(RoadTrip.reflect_on_association(:participants).options[:source]).to eq(:user)
+    end
   end
 
   describe 'validations' do
@@ -135,6 +146,106 @@ RSpec.describe RoadTrip, type: :model do
       allow(road_trip).to receive(:routes).and_return([ route ])
 
       expect(road_trip.total_distance).to eq(0.0)
+    end
+  end
+
+  describe 'participant management' do
+    let(:owner) { create(:user) }
+    let(:participant1) { create(:user) }
+    let(:participant2) { create(:user) }
+    let(:road_trip) { create(:road_trip, user: owner) }
+
+    describe '#owner?' do
+      it 'returns true for the road trip owner' do
+        expect(road_trip.owner?(owner)).to be true
+      end
+
+      it 'returns false for other users' do
+        expect(road_trip.owner?(participant1)).to be false
+      end
+    end
+
+    describe '#participant?' do
+      before do
+        road_trip.participants << participant1
+      end
+
+      it 'returns true for users who are participants' do
+        expect(road_trip.participant?(participant1)).to be true
+      end
+
+      it 'returns false for users who are not participants' do
+        expect(road_trip.participant?(participant2)).to be false
+      end
+
+      it 'returns false for the owner (who is not a participant)' do
+        expect(road_trip.participant?(owner)).to be false
+      end
+    end
+
+    describe '#can_access?' do
+      before do
+        road_trip.participants << participant1
+      end
+
+      it 'returns true for the owner' do
+        expect(road_trip.can_access?(owner)).to be true
+      end
+
+      it 'returns true for participants' do
+        expect(road_trip.can_access?(participant1)).to be true
+      end
+
+      it 'returns false for users with no access' do
+        expect(road_trip.can_access?(participant2)).to be false
+      end
+    end
+
+    describe '#add_participant' do
+      it 'adds a new participant successfully' do
+        expect {
+          road_trip.add_participant(participant1)
+        }.to change { road_trip.participants.count }.by(1)
+
+        expect(road_trip.participants).to include(participant1)
+      end
+
+      it 'does not add the owner as a participant' do
+        result = road_trip.add_participant(owner)
+        expect(result).to be false
+        expect(road_trip.participants).not_to include(owner)
+      end
+
+      it 'does not add duplicate participants' do
+        road_trip.add_participant(participant1)
+
+        expect {
+          road_trip.add_participant(participant1)
+        }.not_to change { road_trip.participants.count }
+
+        result = road_trip.add_participant(participant1)
+        expect(result).to be false
+      end
+    end
+
+    describe '#remove_participant' do
+      before do
+        road_trip.participants << participant1
+      end
+
+      it 'removes an existing participant' do
+        expect {
+          road_trip.remove_participant(participant1)
+        }.to change { road_trip.participants.count }.by(-1)
+
+        expect(road_trip.participants).not_to include(participant1)
+      end
+
+      it 'handles removing non-existent participants gracefully' do
+        expect {
+          road_trip.remove_participant(participant2)
+        }.not_to change { road_trip.participants.count }
+      end
     end
   end
 end
