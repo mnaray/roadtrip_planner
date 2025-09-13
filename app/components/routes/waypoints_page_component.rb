@@ -1,4 +1,6 @@
 class Routes::WaypointsPageComponent < ApplicationComponent
+  include Phlex::Rails::Helpers::HiddenFieldTag
+
   def initialize(route_data:, current_user:)
     @route_data = route_data
     @current_user = current_user
