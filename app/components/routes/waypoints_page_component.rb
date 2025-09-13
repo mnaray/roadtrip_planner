@@ -1,8 +1,7 @@
-class Routes::ConfirmPageComponent < ApplicationComponent
-  def initialize(route_data:, current_user:, route: nil)
+class Routes::WaypointsPageComponent < ApplicationComponent
+  def initialize(route_data:, current_user:)
     @route_data = route_data
     @current_user = current_user
-    @route = route
     @road_trip = RoadTrip.find_by(id: route_data["road_trip_id"]) if route_data
   end
 
@@ -59,7 +58,10 @@ class Routes::ConfirmPageComponent < ApplicationComponent
             # Header
             div class: "bg-blue-600 px-6 py-4" do
               h1 class: "text-2xl font-bold text-white" do
-                "Review Your Route"
+                "Set Waypoints for Your Route"
+              end
+              p class: "text-blue-100 mt-2" do
+                "Click on the map to add waypoints that will modify your route. You can skip this step if you don't want to add waypoints."
               end
             end
 
@@ -103,18 +105,38 @@ class Routes::ConfirmPageComponent < ApplicationComponent
                 end
               end
 
-              # Interactive route map
+              # Interactive waypoint map
               div class: "mb-6" do
                 h2 class: "text-lg font-semibold text-gray-900 mb-4" do
-                  "Route Map"
+                  "Set Waypoints"
                 end
-                div id: "route-map",
+
+                div class: "mb-4 p-4 bg-blue-50 rounded-lg" do
+                  div class: "flex items-start" do
+                    svg_icon path_d: "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+                             class: "h-5 w-5 text-blue-600 mr-3 mt-0.5",
+                             fill: "currentColor",
+                             viewBox: "0 0 24 24"
+                    div class: "text-sm text-blue-800" do
+                      p class: "font-semibold mb-2" do
+                        "How to use waypoints:"
+                      end
+                      ul class: "list-disc list-inside space-y-1" do
+                        li { "Click on roads on the map to add waypoints" }
+                        li { "Waypoints will modify your route to pass through those locations" }
+                        li { "Click on a waypoint marker to remove it" }
+                        li { "The order of waypoints matters for your route" }
+                      end
+                    end
+                  end
+                end
+
+                div id: "waypoints-map",
                      class: "h-96 bg-gray-100 rounded-lg border border-gray-300 relative",
                      data: {
-                       controller: "route-map",
-                       route_map_start_location_value: @route_data["starting_location"],
-                       route_map_end_location_value: @route_data["destination"],
-                       route_map_waypoints_value: waypoints_data_json
+                       controller: "waypoints-map",
+                       waypoints_map_start_location_value: @route_data["starting_location"],
+                       waypoints_map_end_location_value: @route_data["destination"]
                      } do
                   # Map will be rendered here by Stimulus controller
                 end
@@ -125,46 +147,35 @@ class Routes::ConfirmPageComponent < ApplicationComponent
                 end
               end
 
-              # Date/Time selection and approval
-              form_with url: approve_route_path, method: :post, local: true, class: "space-y-4" do |form|
-                div do
-                  form.label :datetime, "Select Date & Time for this Route",
-                             class: "block text-sm font-medium text-gray-700 mb-2"
-
-                  form.datetime_local_field :datetime,
-                                            class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500",
-                                            required: true,
-                                            min: DateTime.now.strftime("%Y-%m-%dT%H:%M"),
-                                            value: 1.hour.from_now.strftime("%Y-%m-%dT%H:%M")
-
-                  if @route && @route.errors[:datetime].any?
-                    div class: "mt-1 text-sm text-red-600" do
-                      @route.errors[:datetime].first
-                    end
-                  end
+              # Waypoint list
+              div class: "mb-6" do
+                h3 class: "text-lg font-semibold text-gray-900 mb-4" do
+                  "Current Waypoints"
                 end
-
-                # Action buttons
-                div class: "flex items-center justify-between pt-6 border-t border-gray-200" do
-                  link_to "Back to Edit",
-                          new_road_trip_route_path(@road_trip),
-                          class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-
-                  form.submit "Add Route to Trip",
-                              class: "inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                div id: "waypoints-list", class: "space-y-2" do
+                  div class: "text-gray-500 text-sm italic" do
+                    "No waypoints set. Click on the map to add waypoints."
+                  end
                 end
               end
 
-              # Error messages
-              if @route && @route.errors.any?
-                div class: "mt-4 p-4 bg-red-50 rounded-md" do
-                  h3 class: "text-sm font-medium text-red-800 mb-2" do
-                    "There were some issues with your route:"
-                  end
-                  ul class: "list-disc list-inside text-sm text-red-700" do
-                    @route.errors.full_messages.each do |message|
-                      li { message }
-                    end
+              # Action buttons and form
+              form_with url: set_waypoints_path, method: :post, local: true, class: "space-y-4" do |form|
+                hidden_field_tag "waypoints", "", id: "waypoints-data"
+
+                div class: "flex items-center justify-between pt-6 border-t border-gray-200" do
+                  link_to "Back to Edit Route",
+                          new_road_trip_route_path(@road_trip),
+                          class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+
+                  div class: "space-x-3" do
+                    link_to "Skip Waypoints",
+                            confirm_route_path,
+                            class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+
+                    form.submit "Continue with Waypoints",
+                                id: "continue-with-waypoints",
+                                class: "inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   end
                 end
               end
@@ -172,16 +183,6 @@ class Routes::ConfirmPageComponent < ApplicationComponent
           end
         end
       end
-    end
-  end
-
-  private
-
-  def waypoints_data_json
-    if @route_data && @route_data["waypoints"].present?
-      @route_data["waypoints"].to_json
-    else
-      [].to_json
     end
   end
 end

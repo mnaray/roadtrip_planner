@@ -22,7 +22,7 @@ class RoutesController < ApplicationController
     }
 
     if @route.valid?(:location_only)
-      redirect_to confirm_route_path
+      redirect_to set_waypoints_path
     else
       render Routes::FormPageComponent.new(route: @route, road_trip: @road_trip, current_user: current_user),
              status: :unprocessable_content
@@ -75,6 +75,17 @@ class RoutesController < ApplicationController
     )
 
     if @route.save
+      # Create waypoints if they were provided in the session
+      if route_data["waypoints"].present?
+        route_data["waypoints"].each_with_index do |waypoint_data, index|
+          @route.waypoints.create!(
+            latitude: waypoint_data["latitude"],
+            longitude: waypoint_data["longitude"],
+            position: index + 1
+          )
+        end
+      end
+
       session[:route_data] = nil
       redirect_to road_trip, notice: "Route was successfully added to your road trip."
     else
