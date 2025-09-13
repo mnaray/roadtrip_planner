@@ -126,7 +126,7 @@ class FuelEconomies::ShowComponent < ApplicationComponent
         div class: "bg-white rounded-lg shadow-sm border border-gray-200 p-6",
             data: {
               controller: "fuel-economy",
-              "fuel-economy-distance-value": @route.distance_in_km || 0
+              fuel_economy_distance_value: @route.distance_in_km || 0
             } do
           h2 class: "text-lg font-semibold text-gray-900 mb-6" do
             "Fuel Cost Calculator"

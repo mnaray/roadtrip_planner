@@ -22,24 +22,17 @@ export default class extends Controller {
   }
 
   connect() {
-    console.log("Fuel economy controller connected!", this.element)
-    console.log("Available targets:", this.targets)
-    console.log("Distance value:", this.distanceValue)
     // Initialize with any pre-filled values
     this.calculate()
   }
 
   calculate() {
-    console.log("Calculate method called")
-
     try {
       const fuelPrice = parseFloat(this.fuelPriceTarget.value) || 0
       const fuelConsumption = parseFloat(this.fuelConsumptionTarget.value) || 0
       const numPassengers = parseInt(this.numPassengersTarget.value) || 1
       const distance = this.distanceValue || 0
       const isRoundTrip = this.roundTripTarget.checked
-
-      console.log("Values:", { fuelPrice, fuelConsumption, numPassengers, distance, isRoundTrip })
 
       // Only show results if we have all required inputs
       if (fuelPrice > 0 && fuelConsumption > 0 && distance > 0) {
