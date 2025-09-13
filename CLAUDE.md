@@ -121,6 +121,7 @@ end
 - Packing list functionality with categories and progress tracking
 - About page with feature descriptions and user onboarding
 - Road trip sharing with other users (add participants, leave functionality, access control)
+- Fuel economy calculator with real-time cost calculations (client-side JavaScript)
 
 ### 🚧 In Progress
 - None currently
