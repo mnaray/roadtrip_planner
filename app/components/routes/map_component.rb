@@ -157,6 +157,16 @@ class Routes::MapComponent < ApplicationComponent
                 span { "Download GPX" }
               end
 
+              link_to route_fuel_economy_path(@route),
+                      class: "inline-flex items-center px-3 py-2 border border-purple-300 text-sm font-medium rounded-md text-purple-700 bg-white hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2" do
+                svg_icon path_d: "M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z",
+                         class: "w-4 h-4 mr-1.5",
+                         stroke_linecap: "round",
+                         stroke_linejoin: "round",
+                         stroke_width: "2"
+                span { "Fuel Economy" }
+              end
+
               button_to route_path(@route),
                         method: :delete,
                         class: "inline-flex items-center px-3 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2",
