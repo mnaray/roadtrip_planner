@@ -52,6 +52,17 @@ class PackingLists::IndexComponent < ApplicationComponent
           end
 
           div class: "flex items-center space-x-3" do
+            # Back to Trip button
+            link_to road_trip_path(@road_trip),
+                    class: "inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" do
+              svg_icon path_d: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",
+                       class: "w-4 h-4 mr-1.5",
+                       stroke_linecap: "round",
+                       stroke_linejoin: "round",
+                       stroke_width: "2"
+              span { "Back to Trip" }
+            end
+
             link_to new_road_trip_packing_list_path(@road_trip),
                     class: "inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" do
               svg_icon path_d: "M12 4v16m8-8H4",
