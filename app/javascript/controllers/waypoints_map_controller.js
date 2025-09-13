@@ -1,23 +1,25 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Connects to data-controller="route-map"
+// Connects to data-controller="waypoints-map"
 export default class extends Controller {
   static values = {
     startLocation: String,
-    endLocation: String,
-    waypoints: Array
+    endLocation: String
   }
 
   connect() {
-    console.log("Route map controller connected")
-    
+    console.log("Waypoints map controller connected")
+
     // Check if Leaflet is available
     if (typeof L === 'undefined') {
       console.error('Leaflet (L) is not available. Make sure leaflet.js is loaded.')
       this.showError('Map library is not available. Please refresh the page.')
       return
     }
-    
+
+    this.waypoints = []
+    this.waypointCounter = 0
+
     this.initializeMap()
   }
 
@@ -54,6 +56,7 @@ export default class extends Controller {
     try {
       // Geocode the locations and display the route
       await this.displayRoute()
+      this.setupMapClickListener()
     } catch (error) {
       console.error('Error displaying route:', error)
       this.showError('Unable to display route. Please check the location names.')
@@ -84,37 +87,17 @@ export default class extends Controller {
     }).addTo(this.map)
       .bindPopup(`<strong>Destination:</strong><br>${this.endLocationValue}`)
 
-    // Add waypoint markers if they exist
-    this.waypointMarkers = []
-    if (this.waypointsValue && this.waypointsValue.length > 0) {
-      this.waypointsValue.forEach((waypoint, index) => {
-        const waypointMarker = L.marker([waypoint.latitude, waypoint.longitude], {
-          icon: this.createWaypointIcon(waypoint.position)
-        }).addTo(this.map)
-          .bindPopup(`<strong>Waypoint ${waypoint.position}</strong><br>Lat: ${waypoint.latitude.toFixed(6)}<br>Lng: ${waypoint.longitude.toFixed(6)}`)
+    // Store markers for later use
+    this.startMarker = startMarker
+    this.endMarker = endMarker
 
-        this.waypointMarkers.push(waypointMarker)
-      })
-    }
-
-    // Get the actual driving route (with waypoints if they exist)
+    // Get the actual driving route
     try {
-      let routeData
-      if (this.waypointsValue && this.waypointsValue.length > 0) {
-        // Create coordinates array: start -> waypoints (ordered) -> end
-        const orderedWaypoints = this.waypointsValue
-          .sort((a, b) => a.position - b.position)
-          .map(w => [w.latitude, w.longitude])
+      const routeData = await this.getRoute(startCoords, endCoords)
 
-        const allCoords = [startCoords, ...orderedWaypoints, endCoords]
-        routeData = await this.getRouteWithWaypoints(allCoords)
-      } else {
-        routeData = await this.getRoute(startCoords, endCoords)
-      }
-      
       if (routeData && routeData.geometry) {
         // Draw the actual route following roads
-        const routeLine = L.geoJSON(routeData.geometry, {
+        this.routeLine = L.geoJSON(routeData.geometry, {
           style: {
             color: '#3B82F6',
             weight: 4,
@@ -122,157 +105,170 @@ export default class extends Controller {
           }
         }).addTo(this.map)
 
-        // Fit the map to show the entire route including waypoints
-        const allMarkers = [startMarker, endMarker, ...this.waypointMarkers]
-        const group = L.featureGroup([...allMarkers, routeLine])
+        // Fit the map to show the entire route
+        const group = L.featureGroup([startMarker, endMarker, this.routeLine])
         this.map.fitBounds(group.getBounds(), { padding: [20, 20] })
 
-        // Update popup with route information
-        if (routeData.properties) {
-          const distance = routeData.properties.segments?.[0]?.distance
-          const duration = routeData.properties.segments?.[0]?.duration
-
-          if (distance && duration) {
-            const distanceKm = (distance / 1000).toFixed(1)
-            const durationHours = (duration / 3600).toFixed(1)
-            
-            startMarker.bindPopup(`
-              <strong>Start:</strong><br>
-              ${this.startLocationValue}<br><br>
-              <strong>Route:</strong><br>
-              Distance: ${distanceKm} km<br>
-              Duration: ${durationHours} hours
-            `)
-          }
-        }
+        // Store route coordinates for waypoint validation
+        this.routeCoordinates = routeData.geometry.coordinates
       } else {
         // Fallback to straight line if routing fails
         console.warn('Unable to get route, falling back to straight line')
-        this.drawStraightLine(startCoords, endCoords, startMarker, endMarker, this.waypointMarkers)
+        this.drawStraightLine(startCoords, endCoords, startMarker, endMarker)
       }
     } catch (error) {
       console.warn('Routing failed, falling back to straight line:', error)
-      this.drawStraightLine(startCoords, endCoords, startMarker, endMarker, this.waypointMarkers)
+      this.drawStraightLine(startCoords, endCoords, startMarker, endMarker)
     }
 
     // Open the start popup by default
     startMarker.openPopup()
   }
 
-  async getRoute(startCoords, endCoords) {
-    try {
-      // Use OpenRouteService for routing (free, no API key required for basic usage)
-      const [startLat, startLon] = startCoords
-      const [endLat, endLon] = endCoords
-      
-      const url = `https://api.openrouteservice.org/v2/directions/driving-car?start=${startLon},${startLat}&end=${endLon},${endLat}`
-      
-      const response = await fetch(url, {
-        headers: {
-          'Accept': 'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8'
-        }
-      })
-      
-      if (!response.ok) {
-        throw new Error(`Routing request failed: ${response.status}`)
-      }
-
-      const data = await response.json()
-      
-      if (data && data.features && data.features.length > 0) {
-        return data.features[0]
-      }
-      
-      return null
-    } catch (error) {
-      console.error('Routing error:', error)
-      // Try alternative routing service as fallback
-      return await this.getRouteAlternative(startCoords, endCoords)
-    }
+  setupMapClickListener() {
+    this.map.on('click', (e) => {
+      const { lat, lng } = e.latlng
+      this.addWaypoint(lat, lng)
+    })
   }
 
-  async getRouteAlternative(startCoords, endCoords) {
-    try {
-      // Alternative: Use OSRM (Open Source Routing Machine) as fallback
-      const [startLat, startLon] = startCoords
-      const [endLat, endLon] = endCoords
-      
-      const url = `https://router.project-osrm.org/route/v1/driving/${startLon},${startLat};${endLon},${endLat}?overview=full&geometries=geojson`
-      
-      const response = await fetch(url)
-      
-      if (!response.ok) {
-        throw new Error(`Alternative routing request failed: ${response.status}`)
-      }
+  addWaypoint(lat, lng) {
+    this.waypointCounter++
 
-      const data = await response.json()
-      
-      if (data && data.routes && data.routes.length > 0) {
-        const route = data.routes[0]
-        return {
-          geometry: route.geometry,
-          properties: {
-            segments: [{
-              distance: route.distance,
-              duration: route.duration
-            }]
-          }
-        }
-      }
-      
-      return null
-    } catch (error) {
-      console.error('Alternative routing error:', error)
-      return null
+    const waypoint = {
+      id: this.waypointCounter,
+      latitude: lat,
+      longitude: lng,
+      position: this.waypoints.length + 1
     }
-  }
 
-  drawStraightLine(startCoords, endCoords, startMarker, endMarker, waypointMarkers = []) {
-    // Fallback: Draw a straight line between the points
-    const routeLine = L.polyline([startCoords, endCoords], {
-      color: '#DC2626', // Red color to indicate it's not a real route
-      weight: 4,
-      opacity: 0.8,
-      dashArray: '10, 5' // Dashed line to indicate it's approximate
+    // Create waypoint marker
+    const marker = L.marker([lat, lng], {
+      icon: this.createWaypointIcon(waypoint.position)
     }).addTo(this.map)
+      .bindPopup(`<strong>Waypoint ${waypoint.position}</strong><br>Click to remove`)
 
-    // Fit the map to show both points and waypoints
-    const allMarkers = [startMarker, endMarker, ...waypointMarkers]
-    const group = L.featureGroup([...allMarkers, routeLine])
-    this.map.fitBounds(group.getBounds(), { padding: [20, 20] })
+    // Add click handler to remove waypoint
+    marker.on('click', (e) => {
+      e.originalEvent.stopPropagation()
+      this.removeWaypoint(waypoint.id)
+    })
 
-    // Add a note about the straight line
-    startMarker.bindPopup(`
-      <strong>Start:</strong><br>
-      ${this.startLocationValue}<br><br>
-      <em style="color: #DC2626;">
-        Note: Showing straight line distance<br>
-        (routing service unavailable)
-      </em>
-    `)
+    waypoint.marker = marker
+    this.waypoints.push(waypoint)
+
+    this.updateWaypointsData()
+    this.updateWaypointsList()
+    this.updateRouteWithWaypoints()
   }
 
-  async geocode(location) {
-    try {
-      // Use Nominatim (OpenStreetMap's geocoding service)
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}&limit=1`
-      )
-      
-      if (!response.ok) {
-        throw new Error('Geocoding request failed')
-      }
+  removeWaypoint(waypointId) {
+    const waypointIndex = this.waypoints.findIndex(w => w.id === waypointId)
+    if (waypointIndex === -1) return
 
-      const data = await response.json()
-      
-      if (data && data.length > 0) {
-        return [parseFloat(data[0].lat), parseFloat(data[0].lon)]
+    const waypoint = this.waypoints[waypointIndex]
+
+    // Remove marker from map
+    this.map.removeLayer(waypoint.marker)
+
+    // Remove from waypoints array
+    this.waypoints.splice(waypointIndex, 1)
+
+    // Reorder remaining waypoints
+    this.waypoints.forEach((w, index) => {
+      w.position = index + 1
+      w.marker.setIcon(this.createWaypointIcon(w.position))
+      w.marker.setPopupContent(`<strong>Waypoint ${w.position}</strong><br>Click to remove`)
+    })
+
+    this.updateWaypointsData()
+    this.updateWaypointsList()
+    this.updateRouteWithWaypoints()
+  }
+
+  updateWaypointsData() {
+    const waypointsData = this.waypoints.map(w => ({
+      latitude: w.latitude,
+      longitude: w.longitude,
+      position: w.position
+    }))
+
+    const waypointsField = document.getElementById('waypoints-data')
+    if (waypointsField) {
+      waypointsField.value = JSON.stringify(waypointsData)
+    }
+  }
+
+  updateWaypointsList() {
+    const waypointsList = document.getElementById('waypoints-list')
+    if (!waypointsList) return
+
+    if (this.waypoints.length === 0) {
+      waypointsList.innerHTML = `
+        <div class="text-gray-500 text-sm italic">
+          No waypoints set. Click on the map to add waypoints.
+        </div>
+      `
+    } else {
+      waypointsList.innerHTML = this.waypoints.map(w => `
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+          <div class="flex items-center">
+            <div class="w-6 h-6 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center mr-3">
+              ${w.position}
+            </div>
+            <div class="text-sm">
+              <div class="font-medium text-gray-900">Waypoint ${w.position}</div>
+              <div class="text-gray-600">${w.latitude.toFixed(6)}, ${w.longitude.toFixed(6)}</div>
+            </div>
+          </div>
+          <button type="button" onclick="this.dispatchEvent(new CustomEvent('remove-waypoint', {detail: {id: ${w.id}}, bubbles: true}))"
+                  class="text-red-600 hover:text-red-800 text-sm font-medium">
+            Remove
+          </button>
+        </div>
+      `).join('')
+    }
+  }
+
+  async updateRouteWithWaypoints() {
+    if (this.waypoints.length === 0) {
+      // Show original route without waypoints
+      return
+    }
+
+    try {
+      // Create coordinates array: start -> waypoints (ordered) -> end
+      const startCoords = await this.geocode(this.startLocationValue)
+      const endCoords = await this.geocode(this.endLocationValue)
+
+      if (!startCoords || !endCoords) return
+
+      const orderedWaypoints = this.waypoints
+        .sort((a, b) => a.position - b.position)
+        .map(w => [w.latitude, w.longitude])
+
+      const allCoords = [startCoords, ...orderedWaypoints, endCoords]
+
+      // Get route with waypoints
+      const routeWithWaypoints = await this.getRouteWithWaypoints(allCoords)
+
+      if (routeWithWaypoints && routeWithWaypoints.geometry) {
+        // Remove existing route line
+        if (this.routeLine) {
+          this.map.removeLayer(this.routeLine)
+        }
+
+        // Draw new route with waypoints
+        this.routeLine = L.geoJSON(routeWithWaypoints.geometry, {
+          style: {
+            color: '#DC2626', // Red color to show modified route
+            weight: 4,
+            opacity: 0.8
+          }
+        }).addTo(this.map)
       }
-      
-      return null
     } catch (error) {
-      console.error('Geocoding error:', error)
-      return null
+      console.warn('Unable to update route with waypoints:', error)
     }
   }
 
@@ -313,6 +309,116 @@ export default class extends Controller {
     }
   }
 
+  // Copy methods from route_map_controller.js
+  async getRoute(startCoords, endCoords) {
+    try {
+      // Use OpenRouteService for routing (free, no API key required for basic usage)
+      const [startLat, startLon] = startCoords
+      const [endLat, endLon] = endCoords
+
+      const url = `https://api.openrouteservice.org/v2/directions/driving-car?start=${startLon},${startLat}&end=${endLon},${endLat}`
+
+      const response = await fetch(url, {
+        headers: {
+          'Accept': 'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8'
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error(`Routing request failed: ${response.status}`)
+      }
+
+      const data = await response.json()
+
+      if (data && data.features && data.features.length > 0) {
+        return data.features[0]
+      }
+
+      return null
+    } catch (error) {
+      console.error('Routing error:', error)
+      // Try alternative routing service as fallback
+      return await this.getRouteAlternative(startCoords, endCoords)
+    }
+  }
+
+  async getRouteAlternative(startCoords, endCoords) {
+    try {
+      // Alternative: Use OSRM (Open Source Routing Machine) as fallback
+      const [startLat, startLon] = startCoords
+      const [endLat, endLon] = endCoords
+
+      const url = `https://router.project-osrm.org/route/v1/driving/${startLon},${startLat};${endLon},${endLat}?overview=full&geometries=geojson`
+
+      const response = await fetch(url)
+
+      if (!response.ok) {
+        throw new Error(`Alternative routing request failed: ${response.status}`)
+      }
+
+      const data = await response.json()
+
+      if (data && data.routes && data.routes.length > 0) {
+        const route = data.routes[0]
+        return {
+          geometry: route.geometry,
+          properties: {
+            segments: [{
+              distance: route.distance,
+              duration: route.duration
+            }]
+          }
+        }
+      }
+
+      return null
+    } catch (error) {
+      console.error('Alternative routing error:', error)
+      return null
+    }
+  }
+
+  drawStraightLine(startCoords, endCoords, startMarker, endMarker) {
+    // Fallback: Draw a straight line between the points
+    this.routeLine = L.polyline([startCoords, endCoords], {
+      color: '#DC2626', // Red color to indicate it's not a real route
+      weight: 4,
+      opacity: 0.8,
+      dashArray: '10, 5' // Dashed line to indicate it's approximate
+    }).addTo(this.map)
+
+    // Fit the map to show both points
+    const group = L.featureGroup([startMarker, endMarker, this.routeLine])
+    this.map.fitBounds(group.getBounds(), { padding: [20, 20] })
+
+    // Store a simplified route for waypoint validation
+    this.routeCoordinates = [[startCoords[1], startCoords[0]], [endCoords[1], endCoords[0]]]
+  }
+
+  async geocode(location) {
+    try {
+      // Use Nominatim (OpenStreetMap's geocoding service)
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}&limit=1`
+      )
+
+      if (!response.ok) {
+        throw new Error('Geocoding request failed')
+      }
+
+      const data = await response.json()
+
+      if (data && data.length > 0) {
+        return [parseFloat(data[0].lat), parseFloat(data[0].lon)]
+      }
+
+      return null
+    } catch (error) {
+      console.error('Geocoding error:', error)
+      return null
+    }
+  }
+
   createStartIcon() {
     return L.divIcon({
       className: 'custom-div-icon start-icon',
@@ -343,7 +449,7 @@ export default class extends Controller {
     return L.divIcon({
       className: 'custom-div-icon waypoint-icon',
       html: `
-        <div style="background-color: #F97316; color: white; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); font-size: 10px; font-weight: bold;">
+        <div style="background-color: #F97316; color: white; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); font-size: 10px; font-weight: bold; cursor: pointer;">
           ${position}
         </div>
       `,
@@ -368,3 +474,18 @@ export default class extends Controller {
     this.element.appendChild(errorDiv)
   }
 }
+
+// Handle remove waypoint events
+document.addEventListener('remove-waypoint', (event) => {
+  // Find the controller through the Stimulus application
+  const mapElement = document.querySelector('[data-controller~="waypoints-map"]')
+  if (mapElement) {
+    const application = window.Stimulus || window.Application
+    if (application) {
+      const controller = application.getControllerForElementAndIdentifier(mapElement, 'waypoints-map')
+      if (controller) {
+        controller.removeWaypoint(event.detail.id)
+      }
+    }
+  }
+})

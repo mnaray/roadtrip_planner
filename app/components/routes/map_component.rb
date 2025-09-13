@@ -74,7 +74,8 @@ class Routes::MapComponent < ApplicationComponent
                data: {
                  controller: "route-map",
                  route_map_start_location_value: @route.starting_location,
-                 route_map_end_location_value: @route.destination
+                 route_map_end_location_value: @route.destination,
+                 route_map_waypoints_value: waypoints_json
                } do
             # Map will be rendered here by Stimulus controller
           end
@@ -193,4 +194,14 @@ class Routes::MapComponent < ApplicationComponent
   end
 
   private
+
+  def waypoints_json
+    @route.waypoints.order(:position).map do |waypoint|
+      {
+        latitude: waypoint.latitude.to_f,
+        longitude: waypoint.longitude.to_f,
+        position: waypoint.position
+      }
+    end.to_json
+  end
 end

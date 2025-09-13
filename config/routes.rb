@@ -35,6 +35,13 @@ Rails.application.routes.draw do
   # Special route flow for confirmation and approval
   get "confirm_route", to: "routes#confirm_route"
   post "approve_route", to: "routes#approve_route"
+
+  # Waypoint flow
+  get "set_waypoints", to: "waypoints#set_waypoints"
+  post "set_waypoints", to: "waypoints#create"
+
+  # Waypoint management
+  resources :waypoints, only: [ :destroy ]
   get "routes/:id/map", to: "routes#map", as: :route_map
   get "routes/:id/export_gpx", to: "routes#export_gpx", as: :route_export_gpx
   get "routes/:route_id/fuel_economy", to: "fuel_economies#show", as: :route_fuel_economy

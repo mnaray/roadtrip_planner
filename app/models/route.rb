@@ -1,6 +1,7 @@
 class Route < ApplicationRecord
   belongs_to :road_trip
   belongs_to :user
+  has_many :waypoints, -> { order(:position) }, dependent: :destroy
 
   validates :starting_location, presence: true, length: { minimum: 1, maximum: 200 }
   validates :destination, presence: true, length: { minimum: 1, maximum: 200 }

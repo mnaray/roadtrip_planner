@@ -122,6 +122,7 @@ end
 - About page with feature descriptions and user onboarding
 - Road trip sharing with other users (add participants, leave functionality, access control)
 - Fuel economy calculator with real-time cost calculations (client-side JavaScript)
+- Route waypoints for route manipulation (interactive map-based waypoint setting, ordering, removal)
 
 ### 🚧 In Progress
 - None currently
@@ -144,10 +145,10 @@ app/
 │   ├── layouts/          # Layout components
 │   ├── shared/           # Shared/common components
 │   ├── road_trips/       # Road trip components
-│   ├── routes/           # Route components
+│   ├── routes/           # Route components (including waypoints)
 │   ├── packing_lists/    # Packing list components
 │   └── packing_list_items/ # Packing list item components
-├── controllers/          # Rails controllers
+├── controllers/          # Rails controllers (including waypoints)
 ├── models/              # ActiveRecord models
 └── javascript/          # Stimulus controllers
 
