@@ -41,7 +41,10 @@ class AboutPage < ApplicationComponent
                 "Share road trips with friends and family for collaborative planning"
               end
               li do
-                "Plan detailed routes with waypoints and destinations together"
+                "Plan detailed routes with interactive waypoint placement on maps"
+              end
+              li do
+                "Customize your route by clicking on roads to add waypoints and modify your path"
               end
               li do
                 "Create and manage shared packing lists with your travel companions"
