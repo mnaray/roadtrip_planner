@@ -22,58 +22,57 @@ export default class extends Controller {
   }
 
   connect() {
-    // Initialize with any pre-filled values
     this.calculate()
   }
 
   calculate() {
     try {
-      const fuelPrice = parseFloat(this.fuelPriceTarget.value) || 0
-      const fuelConsumption = parseFloat(this.fuelConsumptionTarget.value) || 0
-      const numPassengers = parseInt(this.numPassengersTarget.value) || 1
+      const fuelPrice = parseFloat(this.fuelPriceTarget?.value) || 0
+      const fuelConsumption = parseFloat(this.fuelConsumptionTarget?.value) || 0
+      const numPassengers = parseInt(this.numPassengersTarget?.value) || 1
       const distance = this.distanceValue || 0
-      const isRoundTrip = this.roundTripTarget.checked
+      const isRoundTrip = this.roundTripTarget?.checked || false
 
       // Only show results if we have all required inputs
       if (fuelPrice > 0 && fuelConsumption > 0 && distance > 0) {
-      // Calculate fuel needed (liters)
-      const fuelNeeded = (distance * fuelConsumption) / 100
+        // Calculate fuel needed (liters)
+        const fuelNeeded = (distance * fuelConsumption) / 100
 
-      // Calculate total cost
-      const totalCost = fuelNeeded * fuelPrice
+        // Calculate total cost
+        const totalCost = fuelNeeded * fuelPrice
 
-      // Calculate cost per passenger
-      const costPerPassenger = totalCost / numPassengers
+        // Calculate cost per passenger
+        const costPerPassenger = totalCost / numPassengers
 
-      // Calculate cost per km
-      const costPerKm = totalCost / distance
+        // Calculate cost per km
+        const costPerKm = totalCost / distance
 
-      // Update display values
-      this.totalFuelTarget.textContent = `${fuelNeeded.toFixed(1)} L`
-      this.totalCostTarget.textContent = `Currency ${totalCost.toFixed(2)}`
-      this.costPerPassengerTarget.textContent = `Currency ${costPerPassenger.toFixed(2)}`
-      this.costPerKmTarget.textContent = `Currency ${costPerKm.toFixed(3)}`
+        // Update display values with safe property access
+        if (this.totalFuelTarget) this.totalFuelTarget.textContent = `${fuelNeeded.toFixed(1)} L`
+        if (this.totalCostTarget) this.totalCostTarget.textContent = `Currency ${totalCost.toFixed(2)}`
+        if (this.costPerPassengerTarget) this.costPerPassengerTarget.textContent = `Currency ${costPerPassenger.toFixed(2)}`
+        if (this.costPerKmTarget) this.costPerKmTarget.textContent = `Currency ${costPerKm.toFixed(3)}`
 
-      // Handle round trip calculations
-      if (isRoundTrip) {
-        const roundTripCost = totalCost * 2
-        const roundTripCostPerPassenger = roundTripCost / numPassengers
+        // Handle round trip calculations
+        if (isRoundTrip && this.roundTripResultsTarget) {
+          const roundTripCost = totalCost * 2
+          const roundTripCostPerPassenger = roundTripCost / numPassengers
 
-        this.roundTripCostTarget.textContent = `Currency ${roundTripCost.toFixed(2)}`
-        this.roundTripCostPerPassengerTarget.textContent = `Currency ${roundTripCostPerPassenger.toFixed(2)}`
-        this.roundTripResultsTarget.classList.remove("hidden")
-      } else {
-        this.roundTripResultsTarget.classList.add("hidden")
-      }
+          if (this.roundTripCostTarget) this.roundTripCostTarget.textContent = `Currency ${roundTripCost.toFixed(2)}`
+          if (this.roundTripCostPerPassengerTarget) this.roundTripCostPerPassengerTarget.textContent = `Currency ${roundTripCostPerPassenger.toFixed(2)}`
+          this.roundTripResultsTarget.classList.remove("hidden")
+        } else if (this.roundTripResultsTarget) {
+          this.roundTripResultsTarget.classList.add("hidden")
+        }
 
         // Show results section
-        this.resultsTarget.classList.remove("hidden")
+        if (this.resultsTarget) this.resultsTarget.classList.remove("hidden")
       } else {
         // Hide results if inputs are incomplete
-        this.resultsTarget.classList.add("hidden")
+        if (this.resultsTarget) this.resultsTarget.classList.add("hidden")
       }
     } catch (error) {
-      console.error("Error in calculate method:", error)
+      console.error("Error in fuel economy calculation:", error)
     }
   }
 }
