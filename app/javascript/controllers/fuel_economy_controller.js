@@ -49,17 +49,17 @@ export default class extends Controller {
 
       // Update display values
       this.totalFuelTarget.textContent = `${fuelNeeded.toFixed(1)} L`
-      this.totalCostTarget.textContent = `CHF ${totalCost.toFixed(2)}`
-      this.costPerPassengerTarget.textContent = `CHF ${costPerPassenger.toFixed(2)}`
-      this.costPerKmTarget.textContent = `CHF ${costPerKm.toFixed(3)}`
+      this.totalCostTarget.textContent = `Currency ${totalCost.toFixed(2)}`
+      this.costPerPassengerTarget.textContent = `Currency ${costPerPassenger.toFixed(2)}`
+      this.costPerKmTarget.textContent = `Currency ${costPerKm.toFixed(3)}`
 
       // Handle round trip calculations
       if (isRoundTrip) {
         const roundTripCost = totalCost * 2
         const roundTripCostPerPassenger = roundTripCost / numPassengers
 
-        this.roundTripCostTarget.textContent = `CHF ${roundTripCost.toFixed(2)}`
-        this.roundTripCostPerPassengerTarget.textContent = `CHF ${roundTripCostPerPassenger.toFixed(2)}`
+        this.roundTripCostTarget.textContent = `Currency ${roundTripCost.toFixed(2)}`
+        this.roundTripCostPerPassengerTarget.textContent = `Currency ${roundTripCostPerPassenger.toFixed(2)}`
         this.roundTripResultsTarget.classList.remove("hidden")
       } else {
         this.roundTripResultsTarget.classList.add("hidden")

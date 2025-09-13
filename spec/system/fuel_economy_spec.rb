@@ -35,7 +35,7 @@ RSpec.describe "Fuel Economy Calculator", type: :system, js: true do
 
     it "calculates fuel costs when all inputs are provided" do
       # Fill in the form
-      fill_in "Fuel Price (CHF per liter)", with: "1.85"
+      fill_in "Fuel Price (Currency per liter)", with: "1.85"
       fill_in "Fuel Consumption (liters per 100 km)", with: "7.5"
       fill_in "Number of Passengers", with: "4"
 
@@ -45,38 +45,38 @@ RSpec.describe "Fuel Economy Calculator", type: :system, js: true do
         expect(page).to have_content("7.5 L") # 100km * 7.5L/100km
 
         expect(page).to have_content("Total Fuel Cost")
-        expect(page).to have_content("CHF 13.88") # 7.5L * 1.85
+        expect(page).to have_content("Currency 13.88") # 7.5L * 1.85
 
         expect(page).to have_content("Cost per Passenger")
-        expect(page).to have_content("CHF 3.47") # 13.88 / 4
+        expect(page).to have_content("Currency 3.47") # 13.88 / 4
 
         expect(page).to have_content("Cost per Kilometer")
-        expect(page).to have_content("CHF 0.139") # 13.88 / 100
+        expect(page).to have_content("Currency 0.139") # 13.88 / 100
       end
     end
 
     it "updates calculations in real-time when inputs change" do
       # Initial calculation
-      fill_in "Fuel Price (CHF per liter)", with: "2.00"
+      fill_in "Fuel Price (Currency per liter)", with: "2.00"
       fill_in "Fuel Consumption (liters per 100 km)", with: "10"
       fill_in "Number of Passengers", with: "2"
 
       within("[data-fuel-economy-target='results']") do
-        expect(page).to have_content("CHF 20.00") # Total cost (100km * 10L/100km * 2CHF)
-        expect(page).to have_content("CHF 10.00") # Cost per passenger (20 / 2)
+        expect(page).to have_content("Currency 20.00") # Total cost (100km * 10L/100km * 2Currency)
+        expect(page).to have_content("Currency 10.00") # Cost per passenger (20 / 2)
       end
 
       # Update number of passengers
       fill_in "Number of Passengers", with: "4"
 
       within("[data-fuel-economy-target='results']") do
-        expect(page).to have_content("CHF 20.00") # Total cost remains same
-        expect(page).to have_content("CHF 5.00") # Cost per passenger updates (20 / 4)
+        expect(page).to have_content("Currency 20.00") # Total cost remains same
+        expect(page).to have_content("Currency 5.00") # Cost per passenger updates (20 / 4)
       end
     end
 
     it "calculates round trip costs when checkbox is selected" do
-      fill_in "Fuel Price (CHF per liter)", with: "1.85"
+      fill_in "Fuel Price (Currency per liter)", with: "1.85"
       fill_in "Fuel Consumption (liters per 100 km)", with: "7.5"
       fill_in "Number of Passengers", with: "4"
 
@@ -85,20 +85,20 @@ RSpec.describe "Fuel Economy Calculator", type: :system, js: true do
 
       within("[data-fuel-economy-target='roundTripResults']") do
         expect(page).to have_content("Round Trip Total Cost")
-        expect(page).to have_content("CHF 27.75") # 13.88 * 2
-        expect(page).to have_content("CHF 6.94 per passenger") # 27.75 / 4
+        expect(page).to have_content("Currency 27.75") # 13.88 * 2
+        expect(page).to have_content("Currency 6.94 per passenger") # 27.75 / 4
       end
     end
 
     it "hides results when inputs are cleared" do
       # Fill in form initially
-      fill_in "Fuel Price (CHF per liter)", with: "1.85"
+      fill_in "Fuel Price (Currency per liter)", with: "1.85"
       fill_in "Fuel Consumption (liters per 100 km)", with: "7.5"
 
       expect(page).to have_selector("[data-fuel-economy-target='results']", visible: true)
 
       # Clear an input
-      fill_in "Fuel Price (CHF per liter)", with: ""
+      fill_in "Fuel Price (Currency per liter)", with: ""
 
       expect(page).to have_selector("[data-fuel-economy-target='results']", visible: false)
     end

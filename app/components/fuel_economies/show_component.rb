@@ -137,7 +137,7 @@ class FuelEconomies::ShowComponent < ApplicationComponent
             # Fuel Price
             div do
               label for: "fuel-price", class: "block text-sm font-medium text-gray-700 mb-1" do
-                "Fuel Price (CHF per liter)"
+                "Fuel Price (Currency per liter)"
               end
               input type: "number",
                     id: "fuel-price",
@@ -228,7 +228,7 @@ class FuelEconomies::ShowComponent < ApplicationComponent
                     "-"
                   end
                   div class: "text-xs text-blue-600" do
-                    "CHF for this route"
+                    "Currency for this route"
                   end
                 end
               end
@@ -244,7 +244,7 @@ class FuelEconomies::ShowComponent < ApplicationComponent
                     "-"
                   end
                   div class: "text-xs text-green-600" do
-                    "CHF per person"
+                    "Currency per person"
                   end
                 end
 
@@ -257,7 +257,7 @@ class FuelEconomies::ShowComponent < ApplicationComponent
                     "-"
                   end
                   div class: "text-xs text-yellow-600" do
-                    "CHF per km"
+                    "Currency per km"
                   end
                 end
               end
@@ -288,7 +288,7 @@ class FuelEconomies::ShowComponent < ApplicationComponent
                   "-"
                 end
                 div class: "text-xs text-purple-600" do
-                  span { "CHF for round trip (" }
+                  span { "Currency for round trip (" }
                   span data: { fuel_economy_target: "roundTripCostPerPassenger" } do
                     "-"
                   end
