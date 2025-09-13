@@ -22,19 +22,27 @@ export default class extends Controller {
   }
 
   connect() {
+    console.log("Fuel economy controller connected!", this.element)
+    console.log("Available targets:", this.targets)
+    console.log("Distance value:", this.distanceValue)
     // Initialize with any pre-filled values
     this.calculate()
   }
 
   calculate() {
-    const fuelPrice = parseFloat(this.fuelPriceTarget.value) || 0
-    const fuelConsumption = parseFloat(this.fuelConsumptionTarget.value) || 0
-    const numPassengers = parseInt(this.numPassengersTarget.value) || 1
-    const distance = this.distanceValue || 0
-    const isRoundTrip = this.roundTripTarget.checked
+    console.log("Calculate method called")
 
-    // Only show results if we have all required inputs
-    if (fuelPrice > 0 && fuelConsumption > 0 && distance > 0) {
+    try {
+      const fuelPrice = parseFloat(this.fuelPriceTarget.value) || 0
+      const fuelConsumption = parseFloat(this.fuelConsumptionTarget.value) || 0
+      const numPassengers = parseInt(this.numPassengersTarget.value) || 1
+      const distance = this.distanceValue || 0
+      const isRoundTrip = this.roundTripTarget.checked
+
+      console.log("Values:", { fuelPrice, fuelConsumption, numPassengers, distance, isRoundTrip })
+
+      // Only show results if we have all required inputs
+      if (fuelPrice > 0 && fuelConsumption > 0 && distance > 0) {
       // Calculate fuel needed (liters)
       const fuelNeeded = (distance * fuelConsumption) / 100
 
@@ -65,11 +73,14 @@ export default class extends Controller {
         this.roundTripResultsTarget.classList.add("hidden")
       }
 
-      // Show results section
-      this.resultsTarget.style.display = "block"
-    } else {
-      // Hide results if inputs are incomplete
-      this.resultsTarget.style.display = "none"
+        // Show results section
+        this.resultsTarget.classList.remove("hidden")
+      } else {
+        // Hide results if inputs are incomplete
+        this.resultsTarget.classList.add("hidden")
+      }
+    } catch (error) {
+      console.error("Error in calculate method:", error)
     }
   }
 }
