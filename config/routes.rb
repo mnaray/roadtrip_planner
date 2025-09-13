@@ -37,6 +37,7 @@ Rails.application.routes.draw do
   post "approve_route", to: "routes#approve_route"
   get "routes/:id/map", to: "routes#map", as: :route_map
   get "routes/:id/export_gpx", to: "routes#export_gpx", as: :route_export_gpx
+  get "routes/:route_id/fuel_economy", to: "fuel_economies#show", as: :route_fuel_economy
 
   # Static pages
   get "about", to: "pages#about", as: :about
