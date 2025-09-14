@@ -157,7 +157,7 @@ class Routes::EditWaypointsComponent < ApplicationComponent
                   end
                 else
                   @waypoints.each do |waypoint|
-                    div class: "flex items-center justify-between p-3 bg-gray-50 rounded-md cursor-move hover:bg-gray-100 transition-colors select-none",
+                    div class: "flex items-center justify-between p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors",
                          data: {
                            sortable_waypoints_target: "item",
                            waypoint_id: waypoint.id,
@@ -167,7 +167,7 @@ class Routes::EditWaypointsComponent < ApplicationComponent
                          } do
                       div class: "flex items-center" do
                         # Drag handle
-                        div class: "mr-3 text-gray-400 hover:text-gray-600" do
+                        div class: "mr-3 text-gray-400 hover:text-gray-600 cursor-move" do
                           svg_icon path_d: "M10 6h4v1H10V6zM10 8h4v1H10V8zM10 10h4v1H10v-1zM8 6H6v1h2V6zM8 8H6v1h2V8zM8 10H6v1h2v-1z",
                                    class: "w-4 h-4",
                                    viewBox: "0 0 20 20"

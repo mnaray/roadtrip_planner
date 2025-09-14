@@ -5,134 +5,268 @@ export default class extends Controller {
   static targets = ["item"]
 
   connect() {
-    this.draggedElement = null
-    this.placeholder = null
-    this.attachDragListeners()
+    this.makeItemsSortable()
   }
 
-  disconnect() {
-    this.removeDragListeners()
+  itemTargetConnected(element) {
+    this.makeItemsSortable()
   }
 
-  attachDragListeners() {
+  itemTargetDisconnected(element) {
+    this.makeItemsSortable()
+  }
+
+  // Performance optimization: Use event delegation instead of individual listeners
+  makeItemsSortable() {
+    // Set draggable attribute on items
     this.itemTargets.forEach(item => {
       item.draggable = true
-      item.addEventListener('dragstart', this.dragStart.bind(this))
-      item.addEventListener('dragover', this.dragOver.bind(this))
-      item.addEventListener('dragenter', this.dragEnter.bind(this))
-      item.addEventListener('dragleave', this.dragLeave.bind(this))
-      item.addEventListener('drop', this.drop.bind(this))
-      item.addEventListener('dragend', this.dragEnd.bind(this))
     })
+
+    // Use event delegation on the container
+    this.attachDelegatedEventListeners()
   }
 
-  removeDragListeners() {
-    this.itemTargets.forEach(item => {
-      item.draggable = false
-      item.removeEventListener('dragstart', this.dragStart.bind(this))
-      item.removeEventListener('dragover', this.dragOver.bind(this))
-      item.removeEventListener('dragenter', this.dragEnter.bind(this))
-      item.removeEventListener('dragleave', this.dragLeave.bind(this))
-      item.removeEventListener('drop', this.drop.bind(this))
-      item.removeEventListener('dragend', this.dragEnd.bind(this))
-    })
+  attachDelegatedEventListeners() {
+    // Remove existing delegated listeners to prevent duplicates
+    this.element.removeEventListener('dragstart', this.delegatedDragStart)
+    this.element.removeEventListener('dragover', this.delegatedDragOver)
+    this.element.removeEventListener('drop', this.delegatedDrop)
+    this.element.removeEventListener('dragend', this.delegatedDragEnd)
+
+    // Create bound methods for event delegation
+    this.delegatedDragStart = this.handleDelegatedDragStart.bind(this)
+    this.delegatedDragOver = this.handleDelegatedDragOver.bind(this)
+    this.delegatedDrop = this.handleDelegatedDrop.bind(this)
+    this.delegatedDragEnd = this.handleDelegatedDragEnd.bind(this)
+
+    // Add delegated listeners to container
+    this.element.addEventListener('dragstart', this.delegatedDragStart)
+    this.element.addEventListener('dragover', this.delegatedDragOver)
+    this.element.addEventListener('drop', this.delegatedDrop)
+    this.element.addEventListener('dragend', this.delegatedDragEnd)
   }
 
-  dragStart(e) {
+  handleDelegatedDragStart(e) {
+    const target = e.target.closest('[data-sortable-waypoints-target="item"]')
+    if (!target) return
+    this.handleDragStart(e)
+  }
+
+  handleDelegatedDragOver(e) {
+    const target = e.target.closest('[data-sortable-waypoints-target="item"]')
+    if (!target) return
+    this.handleDragOver(e)
+  }
+
+  handleDelegatedDrop(e) {
+    const target = e.target.closest('[data-sortable-waypoints-target="item"]')
+    if (!target) return
+    this.handleDrop(e)
+  }
+
+  handleDelegatedDragEnd(e) {
+    const target = e.target.closest('[data-sortable-waypoints-target="item"]')
+    if (!target) return
+    this.handleDragEnd(e)
+  }
+
+  handleDragStart(e) {
     this.draggedElement = e.target.closest('[data-sortable-waypoints-target="item"]')
     this.draggedElement.style.opacity = '0.5'
-
-    // Create placeholder
-    this.placeholder = document.createElement('div')
-    this.placeholder.className = 'h-16 bg-blue-100 border-2 border-dashed border-blue-300 rounded-md flex items-center justify-center'
-    this.placeholder.innerHTML = '<span class="text-blue-600 text-sm">Drop waypoint here</span>'
-
     e.dataTransfer.effectAllowed = 'move'
-    e.dataTransfer.setData('text/html', this.draggedElement.outerHTML)
+
+    // Create drop indicator line
+    this.createDropIndicator()
   }
 
-  dragOver(e) {
+  handleDragOver(e) {
     e.preventDefault()
     e.dataTransfer.dropEffect = 'move'
+
+    // Show drop indicator at the appropriate position
+    this.showDropIndicator(e)
   }
 
-  dragEnter(e) {
+  handleDrop(e) {
     e.preventDefault()
-    const target = e.target.closest('[data-sortable-waypoints-target="item"]')
-    if (target && target !== this.draggedElement) {
-      const rect = target.getBoundingClientRect()
-      const midpoint = rect.top + rect.height / 2
 
-      if (e.clientY < midpoint) {
-        target.parentNode.insertBefore(this.placeholder, target)
-      } else {
-        target.parentNode.insertBefore(this.placeholder, target.nextSibling)
-      }
+    if (!this.draggedElement) return
+
+    const dropTarget = e.target.closest('[data-sortable-waypoints-target="item"]')
+    if (!dropTarget || dropTarget === this.draggedElement) return
+
+    // Get the parent container
+    const container = this.draggedElement.parentNode
+
+    // Determine if we should insert before or after the drop target
+    const rect = dropTarget.getBoundingClientRect()
+    const midpoint = rect.top + rect.height / 2
+
+    if (e.clientY < midpoint) {
+      container.insertBefore(this.draggedElement, dropTarget)
+    } else {
+      container.insertBefore(this.draggedElement, dropTarget.nextSibling)
     }
+
+    // Update positions after reordering
+    this.updatePositions()
+
+    // Remove drop indicator
+    this.removeDropIndicator()
   }
 
-  dragLeave(e) {
-    // Remove placeholder if we're leaving the container
-    if (!this.element.contains(e.relatedTarget) && this.placeholder && this.placeholder.parentNode) {
-      this.placeholder.parentNode.removeChild(this.placeholder)
-    }
-  }
-
-  drop(e) {
-    e.preventDefault()
-    if (this.placeholder && this.placeholder.parentNode) {
-      // Insert dragged element at placeholder position
-      this.placeholder.parentNode.insertBefore(this.draggedElement, this.placeholder)
-      this.placeholder.parentNode.removeChild(this.placeholder)
-
-      // Update positions and refresh map
-      this.updateWaypointPositions()
-    }
-  }
-
-  dragEnd(e) {
+  handleDragEnd(e) {
     if (this.draggedElement) {
       this.draggedElement.style.opacity = ''
       this.draggedElement = null
     }
 
-    if (this.placeholder && this.placeholder.parentNode) {
-      this.placeholder.parentNode.removeChild(this.placeholder)
-      this.placeholder = null
-    }
+    // Remove drop indicator
+    this.removeDropIndicator()
   }
 
-  updateWaypointPositions() {
-    // Update the position numbers in the UI
+  updatePositions() {
+    // Update position badges and data attributes
     this.itemTargets.forEach((item, index) => {
-      const positionBadge = item.querySelector('.waypoint-position-badge')
-      const positionText = item.querySelector('.waypoint-position-text')
       const newPosition = index + 1
+      const badge = item.querySelector('.waypoint-position-badge')
+      const text = item.querySelector('.waypoint-position-text')
 
-      if (positionBadge) {
-        positionBadge.textContent = newPosition.toString()
+      // Update visual elements
+      if (badge) {
+        badge.textContent = newPosition.toString()
       }
-      if (positionText) {
-        positionText.textContent = `Waypoint ${newPosition}`
+      if (text) {
+        text.textContent = `Waypoint ${newPosition}`
       }
 
-      // Store the new position on the element
+      // Update data attribute
       item.dataset.position = newPosition.toString()
     })
 
-    // Find the map controller directly and call the update method
+    // Notify the map controller about the position changes
+    this.notifyMapController()
+  }
+
+  notifyMapController() {
     const mapElement = document.getElementById('edit-waypoints-map')
-    if (mapElement) {
-      const mapController = this.application.getControllerForElementAndIdentifier(mapElement, 'edit-waypoints-map')
-      if (mapController && mapController.updateWaypointPositionsFromList) {
-        mapController.updateWaypointPositionsFromList()
+    if (!mapElement) return
+
+    const mapController = this.application.getControllerForElementAndIdentifier(mapElement, 'edit-waypoints-map')
+    if (mapController && mapController.updateWaypointPositionsFromList) {
+      mapController.updateWaypointPositionsFromList()
+    }
+  }
+
+  createDropIndicator() {
+    // Create a visual drop indicator line
+    this.dropIndicator = document.createElement('div')
+    this.dropIndicator.className = 'drop-indicator'
+    this.dropIndicator.style.cssText = `
+      height: 3px;
+      background: linear-gradient(90deg, #3B82F6, #60A5FA);
+      border-radius: 2px;
+      margin: 2px 0;
+      opacity: 0;
+      transform: scaleX(0);
+      transform-origin: center;
+      transition: all 0.2s ease;
+      box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
+      position: relative;
+    `
+
+    // Add arrow indicators on the sides
+    const leftArrow = document.createElement('div')
+    leftArrow.style.cssText = `
+      position: absolute;
+      left: -6px;
+      top: -3px;
+      width: 0;
+      height: 0;
+      border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent;
+      border-right: 6px solid #3B82F6;
+    `
+
+    const rightArrow = document.createElement('div')
+    rightArrow.style.cssText = `
+      position: absolute;
+      right: -6px;
+      top: -3px;
+      width: 0;
+      height: 0;
+      border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent;
+      border-left: 6px solid #3B82F6;
+    `
+
+    this.dropIndicator.appendChild(leftArrow)
+    this.dropIndicator.appendChild(rightArrow)
+  }
+
+  // Performance optimization: Improved drop indicator with RAF and reduced DOM manipulation
+  showDropIndicator(e) {
+    if (!this.draggedElement || !this.dropIndicator) return
+
+    const dropTarget = e.target.closest('[data-sortable-waypoints-target="item"]')
+    if (!dropTarget || dropTarget === this.draggedElement) {
+      this.hideDropIndicator()
+      return
+    }
+
+    // Calculate where to show the indicator
+    const rect = dropTarget.getBoundingClientRect()
+    const midpoint = rect.top + rect.height / 2
+    const shouldInsertBefore = e.clientY < midpoint
+
+    // Only move indicator if position actually changed
+    let targetElement = shouldInsertBefore ? dropTarget : dropTarget.nextSibling
+    if (this.dropIndicator.nextElementSibling !== targetElement) {
+      // Use document fragment for efficient DOM manipulation
+      if (this.dropIndicator.parentNode) {
+        this.dropIndicator.parentNode.removeChild(this.dropIndicator)
+      }
+
+      if (shouldInsertBefore) {
+        dropTarget.parentNode.insertBefore(this.dropIndicator, dropTarget)
+      } else {
+        dropTarget.parentNode.insertBefore(this.dropIndicator, dropTarget.nextSibling)
+      }
+
+      // Animate the indicator in with RAF for smooth animation
+      if (!this.indicatorAnimationFrame) {
+        this.indicatorAnimationFrame = requestAnimationFrame(() => {
+          this.dropIndicator.style.opacity = '1'
+          this.dropIndicator.style.transform = 'scaleX(1)'
+          this.indicatorAnimationFrame = null
+        })
       }
     }
   }
 
-  // Called when new waypoints are added to refresh drag listeners
-  refreshDragListeners() {
-    this.removeDragListeners()
-    this.attachDragListeners()
+  hideDropIndicator() {
+    if (this.indicatorAnimationFrame) {
+      cancelAnimationFrame(this.indicatorAnimationFrame)
+      this.indicatorAnimationFrame = null
+    }
+    this.dropIndicator.style.opacity = '0'
+    this.dropIndicator.style.transform = 'scaleX(0)'
+  }
+
+  removeDropIndicator() {
+    if (this.dropIndicator) {
+      // Animate out
+      this.dropIndicator.style.opacity = '0'
+      this.dropIndicator.style.transform = 'scaleX(0)'
+
+      // Remove after animation
+      setTimeout(() => {
+        if (this.dropIndicator && this.dropIndicator.parentNode) {
+          this.dropIndicator.parentNode.removeChild(this.dropIndicator)
+        }
+        this.dropIndicator = null
+      }, 200)
+    }
   }
 }

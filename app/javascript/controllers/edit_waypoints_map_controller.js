@@ -19,6 +19,13 @@ export default class extends Controller {
     this.waypoints = []
     this.waypointCounter = 0
 
+    // Performance optimization: Geocoding cache
+    this.geocodeCache = new Map()
+
+    // Performance optimization: Debounced route updates
+    this.routeUpdateTimeout = null
+    this.ROUTE_UPDATE_DEBOUNCE = 300 // ms
+
     this.initializeMap()
   }
 
@@ -242,6 +249,7 @@ export default class extends Controller {
     }
   }
 
+  // Performance optimization: Targeted DOM updates instead of full rebuild
   updateWaypointsList() {
     const waypointsList = document.getElementById('waypoints-list')
     if (!waypointsList) return
@@ -250,42 +258,135 @@ export default class extends Controller {
     const sortableContainer = waypointsList.querySelector('[data-controller="sortable-waypoints"]') || waypointsList
 
     if (this.waypoints.length === 0) {
-      sortableContainer.innerHTML = `
-        <div class="text-gray-500 text-sm italic">
-          No waypoints set. Click on the map to add waypoints.
-        </div>
-      `
-    } else {
-      sortableContainer.innerHTML = this.waypoints.map(w => `
-        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-md cursor-move hover:bg-gray-100 transition-colors select-none"
-             data-sortable-waypoints-target="item"
-             data-waypoint-id="${w.id}"
-             data-position="${w.position}"
-             data-latitude="${w.latitude}"
-             data-longitude="${w.longitude}">
-          <div class="flex items-center">
-            <div class="mr-3 text-gray-400 hover:text-gray-600">
-              <svg class="w-4 h-4" viewBox="0 0 20 20">
-                <path d="M10 6h4v1H10V6zM10 8h4v1H10V8zM10 10h4v1H10v-1zM8 6H6v1h2V6zM8 8H6v1h2V8zM8 10H6v1h2v-1z" fill="currentColor"/>
-              </svg>
-            </div>
-            <div class="w-6 h-6 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center mr-3 waypoint-position-badge">
-              ${w.position}
-            </div>
-            <div class="text-sm">
-              <div class="font-medium text-gray-900 waypoint-position-text">Waypoint ${w.position}</div>
-              <div class="text-gray-600">${w.latitude.toFixed(6)}, ${w.longitude.toFixed(6)}</div>
-            </div>
-          </div>
-        </div>
-      `).join('')
+      this.showEmptyWaypointsMessage(sortableContainer)
+      return
+    }
 
-      // Refresh sortable drag listeners after updating the DOM
+    // Get existing waypoint elements
+    const existingElements = Array.from(sortableContainer.querySelectorAll('[data-waypoint-id]'))
+    const existingIds = new Set(existingElements.map(el => parseInt(el.dataset.waypointId)))
+
+    // Remove empty message if it exists
+    const emptyMessage = sortableContainer.querySelector('.text-gray-500')
+    if (emptyMessage) {
+      emptyMessage.remove()
+    }
+
+    // Update existing elements and create new ones
+    this.waypoints.forEach((waypoint, index) => {
+      let element = existingElements.find(el => parseInt(el.dataset.waypointId) === waypoint.id)
+
+      if (element) {
+        // Update existing element
+        this.updateWaypointElement(element, waypoint)
+        // Ensure correct order
+        const targetPosition = index
+        const currentPosition = Array.from(sortableContainer.children).indexOf(element)
+        if (currentPosition !== targetPosition) {
+          const referenceElement = sortableContainer.children[targetPosition]
+          if (referenceElement) {
+            sortableContainer.insertBefore(element, referenceElement)
+          } else {
+            sortableContainer.appendChild(element)
+          }
+        }
+      } else {
+        // Create new element
+        element = this.createWaypointElement(waypoint)
+        // Insert at correct position
+        const referenceElement = sortableContainer.children[index]
+        if (referenceElement) {
+          sortableContainer.insertBefore(element, referenceElement)
+        } else {
+          sortableContainer.appendChild(element)
+        }
+      }
+
+      existingIds.delete(waypoint.id)
+    })
+
+    // Remove elements for waypoints that no longer exist
+    existingIds.forEach(id => {
+      const element = sortableContainer.querySelector(`[data-waypoint-id="${id}"]`)
+      if (element) {
+        element.remove()
+      }
+    })
+
+    // Only refresh sortable controller if DOM structure changed significantly
+    if (existingIds.size > 0 || this.waypoints.some(w => !existingElements.find(el => parseInt(el.dataset.waypointId) === w.id))) {
       const sortableController = this.application.getControllerForElementAndIdentifier(sortableContainer, 'sortable-waypoints')
-      if (sortableController && sortableController.refreshDragListeners) {
-        sortableController.refreshDragListeners()
+      if (sortableController && sortableController.makeItemsSortable) {
+        setTimeout(() => {
+          sortableController.makeItemsSortable()
+        }, 10)
       }
     }
+  }
+
+  showEmptyWaypointsMessage(container) {
+    if (container.querySelector('.text-gray-500')) return // Already showing
+
+    container.innerHTML = `
+      <div class="text-gray-500 text-sm italic">
+        No waypoints set. Click on the map to add waypoints.
+      </div>
+    `
+  }
+
+  updateWaypointElement(element, waypoint) {
+    // Update data attributes
+    element.dataset.position = waypoint.position.toString()
+    element.dataset.latitude = waypoint.latitude.toString()
+    element.dataset.longitude = waypoint.longitude.toString()
+
+    // Update position badge
+    const badge = element.querySelector('.waypoint-position-badge')
+    if (badge) {
+      badge.textContent = waypoint.position.toString()
+    }
+
+    // Update position text
+    const text = element.querySelector('.waypoint-position-text')
+    if (text) {
+      text.textContent = `Waypoint ${waypoint.position}`
+    }
+
+    // Update coordinates
+    const coords = element.querySelector('.text-gray-600')
+    if (coords) {
+      coords.textContent = `${waypoint.latitude.toFixed(6)}, ${waypoint.longitude.toFixed(6)}`
+    }
+  }
+
+  createWaypointElement(waypoint) {
+    const element = document.createElement('div')
+    element.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors'
+    element.setAttribute('data-sortable-waypoints-target', 'item')
+    element.setAttribute('data-waypoint-id', waypoint.id.toString())
+    element.setAttribute('data-position', waypoint.position.toString())
+    element.setAttribute('data-latitude', waypoint.latitude.toString())
+    element.setAttribute('data-longitude', waypoint.longitude.toString())
+    element.draggable = true
+
+    element.innerHTML = `
+      <div class="flex items-center">
+        <div class="mr-3 text-gray-400 hover:text-gray-600 cursor-move">
+          <svg class="w-4 h-4" viewBox="0 0 20 20">
+            <path d="M10 6h4v1H10V6zM10 8h4v1H10V8zM10 10h4v1H10v-1zM8 6H6v1h2V6zM8 8H6v1h2V8zM8 10H6v1h2v-1z" fill="currentColor"/>
+          </svg>
+        </div>
+        <div class="w-6 h-6 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center mr-3 waypoint-position-badge">
+          ${waypoint.position}
+        </div>
+        <div class="text-sm">
+          <div class="font-medium text-gray-900 waypoint-position-text">Waypoint ${waypoint.position}</div>
+          <div class="text-gray-600">${waypoint.latitude.toFixed(6)}, ${waypoint.longitude.toFixed(6)}</div>
+        </div>
+      </div>
+    `
+
+    return element
   }
 
   addDragHandlers(marker, waypoint) {
@@ -316,8 +417,22 @@ export default class extends Controller {
       // Update data and refresh route
       this.updateWaypointsData()
       this.updateWaypointsList()
-      this.updateRouteWithWaypoints()
+      // Use debounced route update for drag operations
+      this.debouncedUpdateRoute()
     })
+  }
+
+  // Performance optimization: Debounced route updates
+  debouncedUpdateRoute() {
+    // Clear existing timeout
+    if (this.routeUpdateTimeout) {
+      clearTimeout(this.routeUpdateTimeout)
+    }
+
+    // Set new timeout for debounced update
+    this.routeUpdateTimeout = setTimeout(() => {
+      this.updateRouteWithWaypoints()
+    }, this.ROUTE_UPDATE_DEBOUNCE)
   }
 
   async updateRouteWithWaypoints() {
@@ -454,6 +569,11 @@ export default class extends Controller {
   }
 
   async geocode(location) {
+    // Performance optimization: Check cache first
+    if (this.geocodeCache.has(location)) {
+      return this.geocodeCache.get(location)
+    }
+
     try {
       // Use Nominatim (OpenStreetMap's geocoding service)
       const response = await fetch(
@@ -467,12 +587,19 @@ export default class extends Controller {
       const data = await response.json()
 
       if (data && data.length > 0) {
-        return [parseFloat(data[0].lat), parseFloat(data[0].lon)]
+        const coordinates = [parseFloat(data[0].lat), parseFloat(data[0].lon)]
+        // Cache the result
+        this.geocodeCache.set(location, coordinates)
+        return coordinates
       }
 
+      // Cache null results to avoid repeated failed requests
+      this.geocodeCache.set(location, null)
       return null
     } catch (error) {
       console.error('Geocoding error:', error)
+      // Cache null results for failed requests
+      this.geocodeCache.set(location, null)
       return null
     }
   }
@@ -519,45 +646,40 @@ export default class extends Controller {
   // Method called by sortable waypoints controller to update waypoint positions
   updateWaypointPositionsFromList() {
     const waypointItems = document.querySelectorAll('[data-sortable-waypoints-target="item"]')
-    const newPositions = []
+    if (waypointItems.length === 0) return
+
+    // Create a new ordered array based on the current DOM order
+    const reorderedWaypoints = []
 
     waypointItems.forEach((item, index) => {
       const waypointId = parseInt(item.dataset.waypointId)
-      const latitude = parseFloat(item.dataset.latitude)
-      const longitude = parseFloat(item.dataset.longitude)
       const newPosition = index + 1
 
-      newPositions.push({
-        id: waypointId,
-        latitude: latitude,
-        longitude: longitude,
-        position: newPosition
-      })
-    })
+      // Find the existing waypoint by ID
+      const existingWaypoint = this.waypoints.find(w => w.id === waypointId)
+      if (existingWaypoint) {
+        // Update the position and add to reordered array
+        const updatedWaypoint = {
+          ...existingWaypoint,
+          position: newPosition
+        }
+        reorderedWaypoints.push(updatedWaypoint)
 
-    // Update internal waypoints array with new positions
-    this.waypoints = newPositions.map(np => {
-      const existingWaypoint = this.waypoints.find(w => w.id === np.id)
-      if (!existingWaypoint) {
-        return np // Use the new position data if we can't find existing
-      }
-      return {
-        ...existingWaypoint,
-        position: np.position
+        // Update the marker icon and popup
+        if (existingWaypoint.marker) {
+          existingWaypoint.marker.setIcon(this.createWaypointIcon(newPosition))
+          existingWaypoint.marker.setPopupContent(`<strong>Waypoint ${newPosition}</strong><br>Drag to reposition, click to remove`)
+        }
       }
     })
 
-    // Update map markers with new positions
-    this.waypoints.forEach(waypoint => {
-      if (waypoint.marker) {
-        waypoint.marker.setIcon(this.createWaypointIcon(waypoint.position))
-        waypoint.marker.setPopupContent(`<strong>Waypoint ${waypoint.position}</strong><br>Drag to reposition, click to remove`)
-      }
-    })
+    // Replace the waypoints array with the reordered one
+    this.waypoints = reorderedWaypoints
 
-    // Update data and refresh route
+    // Update the hidden form field and refresh the route
     this.updateWaypointsData()
-    this.updateRouteWithWaypoints()
+    // Use debounced route update for reordering operations
+    this.debouncedUpdateRoute()
   }
 
   showError(message) {
