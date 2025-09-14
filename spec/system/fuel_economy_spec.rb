@@ -65,7 +65,7 @@ RSpec.describe "Fuel Economy Calculator", type: :system, js: true do
       fill_in "Number of Passengers", with: "4"
 
       # Wait for inputs to be processed
-      sleep 0.1
+      sleep 0.2
 
       # Verify form accepts input correctly
       expect(find_field("Fuel Price (Currency per liter)").value).to eq("1.85")
@@ -82,8 +82,8 @@ RSpec.describe "Fuel Economy Calculator", type: :system, js: true do
       fill_in "Fuel Consumption (liters per 100 km)", with: "10"
       fill_in "Number of Passengers", with: "2"
 
-      # Wait for JavaScript to process the input events
-      sleep 0.5
+      # Wait for JavaScript to process the input events and show results
+      expect(page).to have_selector("[data-fuel-economy-target='results']", visible: true)
 
       within("[data-fuel-economy-target='results']") do
         expect(page).to have_content("Currency 20.00") # Total cost (100km * 10L/100km * 2Currency)
@@ -93,7 +93,7 @@ RSpec.describe "Fuel Economy Calculator", type: :system, js: true do
       # Update number of passengers
       fill_in "Number of Passengers", with: "4"
 
-      # Wait for JavaScript to process the input events
+      # Wait for JavaScript to process the updated calculation
       sleep 0.5
 
       within("[data-fuel-economy-target='results']") do
@@ -107,14 +107,15 @@ RSpec.describe "Fuel Economy Calculator", type: :system, js: true do
       fill_in "Fuel Consumption (liters per 100 km)", with: "7.5"
       fill_in "Number of Passengers", with: "4"
 
-      # Wait for JavaScript to process the input events
-      sleep 0.5
+      # Wait for JavaScript to process the input events and show results
+      expect(page).to have_selector("[data-fuel-economy-target='results']", visible: true)
 
-      # Check round trip option
+      # Check round trip option and ensure it's actually checked
       check "Calculate for round trip"
+      expect(page).to have_checked_field("Calculate for round trip")
 
-      # Wait for JavaScript to process the checkbox change
-      sleep 0.5
+      # Wait for JavaScript to process the checkbox change and show round trip results
+      expect(page).to have_selector("[data-fuel-economy-target='roundTripResults']", visible: true)
 
       within("[data-fuel-economy-target='roundTripResults']") do
         expect(page).to have_content("Round Trip Total Cost")

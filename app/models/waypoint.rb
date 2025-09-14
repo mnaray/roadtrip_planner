@@ -13,7 +13,7 @@ class Waypoint < ApplicationRecord
   scope :ordered, -> { order(:position) }
 
   before_validation :set_next_position, unless: -> { position.present? }
-  before_validation :set_default_name, unless: -> { name.present? }
+  before_validation :set_default_name, unless: -> { self.name.present? }
 
   private
 
