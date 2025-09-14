@@ -26,7 +26,14 @@ class WaypointsController < ApplicationController
       return
     end
 
-    session[:route_data] = @route_data.merge("waypoints" => params[:waypoints] || [])
+    # Parse waypoints JSON string if it's provided
+    waypoints_data = if params[:waypoints].present?
+                       JSON.parse(params[:waypoints])
+                     else
+                       []
+                     end
+
+    session[:route_data] = @route_data.merge("waypoints" => waypoints_data)
 
     redirect_to confirm_route_path
   end
