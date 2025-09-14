@@ -205,8 +205,19 @@ class RoadTrips::ShowComponent < ApplicationComponent
         # Actions - separate from main clickable area
         div class: "flex items-center space-x-2 px-6 py-6" do
           link_to edit_route_path(route),
-                  class: "inline-flex items-center p-1.5 border border-transparent rounded-md text-gray-400 hover:text-gray-600" do
+                  class: "inline-flex items-center p-1.5 border border-transparent rounded-md text-gray-400 hover:text-gray-600",
+                  title: "Edit Route" do
             svg_icon path_d: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z",
+                     class: "w-4 h-4",
+                     stroke_linecap: "round",
+                     stroke_linejoin: "round",
+                     stroke_width: "2"
+          end
+
+          link_to edit_route_waypoints_path(route),
+                  class: "inline-flex items-center p-1.5 border border-transparent rounded-md text-gray-400 hover:text-blue-600",
+                  title: "Edit Waypoints" do
+            svg_icon path_d: "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z",
                      class: "w-4 h-4",
                      stroke_linecap: "round",
                      stroke_linejoin: "round",
@@ -217,7 +228,8 @@ class RoadTrips::ShowComponent < ApplicationComponent
                     method: :delete,
                     class: "inline-flex items-center p-1.5 border border-transparent rounded-md text-gray-400 hover:text-red-600",
                     data: { turbo_confirm: "Are you sure you want to delete this route?" },
-                    form: { class: "inline" } do
+                    form: { class: "inline" },
+                    title: "Delete Route" do
             svg_icon path_d: "M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16",
                      class: "w-4 h-4",
                      stroke_linecap: "round",

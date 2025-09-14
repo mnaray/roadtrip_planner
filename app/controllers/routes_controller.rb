@@ -1,7 +1,7 @@
 class RoutesController < ApplicationController
   before_action :require_login
   before_action :set_road_trip, only: [ :new, :create ]
-  before_action :set_route, only: [ :show, :edit, :update, :destroy, :map, :export_gpx ]
+  before_action :set_route, only: [ :show, :edit, :update, :destroy, :map, :export_gpx, :edit_waypoints, :update_waypoints ]
   before_action :set_road_trip_for_route, only: [ :edit, :update ]
   before_action :set_route_for_confirmation, only: [ :confirm_route, :approve_route ]
 
@@ -109,6 +109,42 @@ class RoutesController < ApplicationController
               filename: filename,
               type: "application/gpx+xml",
               disposition: "attachment"
+  end
+
+  def edit_waypoints
+    @waypoints = @route.waypoints.ordered
+    render Routes::EditWaypointsComponent.new(route: @route, waypoints: @waypoints, current_user: current_user)
+  end
+
+  def update_waypoints
+    # Handle waypoint updates
+    if params[:waypoints].present?
+      begin
+        # Parse waypoints data
+        waypoints_data = JSON.parse(params[:waypoints])
+
+        # Delete existing waypoints
+        @route.waypoints.destroy_all
+
+        # Create new waypoints
+        waypoints_data.each do |waypoint_data|
+          @route.waypoints.create!(
+            latitude: waypoint_data["latitude"],
+            longitude: waypoint_data["longitude"],
+            position: waypoint_data["position"]
+          )
+        end
+
+        redirect_to @route.road_trip, notice: "Waypoints updated successfully."
+      rescue => e
+        Rails.logger.error "Failed to update waypoints: #{e.message}"
+        redirect_to edit_route_waypoints_path(@route), alert: "Failed to update waypoints."
+      end
+    else
+      # If no waypoints provided, just clear them
+      @route.waypoints.destroy_all
+      redirect_to @route.road_trip, notice: "All waypoints removed."
+    end
   end
 
   private

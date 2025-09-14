@@ -44,6 +44,8 @@ Rails.application.routes.draw do
   resources :waypoints, only: [ :destroy ]
   get "routes/:id/map", to: "routes#map", as: :route_map
   get "routes/:id/export_gpx", to: "routes#export_gpx", as: :route_export_gpx
+  get "routes/:id/edit_waypoints", to: "routes#edit_waypoints", as: :edit_route_waypoints
+  patch "routes/:id/update_waypoints", to: "routes#update_waypoints", as: :update_route_waypoints
   get "routes/:route_id/fuel_economy", to: "fuel_economies#show", as: :route_fuel_economy
 
   # Static pages
