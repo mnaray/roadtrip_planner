@@ -26,9 +26,13 @@ class WaypointsController < ApplicationController
       return
     end
 
-    # Parse waypoints JSON string if it's provided
+    # Parse waypoints data if it's provided (can be JSON string or array)
     waypoints_data = if params[:waypoints].present?
-                       JSON.parse(params[:waypoints])
+                       if params[:waypoints].is_a?(String)
+                         JSON.parse(params[:waypoints])
+                       else
+                         params[:waypoints]
+                       end
                      else
                        []
                      end

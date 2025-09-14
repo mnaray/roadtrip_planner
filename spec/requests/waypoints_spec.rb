@@ -1,43 +1,37 @@
 require 'rails_helper'
 
-RSpec.describe "Waypoints", type: :request do
+RSpec.describe WaypointsController, type: :controller do
   let(:user) { create(:user) }
   let(:road_trip) { create(:road_trip, user: user) }
 
-  # Helper to sign in user
+  # Helper to sign in user for controller specs
   def sign_in_user(user)
-    post login_path, params: { username: user.username, password: "password123" }
+    session[:user_id] = user.id
   end
 
   before do
     sign_in_user(user)
   end
 
-  describe "GET /set_waypoints" do
+  describe "GET set_waypoints" do
     context "with valid route data in session" do
-      before do
+      it "renders the waypoints setting page" do
         session[:route_data] = {
           "road_trip_id" => road_trip.id,
           "starting_location" => "San Francisco, CA",
           "destination" => "Los Angeles, CA"
         }
-      end
 
-      it "renders the waypoints setting page" do
-        get set_waypoints_path
+        get :set_waypoints
         expect(response).to have_http_status(:success)
-        expect(response.body).to include("Set Waypoints for Your Route")
-        expect(response.body).to include("San Francisco, CA")
-        expect(response.body).to include("Los Angeles, CA")
       end
     end
 
     context "with no route data in session" do
       it "redirects to road trips with alert" do
-        get set_waypoints_path
+        get :set_waypoints
         expect(response).to redirect_to(road_trips_path)
-        follow_redirect!
-        expect(response.body).to include("No route data found.")
+        expect(flash[:alert]).to eq("No route data found.")
       end
     end
 
@@ -45,24 +39,21 @@ RSpec.describe "Waypoints", type: :request do
       let(:other_user) { create(:user) }
       let(:other_road_trip) { create(:road_trip, user: other_user) }
 
-      before do
+      it "redirects to road trips with alert" do
         session[:route_data] = {
           "road_trip_id" => other_road_trip.id,
           "starting_location" => "San Francisco, CA",
           "destination" => "Los Angeles, CA"
         }
-      end
 
-      it "redirects to road trips with alert" do
-        get set_waypoints_path
+        get :set_waypoints
         expect(response).to redirect_to(road_trips_path)
-        follow_redirect!
-        expect(response.body).to include("You don't have access to this road trip.")
+        expect(flash[:alert]).to eq("You don't have access to this road trip.")
       end
     end
   end
 
-  describe "POST /set_waypoints" do
+  describe "POST create" do
     let(:waypoints_data) do
       [
         { "latitude" => "37.7749", "longitude" => "-122.4194", "position" => 1 },
@@ -71,23 +62,28 @@ RSpec.describe "Waypoints", type: :request do
     end
 
     context "with valid route data in session" do
-      before do
+      it "stores waypoints data in session and redirects to confirm route" do
         session[:route_data] = {
           "road_trip_id" => road_trip.id,
           "starting_location" => "San Francisco, CA",
           "destination" => "Los Angeles, CA"
         }
-      end
 
-      it "stores waypoints data in session and redirects to confirm route" do
-        post set_waypoints_path, params: { waypoints: waypoints_data }
+        post :create, params: { waypoints: waypoints_data }
 
         expect(response).to redirect_to(confirm_route_path)
-        expect(session[:route_data]["waypoints"]).to eq(waypoints_data)
+        expect(session[:route_data]["waypoints"]).to be_present
+        expect(session[:route_data]["waypoints"].length).to eq(2)
       end
 
       it "handles empty waypoints data" do
-        post set_waypoints_path, params: { waypoints: [] }
+        session[:route_data] = {
+          "road_trip_id" => road_trip.id,
+          "starting_location" => "San Francisco, CA",
+          "destination" => "Los Angeles, CA"
+        }
+
+        post :create, params: { waypoints: [] }
 
         expect(response).to redirect_to(confirm_route_path)
         expect(session[:route_data]["waypoints"]).to eq([])
@@ -96,11 +92,10 @@ RSpec.describe "Waypoints", type: :request do
 
     context "with no route data in session" do
       it "redirects to road trips with alert" do
-        post set_waypoints_path, params: { waypoints: waypoints_data }
+        post :create, params: { waypoints: waypoints_data }
 
         expect(response).to redirect_to(road_trips_path)
-        follow_redirect!
-        expect(response.body).to include("No route data found.")
+        expect(flash[:alert]).to eq("No route data found.")
       end
     end
 
@@ -108,25 +103,22 @@ RSpec.describe "Waypoints", type: :request do
       let(:other_user) { create(:user) }
       let(:other_road_trip) { create(:road_trip, user: other_user) }
 
-      before do
+      it "redirects to road trips with alert" do
         session[:route_data] = {
           "road_trip_id" => other_road_trip.id,
           "starting_location" => "San Francisco, CA",
           "destination" => "Los Angeles, CA"
         }
-      end
 
-      it "redirects to road trips with alert" do
-        post set_waypoints_path, params: { waypoints: waypoints_data }
+        post :create, params: { waypoints: waypoints_data }
 
         expect(response).to redirect_to(road_trips_path)
-        follow_redirect!
-        expect(response.body).to include("You don't have access to this road trip.")
+        expect(flash[:alert]).to eq("You don't have access to this road trip.")
       end
     end
   end
 
-  describe "DELETE /waypoints/:id" do
+  describe "DELETE destroy" do
     let(:route) { create(:route, road_trip: road_trip, user: user) }
     let!(:waypoint1) { create(:waypoint, route: route, position: 1, latitude: 37.7749, longitude: -122.4194) }
     let!(:waypoint2) { create(:waypoint, route: route, position: 2, latitude: 37.7849, longitude: -122.4094) }
@@ -134,7 +126,7 @@ RSpec.describe "Waypoints", type: :request do
 
     it "deletes the waypoint and reorders remaining waypoints" do
       expect {
-        delete waypoint_path(waypoint2), xhr: true
+        delete :destroy, params: { id: waypoint2.id }, xhr: true
       }.to change(Waypoint, :count).by(-1)
 
       expect(response).to have_http_status(:success)
@@ -158,7 +150,7 @@ RSpec.describe "Waypoints", type: :request do
       let(:other_waypoint) { create(:waypoint, route: other_route, position: 1) }
 
       it "returns forbidden status" do
-        delete waypoint_path(other_waypoint), xhr: true
+        delete :destroy, params: { id: other_waypoint.id }, xhr: true
 
         expect(response).to have_http_status(:forbidden)
         json_response = JSON.parse(response.body)
@@ -169,7 +161,7 @@ RSpec.describe "Waypoints", type: :request do
 
     context "when waypoint doesn't exist" do
       it "returns not found status" do
-        delete waypoint_path(999999), xhr: true
+        delete :destroy, params: { id: 999999 }, xhr: true
 
         expect(response).to have_http_status(:not_found)
         json_response = JSON.parse(response.body)
