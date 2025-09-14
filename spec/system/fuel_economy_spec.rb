@@ -145,7 +145,7 @@ RSpec.describe "Fuel Economy Calculator", type: :system, js: true do
       # Mock the RouteDistanceCalculator to return nil distance
       calculator = instance_double(RouteDistanceCalculator)
       allow(RouteDistanceCalculator).to receive(:new)
-        .with(route_without_distance.starting_location, route_without_distance.destination)
+        .with(route_without_distance.starting_location, route_without_distance.destination, [])
         .and_return(calculator)
       allow(calculator).to receive(:calculate).and_return({ distance: nil, duration: nil })
 

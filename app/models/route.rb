@@ -89,19 +89,20 @@ class Route < ApplicationRecord
 
     # Calculate end time using current duration (accounts for waypoints if present)
     my_duration = current_duration_hours
-    end_time = datetime + my_duration.hours
+    my_end_time = datetime + my_duration.hours
 
-    # Check for overlap: two time ranges [A1,A2] and [B1,B2] overlap if A1 < B2 AND A2 > B1
-    # In our case: new route is [datetime, end_time] and existing route is [existing_start, existing_end]
-    # They overlap if: datetime < existing_end AND end_time > existing_start
-    overlapping_routes = road_trip.routes
-                                 .where.not(id: id)
-                                 .where(
-                                   "? < datetime + (COALESCE(duration, 2.0) * INTERVAL '1 hour') AND ? > datetime",
-                                   datetime, end_time
-                                 )
+    # Check for overlap with other routes, accounting for their waypoints
+    # We need to check each route individually to use their current_duration_hours
+    overlapping = road_trip.routes.where.not(id: id).any? do |other_route|
+      # Calculate other route's actual end time with waypoints
+      other_duration = other_route.current_duration_hours
+      other_end_time = other_route.datetime + other_duration.hours
 
-    if overlapping_routes.exists?
+      # Check for overlap: two time ranges [A1,A2] and [B1,B2] overlap if A1 < B2 AND A2 > B1
+      datetime < other_end_time && my_end_time > other_route.datetime
+    end
+
+    if overlapping
       errors.add(:datetime, "overlaps with another route in this road trip")
     end
   end
