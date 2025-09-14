@@ -8,8 +8,6 @@ export default class extends Controller {
   }
 
   connect() {
-    console.log("Waypoints map controller connected")
-
     // Check if Leaflet is available
     if (typeof L === 'undefined') {
       console.error('Leaflet (L) is not available. Make sure leaflet.js is loaded.')

@@ -180,27 +180,21 @@ class Routes::ConfirmPageComponent < ApplicationComponent
   def waypoints_data_json
     if @route_data && @route_data["waypoints"].present?
       waypoints = @route_data["waypoints"]
-      Rails.logger.info "Waypoints in component - class: #{waypoints.class}, value: #{waypoints.inspect}"
 
       # Ensure we always have an array, regardless of how it's stored in session
       waypoints_array = case waypoints
                        when String
                          # If it's a JSON string, parse it back to array
-                         Rails.logger.info "Parsing JSON string to array"
                          JSON.parse(waypoints)
                        when Array
                          # If it's already an array, use it as-is
-                         Rails.logger.info "Using existing array"
                          waypoints
                        else
                          # Fallback to empty array
-                         Rails.logger.warn "Unexpected waypoints type: #{waypoints.class}, falling back to empty array"
                          []
                        end
 
-      json_result = waypoints_array.to_json
-      Rails.logger.info "Final JSON result: #{json_result}"
-      json_result
+      waypoints_array.to_json
     else
       [].to_json
     end

@@ -9,8 +9,6 @@ export default class extends Controller {
   }
 
   connect() {
-    console.log("Route map controller connected")
-    
     // Check if Leaflet is available
     if (typeof L === 'undefined') {
       console.error('Leaflet (L) is not available. Make sure leaflet.js is loaded.')
@@ -86,9 +84,7 @@ export default class extends Controller {
 
     // Add waypoint markers if they exist
     this.waypointMarkers = []
-    console.log('Route map waypoints data:', this.waypointsValue)
     if (this.waypointsValue && this.waypointsValue.length > 0) {
-      console.log('Adding', this.waypointsValue.length, 'waypoints to map')
       this.waypointsValue.forEach((waypoint, index) => {
         const waypointMarker = L.marker([waypoint.latitude, waypoint.longitude], {
           icon: this.createWaypointIcon(waypoint.position)
@@ -103,22 +99,18 @@ export default class extends Controller {
     try {
       let routeData
       if (this.waypointsValue && this.waypointsValue.length > 0) {
-        console.log('Drawing route with waypoints')
         // Create coordinates array: start -> waypoints (ordered) -> end
         const orderedWaypoints = this.waypointsValue
           .sort((a, b) => a.position - b.position)
           .map(w => [w.latitude, w.longitude])
 
         const allCoords = [startCoords, ...orderedWaypoints, endCoords]
-        console.log('All coordinates for routing:', allCoords)
         routeData = await this.getRouteWithWaypoints(allCoords)
       } else {
-        console.log('Drawing route without waypoints')
         routeData = await this.getRoute(startCoords, endCoords)
       }
-      
+
       if (routeData && routeData.geometry) {
-        console.log('Route data received, drawing route line')
         // Draw the actual route following roads
         const routeLine = L.geoJSON(routeData.geometry, {
           style: {
