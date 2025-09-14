@@ -125,4 +125,137 @@ RSpec.describe Waypoint, type: :model do
       expect(waypoint.position).to eq(1)
     end
   end
+
+  describe "route metrics invalidation callbacks" do
+    let(:route) { create(:route) }
+
+    before do
+      # Set initial state where route metrics are calculated
+      route.update_columns(waypoints_updated_at: 1.hour.ago)
+      expect(route.reload.waypoints_updated_at).not_to be_nil # Ensure it's set
+    end
+
+    describe "after_create" do
+      it "invalidates route metrics when waypoint is created" do
+        expect {
+          create(:waypoint, route: route)
+        }.to change { route.reload.waypoints_updated_at }.to(nil)
+      end
+    end
+
+    describe "after_update" do
+      let!(:waypoint) do
+        # Create waypoint first, then set route state
+        wp = create(:waypoint, route: route)
+        route.update_columns(waypoints_updated_at: 1.hour.ago)  # Reset after waypoint creation
+        expect(route.reload.waypoints_updated_at).not_to be_nil # Ensure it's set
+        wp
+      end
+
+      context "when position changes" do
+        it "invalidates route metrics" do
+          expect {
+            waypoint.update!(position: waypoint.position + 1)
+          }.to change { route.reload.waypoints_updated_at }.to(nil)
+        end
+      end
+
+      context "when coordinates change" do
+        it "invalidates route metrics when latitude changes" do
+          expect {
+            waypoint.update!(latitude: waypoint.latitude + 1.0)
+          }.to change { route.reload.waypoints_updated_at }.to(nil)
+        end
+
+        it "invalidates route metrics when longitude changes" do
+          expect {
+            waypoint.update!(longitude: waypoint.longitude + 1.0)
+          }.to change { route.reload.waypoints_updated_at }.to(nil)
+        end
+      end
+
+      context "when irrelevant attributes change" do
+        it "does not invalidate route metrics for non-position/coordinate changes" do
+          original_waypoints_updated_at = route.waypoints_updated_at
+
+          # Touch the waypoint to update its updated_at timestamp
+          # but don't change position or coordinates
+          waypoint.touch
+
+          expect(route.reload.waypoints_updated_at).to eq(original_waypoints_updated_at)
+        end
+      end
+    end
+
+    describe "after_destroy" do
+      let!(:waypoint) do
+        # Create waypoint first, then set route state
+        wp = create(:waypoint, route: route)
+        route.update_columns(waypoints_updated_at: 1.hour.ago)  # Reset after waypoint creation
+        expect(route.reload.waypoints_updated_at).not_to be_nil # Ensure it's set
+        wp
+      end
+
+      it "invalidates route metrics when waypoint is destroyed" do
+        expect {
+          waypoint.destroy!
+        }.to change { route.reload.waypoints_updated_at }.to(nil)
+      end
+    end
+  end
+
+  describe "integration with route metrics" do
+    let(:user) { create(:user) }
+    let(:road_trip) { create(:road_trip, user: user) }
+    let(:route) { create(:route, user: user, road_trip: road_trip) }
+
+    it "triggers route recalculation when waypoint affects the route" do
+      # Mock the calculator to simulate different results with waypoints
+      calculator = instance_double(RouteDistanceCalculator)
+
+      # Initially no waypoints
+      expect(route.waypoints_updated_at).to be_nil
+
+      # Create waypoint - this should invalidate route metrics
+      waypoint = create(:waypoint, route: route)
+      expect(route.reload.waypoints_updated_at).to be_nil
+
+      # When route metrics are recalculated, they should include the waypoint
+      allow(RouteDistanceCalculator).to receive(:new)
+        .with(route.starting_location, route.destination, [waypoint])
+        .and_return(calculator)
+      allow(calculator).to receive(:calculate)
+        .and_return({ distance: 250.0, duration: 4.5 })
+
+      result = route.recalculate_metrics!
+
+      expect(result[:distance]).to eq(250.0)
+      expect(result[:duration]).to eq(4.5)
+      expect(route.waypoints_updated_at).to be_present
+    end
+
+    it "affects route overlap validation through duration changes" do
+      base_time = 1.day.from_now.beginning_of_hour
+
+      # Create first route with standard 2-hour duration
+      route1 = create(:route, road_trip: road_trip, user: user, datetime: base_time)
+      route1.update_columns(duration: 2.0, waypoints_updated_at: Time.current)
+
+      # Should be able to create non-overlapping route at 3 hours later
+      route2 = build(:route, road_trip: road_trip, user: user, datetime: base_time + 3.hours)
+      expect(route2).to be_valid
+
+      # Add waypoint to first route - this invalidates metrics
+      waypoint = create(:waypoint, route: route1)
+      expect(route1.reload.waypoints_updated_at).to be_nil
+
+      # Mock the recalculated duration to be longer due to waypoint
+      allow(route1).to receive(:current_duration_hours).and_return(4.0)
+
+      # Now the second route should overlap due to longer duration
+      route2_overlap = build(:route, road_trip: road_trip, user: user, datetime: base_time + 3.hours)
+      expect(route2_overlap).not_to be_valid
+      expect(route2_overlap.errors[:datetime]).to include('overlaps with another route in this road trip')
+    end
+  end
 end

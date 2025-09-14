@@ -44,17 +44,49 @@ class WaypointsController < ApplicationController
 
   def destroy
     if @waypoint.route.road_trip.can_access?(current_user)
-      route_id = @waypoint.route.id
+      route = @waypoint.route
       position = @waypoint.position
 
       @waypoint.destroy!
 
-      @waypoint.route.waypoints.where("position > ?", position).update_all("position = position - 1")
+      route.waypoints.where("position > ?", position).update_all("position = position - 1")
 
-      render json: { status: "success", message: "Waypoint removed successfully." }
+      # Trigger route metrics recalculation
+      updated_metrics = route.recalculate_metrics!
+
+      render json: {
+        status: "success",
+        message: "Waypoint removed successfully.",
+        route_metrics: {
+          distance: updated_metrics[:distance],
+          duration: updated_metrics[:duration]
+        }
+      }
     else
       render json: { status: "error", message: "Access denied." }, status: :forbidden
     end
+  end
+
+  # Endpoint to recalculate route metrics
+  def recalculate_route_metrics
+    @waypoint = Waypoint.find(params[:id])
+
+    if @waypoint.route.road_trip.can_access?(current_user)
+      updated_metrics = @waypoint.route.recalculate_metrics!
+
+      render json: {
+        status: "success",
+        message: "Route metrics recalculated successfully.",
+        route_metrics: {
+          distance: updated_metrics[:distance],
+          duration: updated_metrics[:duration]
+        }
+      }
+    else
+      render json: { status: "error", message: "Access denied." }, status: :forbidden
+    end
+  rescue ActiveRecord::RecordNotFound
+    render json: { status: "error", message: "Waypoint not found." }, status: :not_found
   end
 
   private

@@ -123,10 +123,10 @@ class Routes::MapComponent < ApplicationComponent
                 "Duration"
               end
               p class: "text-lg font-semibold text-gray-900" do
-                if @route.duration_hours < 1
-                  "#{(@route.duration_hours * 60).round} minutes"
+                if @route.current_duration_hours < 1
+                  "#{(@route.current_duration_hours * 60).round} minutes"
                 else
-                  "#{@route.duration_hours.round(1)} hours"
+                  "#{@route.current_duration_hours.round(1)} hours"
                 end
               end
               p class: "text-sm text-gray-600" do

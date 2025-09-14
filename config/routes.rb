@@ -41,7 +41,11 @@ Rails.application.routes.draw do
   post "set_waypoints", to: "waypoints#create"
 
   # Waypoint management
-  resources :waypoints, only: [ :destroy ]
+  resources :waypoints, only: [ :destroy ] do
+    member do
+      patch :recalculate_route_metrics
+    end
+  end
   get "routes/:id/map", to: "routes#map", as: :route_map
   get "routes/:id/export_gpx", to: "routes#export_gpx", as: :route_export_gpx
   get "routes/:id/edit_waypoints", to: "routes#edit_waypoints", as: :edit_route_waypoints

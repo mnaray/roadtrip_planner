@@ -24,6 +24,35 @@ class Route < ApplicationRecord
     distance || calculate_and_save_route_metrics[:distance]
   end
 
+  # Force recalculation of route metrics including waypoints
+  def recalculate_metrics!
+    calculate_route_metrics
+    save! if persisted?
+    { distance: distance, duration: duration }
+  end
+
+  # Check if route metrics need recalculation due to waypoint changes
+  def metrics_outdated?
+    return false unless waypoints.any?
+    return true if waypoints_updated_at.nil?
+
+    # Check if any waypoint was updated after the last route metric calculation
+    latest_waypoint_update = waypoints.maximum(:updated_at)
+    return true if latest_waypoint_update && waypoints_updated_at && latest_waypoint_update > waypoints_updated_at
+
+    false
+  end
+
+  # Get current route duration considering if recalculation is needed
+  def current_duration_hours
+    if metrics_outdated?
+      recalculate_metrics!
+      duration_hours
+    else
+      duration_hours
+    end
+  end
+
   private
 
   def locations_changed?
@@ -33,11 +62,14 @@ class Route < ApplicationRecord
   def calculate_route_metrics
     return unless starting_location.present? && destination.present?
 
-    calculator = RouteDistanceCalculator.new(starting_location, destination)
+    # Include waypoints in calculation if they exist - convert to array for compatibility
+    ordered_waypoints = waypoints.ordered.to_a
+    calculator = RouteDistanceCalculator.new(starting_location, destination, ordered_waypoints)
     result = calculator.calculate
 
     self.distance = result[:distance]
     self.duration = result[:duration]
+    self.waypoints_updated_at = Time.current if waypoints.any?
   end
 
   def calculate_and_save_route_metrics
@@ -55,9 +87,8 @@ class Route < ApplicationRecord
   def datetime_not_overlapping_with_other_routes
     return unless datetime && road_trip
 
-    # Calculate end time using duration_hours which handles nil values
-    # Use a default of 2 hours if duration is not available
-    my_duration = duration || 2.0
+    # Calculate end time using current duration (accounts for waypoints if present)
+    my_duration = current_duration_hours
     end_time = datetime + my_duration.hours
 
     # Check for overlap: two time ranges [A1,A2] and [B1,B2] overlap if A1 < B2 AND A2 > B1

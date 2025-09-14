@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_13_121936) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_14_204131) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -61,6 +61,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_13_121936) do
     t.datetime "updated_at", null: false
     t.float "distance"
     t.float "duration"
+    t.datetime "waypoints_updated_at"
     t.index ["road_trip_id"], name: "index_routes_on_road_trip_id"
     t.index ["user_id"], name: "index_routes_on_user_id"
   end
@@ -80,6 +81,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_13_121936) do
     t.integer "position", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "name"
     t.index ["route_id", "position"], name: "index_waypoints_on_route_id_and_position", unique: true
     t.index ["route_id"], name: "index_waypoints_on_route_id"
   end

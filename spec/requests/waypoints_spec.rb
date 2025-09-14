@@ -124,7 +124,12 @@ RSpec.describe WaypointsController, type: :controller do
     let!(:waypoint2) { create(:waypoint, route: route, position: 2, latitude: 37.7849, longitude: -122.4094) }
     let!(:waypoint3) { create(:waypoint, route: route, position: 3, latitude: 37.7949, longitude: -122.3994) }
 
-    it "deletes the waypoint and reorders remaining waypoints" do
+    it "deletes the waypoint, reorders remaining waypoints, and recalculates route metrics" do
+      # Mock the route calculator to return updated metrics
+      calculator = instance_double(RouteDistanceCalculator)
+      allow(RouteDistanceCalculator).to receive(:new).and_return(calculator)
+      allow(calculator).to receive(:calculate).and_return({ distance: 300.0, duration: 5.5 })
+
       expect {
         delete :destroy, params: { id: waypoint2.id }, xhr: true
       }.to change(Waypoint, :count).by(-1)
@@ -133,6 +138,8 @@ RSpec.describe WaypointsController, type: :controller do
 
       json_response = JSON.parse(response.body)
       expect(json_response["status"]).to eq("success")
+      expect(json_response["route_metrics"]["distance"]).to eq(300.0)
+      expect(json_response["route_metrics"]["duration"]).to eq(5.5)
 
       # Check that remaining waypoints are reordered
       remaining_waypoints = route.waypoints.ordered
@@ -162,6 +169,62 @@ RSpec.describe WaypointsController, type: :controller do
     context "when waypoint doesn't exist" do
       it "returns not found status" do
         delete :destroy, params: { id: 999999 }, xhr: true
+
+        expect(response).to have_http_status(:not_found)
+        json_response = JSON.parse(response.body)
+        expect(json_response["status"]).to eq("error")
+        expect(json_response["message"]).to eq("Waypoint not found.")
+      end
+    end
+  end
+
+  describe "PATCH recalculate_route_metrics" do
+    let(:route) { create(:route, road_trip: road_trip, user: user) }
+    let!(:waypoint) { create(:waypoint, route: route, position: 1, latitude: 37.7749, longitude: -122.4194) }
+
+    it "recalculates and returns updated route metrics" do
+      # Mock the route calculator to return updated metrics
+      calculator = instance_double(RouteDistanceCalculator)
+      allow(RouteDistanceCalculator).to receive(:new)
+        .with(route.starting_location, route.destination, [waypoint])
+        .and_return(calculator)
+      allow(calculator).to receive(:calculate).and_return({ distance: 450.0, duration: 7.0 })
+
+      patch :recalculate_route_metrics, params: { id: waypoint.id }, xhr: true
+
+      expect(response).to have_http_status(:success)
+
+      json_response = JSON.parse(response.body)
+      expect(json_response["status"]).to eq("success")
+      expect(json_response["message"]).to eq("Route metrics recalculated successfully.")
+      expect(json_response["route_metrics"]["distance"]).to eq(450.0)
+      expect(json_response["route_metrics"]["duration"]).to eq(7.0)
+
+      # Verify the route was actually updated in the database
+      route.reload
+      expect(route.distance).to eq(450.0)
+      expect(route.duration).to eq(7.0)
+    end
+
+    context "when user doesn't have access to the route" do
+      let(:other_user) { create(:user) }
+      let(:other_road_trip) { create(:road_trip, user: other_user) }
+      let(:other_route) { create(:route, road_trip: other_road_trip, user: other_user) }
+      let(:other_waypoint) { create(:waypoint, route: other_route, position: 1) }
+
+      it "returns forbidden status" do
+        patch :recalculate_route_metrics, params: { id: other_waypoint.id }, xhr: true
+
+        expect(response).to have_http_status(:forbidden)
+        json_response = JSON.parse(response.body)
+        expect(json_response["status"]).to eq("error")
+        expect(json_response["message"]).to eq("Access denied.")
+      end
+    end
+
+    context "when waypoint doesn't exist" do
+      it "returns not found status" do
+        patch :recalculate_route_metrics, params: { id: 999999 }, xhr: true
 
         expect(response).to have_http_status(:not_found)
         json_response = JSON.parse(response.body)
