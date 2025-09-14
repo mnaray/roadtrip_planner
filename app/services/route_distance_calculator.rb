@@ -22,10 +22,10 @@ class RouteDistanceCalculator
     # If waypoints are present, calculate route with waypoints
     route_data = if @waypoints.any?
                    calculate_with_waypoints(start_coords, end_coords)
-                 else
+    else
                    # Original behavior for routes without waypoints
                    fetch_route_data_osrm(start_coords, end_coords)
-                 end
+    end
 
     # Fallback to straight-line calculations if routing fails
     route_data ||= calculate_straight_line_estimates(start_coords, end_coords)
@@ -50,7 +50,7 @@ class RouteDistanceCalculator
     return { distance: nil, duration: nil } unless start_coords && end_coords
 
     # Build coordinates array: start -> waypoints (ordered) -> end
-    all_coords = [start_coords] + waypoint_coords + [end_coords]
+    all_coords = [ start_coords ] + waypoint_coords + [ end_coords ]
 
     # Fetch route data with all waypoints
     route_data = fetch_route_data_osrm_with_waypoints(all_coords)
@@ -68,10 +68,10 @@ class RouteDistanceCalculator
     waypoint_coords = @waypoints.map do |waypoint|
       if waypoint.respond_to?(:latitude) && waypoint.respond_to?(:longitude)
         # Waypoint is an AR model with lat/lon
-        [waypoint.latitude, waypoint.longitude]
+        [ waypoint.latitude, waypoint.longitude ]
       elsif waypoint.is_a?(Hash) && waypoint[:latitude] && waypoint[:longitude]
         # Waypoint is a hash with lat/lon keys
-        [waypoint[:latitude], waypoint[:longitude]]
+        [ waypoint[:latitude], waypoint[:longitude] ]
       elsif waypoint.is_a?(Array) && waypoint.length >= 2
         # Waypoint is already coordinates array
         waypoint

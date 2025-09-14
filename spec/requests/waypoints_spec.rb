@@ -186,7 +186,7 @@ RSpec.describe WaypointsController, type: :controller do
       # Mock the route calculator to return updated metrics
       calculator = instance_double(RouteDistanceCalculator)
       allow(RouteDistanceCalculator).to receive(:new)
-        .with(route.starting_location, route.destination, [waypoint])
+        .with(route.starting_location, route.destination, [ waypoint ])
         .and_return(calculator)
       allow(calculator).to receive(:calculate).and_return({ distance: 450.0, duration: 7.0 })
 

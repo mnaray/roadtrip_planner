@@ -11,7 +11,7 @@ RSpec.describe RouteDistanceCalculator do
     end
 
     it 'accepts waypoints parameter' do
-      waypoints = [{ latitude: 40.7128, longitude: -74.0060 }]
+      waypoints = [ { latitude: 40.7128, longitude: -74.0060 } ]
       calculator = described_class.new(start_location, destination, waypoints)
       expect(calculator).to be_present
     end
@@ -28,9 +28,9 @@ RSpec.describe RouteDistanceCalculator do
     context 'without waypoints' do
       before do
         allow(calculator).to receive(:geocode).with(start_location)
-                                              .and_return([40.7128, -74.0060]) # NYC coords
+                                              .and_return([ 40.7128, -74.0060 ]) # NYC coords
         allow(calculator).to receive(:geocode).with(destination)
-                                              .and_return([42.3601, -71.0589]) # Boston coords
+                                              .and_return([ 42.3601, -71.0589 ]) # Boston coords
         allow(calculator).to receive(:fetch_route_data_osrm)
                                 .and_return({ distance: 300000, duration: 14400 }) # 300km, 4h
       end
@@ -44,14 +44,14 @@ RSpec.describe RouteDistanceCalculator do
     end
 
     context 'with waypoints' do
-      let(:waypoints) { [create(:waypoint, latitude: 41.4993, longitude: -81.6944)] } # Cleveland
+      let(:waypoints) { [ create(:waypoint, latitude: 41.4993, longitude: -81.6944) ] } # Cleveland
       let(:calculator) { described_class.new(start_location, destination, waypoints) }
 
       before do
         allow(calculator).to receive(:geocode).with(start_location)
-                                              .and_return([40.7128, -74.0060]) # NYC coords
+                                              .and_return([ 40.7128, -74.0060 ]) # NYC coords
         allow(calculator).to receive(:geocode).with(destination)
-                                              .and_return([42.3601, -71.0589]) # Boston coords
+                                              .and_return([ 42.3601, -71.0589 ]) # Boston coords
         allow(calculator).to receive(:calculate_with_waypoints_from_coordinates)
                                 .and_return({ distance: 450000, duration: 21600 }) # 450km, 6h
       end
@@ -80,9 +80,9 @@ RSpec.describe RouteDistanceCalculator do
     context 'when routing API fails' do
       before do
         allow(calculator).to receive(:geocode).with(start_location)
-                                              .and_return([40.7128, -74.0060])
+                                              .and_return([ 40.7128, -74.0060 ])
         allow(calculator).to receive(:geocode).with(destination)
-                                              .and_return([42.3601, -71.0589])
+                                              .and_return([ 42.3601, -71.0589 ])
         allow(calculator).to receive(:fetch_route_data_osrm).and_return(nil)
         allow(calculator).to receive(:calculate_straight_line_estimates)
                                 .and_return({ distance: 250000, duration: 12000 })
@@ -99,9 +99,9 @@ RSpec.describe RouteDistanceCalculator do
 
   describe '#calculate_with_waypoints_from_coordinates' do
     let(:calculator) { described_class.new(start_location, destination) }
-    let(:start_coords) { [40.7128, -74.0060] } # NYC
-    let(:waypoint_coords) { [[41.4993, -81.6944]] } # Cleveland
-    let(:end_coords) { [42.3601, -71.0589] } # Boston
+    let(:start_coords) { [ 40.7128, -74.0060 ] } # NYC
+    let(:waypoint_coords) { [ [ 41.4993, -81.6944 ] ] } # Cleveland
+    let(:end_coords) { [ 42.3601, -71.0589 ] } # Boston
 
     context 'when OSRM waypoint routing succeeds' do
       before do
@@ -139,14 +139,14 @@ RSpec.describe RouteDistanceCalculator do
     let(:route) { create(:route) }
 
     context 'with ActiveRecord waypoint models' do
-      let(:waypoints) { [create(:waypoint, route: route, latitude: 41.4993, longitude: -81.6944)] }
+      let(:waypoints) { [ create(:waypoint, route: route, latitude: 41.4993, longitude: -81.6944) ] }
       let(:calculator) { described_class.new(start_location, destination, waypoints) }
 
       before do
         allow(calculator).to receive(:geocode).with(start_location)
-                                              .and_return([40.7128, -74.0060])
+                                              .and_return([ 40.7128, -74.0060 ])
         allow(calculator).to receive(:geocode).with(destination)
-                                              .and_return([42.3601, -71.0589])
+                                              .and_return([ 42.3601, -71.0589 ])
         allow(calculator).to receive(:calculate_with_waypoints_from_coordinates)
                                 .and_return({ distance: 450000, duration: 21600 })
       end
@@ -158,14 +158,14 @@ RSpec.describe RouteDistanceCalculator do
     end
 
     context 'with hash waypoints' do
-      let(:waypoints) { [{ latitude: 41.4993, longitude: -81.6944 }] }
+      let(:waypoints) { [ { latitude: 41.4993, longitude: -81.6944 } ] }
       let(:calculator) { described_class.new(start_location, destination, waypoints) }
 
       before do
         allow(calculator).to receive(:geocode).with(start_location)
-                                              .and_return([40.7128, -74.0060])
+                                              .and_return([ 40.7128, -74.0060 ])
         allow(calculator).to receive(:geocode).with(destination)
-                                              .and_return([42.3601, -71.0589])
+                                              .and_return([ 42.3601, -71.0589 ])
         allow(calculator).to receive(:calculate_with_waypoints_from_coordinates)
                                 .and_return({ distance: 450000, duration: 21600 })
       end
@@ -177,14 +177,14 @@ RSpec.describe RouteDistanceCalculator do
     end
 
     context 'with coordinate array waypoints' do
-      let(:waypoints) { [[41.4993, -81.6944]] }
+      let(:waypoints) { [ [ 41.4993, -81.6944 ] ] }
       let(:calculator) { described_class.new(start_location, destination, waypoints) }
 
       before do
         allow(calculator).to receive(:geocode).with(start_location)
-                                              .and_return([40.7128, -74.0060])
+                                              .and_return([ 40.7128, -74.0060 ])
         allow(calculator).to receive(:geocode).with(destination)
-                                              .and_return([42.3601, -71.0589])
+                                              .and_return([ 42.3601, -71.0589 ])
         allow(calculator).to receive(:calculate_with_waypoints_from_coordinates)
                                 .and_return({ distance: 450000, duration: 21600 })
       end
