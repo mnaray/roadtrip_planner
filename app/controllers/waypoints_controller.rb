@@ -29,14 +29,18 @@ class WaypointsController < ApplicationController
     # Parse waypoints data if it's provided (can be JSON string or array)
     waypoints_data = if params[:waypoints].present?
                        if params[:waypoints].is_a?(String)
-                         JSON.parse(params[:waypoints])
+                         parsed_data = JSON.parse(params[:waypoints])
+                         Rails.logger.info "Parsed waypoints from JSON string: #{parsed_data.inspect}"
+                         parsed_data
                        else
+                         Rails.logger.info "Using waypoints as array: #{params[:waypoints].inspect}"
                          params[:waypoints]
                        end
                      else
                        []
                      end
 
+    Rails.logger.info "Final waypoints_data class: #{waypoints_data.class}, value: #{waypoints_data.inspect}"
     session[:route_data] = @route_data.merge("waypoints" => waypoints_data)
 
     redirect_to confirm_route_path
