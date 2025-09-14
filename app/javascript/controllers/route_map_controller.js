@@ -86,7 +86,9 @@ export default class extends Controller {
 
     // Add waypoint markers if they exist
     this.waypointMarkers = []
+    console.log('Route map waypoints data:', this.waypointsValue)
     if (this.waypointsValue && this.waypointsValue.length > 0) {
+      console.log('Adding', this.waypointsValue.length, 'waypoints to map')
       this.waypointsValue.forEach((waypoint, index) => {
         const waypointMarker = L.marker([waypoint.latitude, waypoint.longitude], {
           icon: this.createWaypointIcon(waypoint.position)
@@ -101,18 +103,22 @@ export default class extends Controller {
     try {
       let routeData
       if (this.waypointsValue && this.waypointsValue.length > 0) {
+        console.log('Drawing route with waypoints')
         // Create coordinates array: start -> waypoints (ordered) -> end
         const orderedWaypoints = this.waypointsValue
           .sort((a, b) => a.position - b.position)
           .map(w => [w.latitude, w.longitude])
 
         const allCoords = [startCoords, ...orderedWaypoints, endCoords]
+        console.log('All coordinates for routing:', allCoords)
         routeData = await this.getRouteWithWaypoints(allCoords)
       } else {
+        console.log('Drawing route without waypoints')
         routeData = await this.getRoute(startCoords, endCoords)
       }
       
       if (routeData && routeData.geometry) {
+        console.log('Route data received, drawing route line')
         // Draw the actual route following roads
         const routeLine = L.geoJSON(routeData.geometry, {
           style: {
@@ -147,7 +153,7 @@ export default class extends Controller {
         }
       } else {
         // Fallback to straight line if routing fails
-        console.warn('Unable to get route, falling back to straight line')
+        console.warn('Unable to get route data, falling back to straight line. Route data:', routeData)
         this.drawStraightLine(startCoords, endCoords, startMarker, endMarker, this.waypointMarkers)
       }
     } catch (error) {
