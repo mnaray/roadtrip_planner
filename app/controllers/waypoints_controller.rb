@@ -33,9 +33,9 @@ class WaypointsController < ApplicationController
                        else
                          params[:waypoints]
                        end
-                     else
+    else
                        []
-                     end
+    end
 
     session[:route_data] = @route_data.merge("waypoints" => waypoints_data)
 

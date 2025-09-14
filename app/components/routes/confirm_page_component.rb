@@ -183,16 +183,16 @@ class Routes::ConfirmPageComponent < ApplicationComponent
 
       # Ensure we always have an array, regardless of how it's stored in session
       waypoints_array = case waypoints
-                       when String
+      when String
                          # If it's a JSON string, parse it back to array
                          JSON.parse(waypoints)
-                       when Array
+      when Array
                          # If it's already an array, use it as-is
                          waypoints
-                       else
+      else
                          # Fallback to empty array
                          []
-                       end
+      end
 
       waypoints_array.to_json
     else
