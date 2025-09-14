@@ -81,17 +81,21 @@ export default class extends Controller {
           position: waypointData.position
         }
 
-        // Create waypoint marker
+        // Create draggable waypoint marker
         const marker = L.marker([waypoint.latitude, waypoint.longitude], {
-          icon: this.createWaypointIcon(waypoint.position)
+          icon: this.createWaypointIcon(waypoint.position),
+          draggable: true
         }).addTo(this.map)
-          .bindPopup(`<strong>Waypoint ${waypoint.position}</strong><br>Click to remove`)
+          .bindPopup(`<strong>Waypoint ${waypoint.position}</strong><br>Drag to reposition, click to remove`)
 
         // Add click handler to remove waypoint
         marker.on('click', (e) => {
           e.originalEvent.stopPropagation()
           this.removeWaypoint(waypoint.id)
         })
+
+        // Add drag handlers for repositioning
+        this.addDragHandlers(marker, waypoint)
 
         waypoint.marker = marker
         this.waypoints.push(waypoint)
@@ -177,17 +181,21 @@ export default class extends Controller {
       position: this.waypoints.length + 1
     }
 
-    // Create waypoint marker
+    // Create draggable waypoint marker
     const marker = L.marker([lat, lng], {
-      icon: this.createWaypointIcon(waypoint.position)
+      icon: this.createWaypointIcon(waypoint.position),
+      draggable: true
     }).addTo(this.map)
-      .bindPopup(`<strong>Waypoint ${waypoint.position}</strong><br>Click to remove`)
+      .bindPopup(`<strong>Waypoint ${waypoint.position}</strong><br>Drag to reposition, click to remove`)
 
     // Add click handler to remove waypoint
     marker.on('click', (e) => {
       e.originalEvent.stopPropagation()
       this.removeWaypoint(waypoint.id)
     })
+
+    // Add drag handlers for repositioning
+    this.addDragHandlers(marker, waypoint)
 
     waypoint.marker = marker
     this.waypoints.push(waypoint)
@@ -213,7 +221,7 @@ export default class extends Controller {
     this.waypoints.forEach((w, index) => {
       w.position = index + 1
       w.marker.setIcon(this.createWaypointIcon(w.position))
-      w.marker.setPopupContent(`<strong>Waypoint ${w.position}</strong><br>Click to remove`)
+      w.marker.setPopupContent(`<strong>Waypoint ${w.position}</strong><br>Drag to reposition, click to remove`)
     })
 
     this.updateWaypointsData()
@@ -238,27 +246,78 @@ export default class extends Controller {
     const waypointsList = document.getElementById('waypoints-list')
     if (!waypointsList) return
 
+    // Find the sortable container (skip the instruction text)
+    const sortableContainer = waypointsList.querySelector('[data-controller="sortable-waypoints"]') || waypointsList
+
     if (this.waypoints.length === 0) {
-      waypointsList.innerHTML = `
+      sortableContainer.innerHTML = `
         <div class="text-gray-500 text-sm italic">
           No waypoints set. Click on the map to add waypoints.
         </div>
       `
     } else {
-      waypointsList.innerHTML = this.waypoints.map(w => `
-        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+      sortableContainer.innerHTML = this.waypoints.map(w => `
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-md cursor-move hover:bg-gray-100 transition-colors select-none"
+             data-sortable-waypoints-target="item"
+             data-waypoint-id="${w.id}"
+             data-position="${w.position}"
+             data-latitude="${w.latitude}"
+             data-longitude="${w.longitude}">
           <div class="flex items-center">
-            <div class="w-6 h-6 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center mr-3">
+            <div class="mr-3 text-gray-400 hover:text-gray-600">
+              <svg class="w-4 h-4" viewBox="0 0 20 20">
+                <path d="M10 6h4v1H10V6zM10 8h4v1H10V8zM10 10h4v1H10v-1zM8 6H6v1h2V6zM8 8H6v1h2V8zM8 10H6v1h2v-1z" fill="currentColor"/>
+              </svg>
+            </div>
+            <div class="w-6 h-6 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center mr-3 waypoint-position-badge">
               ${w.position}
             </div>
             <div class="text-sm">
-              <div class="font-medium text-gray-900">Waypoint ${w.position}</div>
+              <div class="font-medium text-gray-900 waypoint-position-text">Waypoint ${w.position}</div>
               <div class="text-gray-600">${w.latitude.toFixed(6)}, ${w.longitude.toFixed(6)}</div>
             </div>
           </div>
         </div>
       `).join('')
+
+      // Refresh sortable drag listeners after updating the DOM
+      const sortableController = this.application.getControllerForElementAndIdentifier(sortableContainer, 'sortable-waypoints')
+      if (sortableController && sortableController.refreshDragListeners) {
+        sortableController.refreshDragListeners()
+      }
     }
+  }
+
+  addDragHandlers(marker, waypoint) {
+    // Add visual feedback on drag start
+    marker.on('dragstart', () => {
+      marker.setOpacity(0.5)
+    })
+
+    // Update position during drag
+    marker.on('drag', (e) => {
+      const { lat, lng } = e.target.getLatLng()
+      waypoint.latitude = lat
+      waypoint.longitude = lng
+    })
+
+    // Handle drag end
+    marker.on('dragend', () => {
+      marker.setOpacity(1.0)
+
+      // Update the waypoint coordinates
+      const { lat, lng } = marker.getLatLng()
+      waypoint.latitude = lat
+      waypoint.longitude = lng
+
+      // Update popup content
+      marker.setPopupContent(`<strong>Waypoint ${waypoint.position}</strong><br>Drag to reposition, click to remove`)
+
+      // Update data and refresh route
+      this.updateWaypointsData()
+      this.updateWaypointsList()
+      this.updateRouteWithWaypoints()
+    })
   }
 
   async updateRouteWithWaypoints() {
@@ -455,6 +514,50 @@ export default class extends Controller {
       iconSize: [25, 25],
       iconAnchor: [12.5, 12.5]
     })
+  }
+
+  // Method called by sortable waypoints controller to update waypoint positions
+  updateWaypointPositionsFromList() {
+    const waypointItems = document.querySelectorAll('[data-sortable-waypoints-target="item"]')
+    const newPositions = []
+
+    waypointItems.forEach((item, index) => {
+      const waypointId = parseInt(item.dataset.waypointId)
+      const latitude = parseFloat(item.dataset.latitude)
+      const longitude = parseFloat(item.dataset.longitude)
+      const newPosition = index + 1
+
+      newPositions.push({
+        id: waypointId,
+        latitude: latitude,
+        longitude: longitude,
+        position: newPosition
+      })
+    })
+
+    // Update internal waypoints array with new positions
+    this.waypoints = newPositions.map(np => {
+      const existingWaypoint = this.waypoints.find(w => w.id === np.id)
+      if (!existingWaypoint) {
+        return np // Use the new position data if we can't find existing
+      }
+      return {
+        ...existingWaypoint,
+        position: np.position
+      }
+    })
+
+    // Update map markers with new positions
+    this.waypoints.forEach(waypoint => {
+      if (waypoint.marker) {
+        waypoint.marker.setIcon(this.createWaypointIcon(waypoint.position))
+        waypoint.marker.setPopupContent(`<strong>Waypoint ${waypoint.position}</strong><br>Drag to reposition, click to remove`)
+      }
+    })
+
+    // Update data and refresh route
+    this.updateWaypointsData()
+    this.updateRouteWithWaypoints()
   }
 
   showError(message) {

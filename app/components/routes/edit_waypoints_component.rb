@@ -143,20 +143,40 @@ class Routes::EditWaypointsComponent < ApplicationComponent
               h3 class: "text-lg font-semibold text-gray-900 mb-4" do
                 "Current Waypoints"
               end
-              div id: "waypoints-list", class: "space-y-2" do
+              div class: "text-sm text-gray-600 mb-2" do
+                "Drag waypoints to reorder their sequence"
+              end
+              div id: "waypoints-list",
+                   class: "space-y-2",
+                   data: {
+                     controller: "sortable-waypoints"
+                   } do
                 if @waypoints.empty?
                   div class: "text-gray-500 text-sm italic" do
                     "No waypoints set. Click on the map to add waypoints."
                   end
                 else
                   @waypoints.each do |waypoint|
-                    div class: "flex items-center justify-between p-3 bg-gray-50 rounded-md" do
+                    div class: "flex items-center justify-between p-3 bg-gray-50 rounded-md cursor-move hover:bg-gray-100 transition-colors select-none",
+                         data: {
+                           sortable_waypoints_target: "item",
+                           waypoint_id: waypoint.id,
+                           position: waypoint.position,
+                           latitude: waypoint.latitude.to_f,
+                           longitude: waypoint.longitude.to_f
+                         } do
                       div class: "flex items-center" do
-                        div class: "w-6 h-6 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center mr-3" do
+                        # Drag handle
+                        div class: "mr-3 text-gray-400 hover:text-gray-600" do
+                          svg_icon path_d: "M10 6h4v1H10V6zM10 8h4v1H10V8zM10 10h4v1H10v-1zM8 6H6v1h2V6zM8 8H6v1h2V8zM8 10H6v1h2v-1z",
+                                   class: "w-4 h-4",
+                                   viewBox: "0 0 20 20"
+                        end
+                        div class: "w-6 h-6 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center mr-3 waypoint-position-badge" do
                           waypoint.position.to_s
                         end
                         div class: "text-sm" do
-                          div class: "font-medium text-gray-900" do
+                          div class: "font-medium text-gray-900 waypoint-position-text" do
                             "Waypoint #{waypoint.position}"
                           end
                           div class: "text-gray-600" do
