@@ -64,6 +64,7 @@ export default class extends Controller {
       await this.displayRoute()
       this.loadExistingWaypoints()
       this.setupMapClickListener()
+      this.bindNameInputEvents()
     } catch (error) {
       console.error('Error displaying route:', error)
       this.showError('Unable to display route. Please check the location names.')
@@ -85,7 +86,8 @@ export default class extends Controller {
           id: waypointData.id || ++this.waypointCounter,
           latitude: waypointData.latitude,
           longitude: waypointData.longitude,
-          position: waypointData.position
+          position: waypointData.position,
+          name: waypointData.name || `Waypoint ${waypointData.position}`
         }
 
         // Create draggable waypoint marker
@@ -93,7 +95,7 @@ export default class extends Controller {
           icon: this.createWaypointIcon(waypoint.position),
           draggable: true
         }).addTo(this.map)
-          .bindPopup(`<strong>Waypoint ${waypoint.position}</strong><br>Drag to reposition, click to remove`)
+          .bindPopup(`<strong>${waypoint.name}</strong><br>Drag to reposition, click to remove`)
 
         // Add click handler to remove waypoint
         marker.on('click', (e) => {
@@ -185,7 +187,8 @@ export default class extends Controller {
       id: this.waypointCounter,
       latitude: lat,
       longitude: lng,
-      position: this.waypoints.length + 1
+      position: this.waypoints.length + 1,
+      name: `Waypoint ${this.waypoints.length + 1}`
     }
 
     // Create draggable waypoint marker
@@ -193,7 +196,7 @@ export default class extends Controller {
       icon: this.createWaypointIcon(waypoint.position),
       draggable: true
     }).addTo(this.map)
-      .bindPopup(`<strong>Waypoint ${waypoint.position}</strong><br>Drag to reposition, click to remove`)
+      .bindPopup(`<strong>${waypoint.name}</strong><br>Drag to reposition, click to remove`)
 
     // Add click handler to remove waypoint
     marker.on('click', (e) => {
@@ -227,8 +230,12 @@ export default class extends Controller {
     // Reorder remaining waypoints
     this.waypoints.forEach((w, index) => {
       w.position = index + 1
+      // Update name if it was just the default positional name
+      if (w.name.match(/^Waypoint \d+$/)) {
+        w.name = `Waypoint ${w.position}`
+      }
       w.marker.setIcon(this.createWaypointIcon(w.position))
-      w.marker.setPopupContent(`<strong>Waypoint ${w.position}</strong><br>Drag to reposition, click to remove`)
+      w.marker.setPopupContent(`<strong>${w.name}</strong><br>Drag to reposition, click to remove`)
     })
 
     this.updateWaypointsData()
@@ -240,7 +247,8 @@ export default class extends Controller {
     const waypointsData = this.waypoints.map(w => ({
       latitude: w.latitude,
       longitude: w.longitude,
-      position: w.position
+      position: w.position,
+      name: w.name
     }))
 
     const waypointsField = document.getElementById('waypoints-data')
@@ -319,6 +327,8 @@ export default class extends Controller {
       if (sortableController && sortableController.makeItemsSortable) {
         setTimeout(() => {
           sortableController.makeItemsSortable()
+          // Rebind name input events after DOM updates
+          this.bindNameInputEvents()
         }, 10)
       }
     }
@@ -339,6 +349,7 @@ export default class extends Controller {
     element.dataset.position = waypoint.position.toString()
     element.dataset.latitude = waypoint.latitude.toString()
     element.dataset.longitude = waypoint.longitude.toString()
+    element.dataset.name = waypoint.name
 
     // Update position badge
     const badge = element.querySelector('.waypoint-position-badge')
@@ -346,14 +357,14 @@ export default class extends Controller {
       badge.textContent = waypoint.position.toString()
     }
 
-    // Update position text
-    const text = element.querySelector('.waypoint-position-text')
-    if (text) {
-      text.textContent = `Waypoint ${waypoint.position}`
+    // Update name input
+    const nameInput = element.querySelector('.waypoint-name-input')
+    if (nameInput) {
+      nameInput.value = waypoint.name
     }
 
     // Update coordinates
-    const coords = element.querySelector('.text-gray-600')
+    const coords = element.querySelector('.waypoint-coordinates')
     if (coords) {
       coords.textContent = `${waypoint.latitude.toFixed(6)}, ${waypoint.longitude.toFixed(6)}`
     }
@@ -367,10 +378,11 @@ export default class extends Controller {
     element.setAttribute('data-position', waypoint.position.toString())
     element.setAttribute('data-latitude', waypoint.latitude.toString())
     element.setAttribute('data-longitude', waypoint.longitude.toString())
+    element.setAttribute('data-name', waypoint.name)
     element.draggable = true
 
     element.innerHTML = `
-      <div class="flex items-center">
+      <div class="flex items-center flex-1">
         <div class="mr-3 text-gray-400 hover:text-gray-600 cursor-move">
           <svg class="w-4 h-4" viewBox="0 0 20 20">
             <path d="M10 6h4v1H10V6zM10 8h4v1H10V8zM10 10h4v1H10v-1zM8 6H6v1h2V6zM8 8H6v1h2V8zM8 10H6v1h2v-1z" fill="currentColor"/>
@@ -379,12 +391,22 @@ export default class extends Controller {
         <div class="w-6 h-6 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center mr-3 waypoint-position-badge">
           ${waypoint.position}
         </div>
-        <div class="text-sm">
-          <div class="font-medium text-gray-900 waypoint-position-text">Waypoint ${waypoint.position}</div>
-          <div class="text-gray-600">${waypoint.latitude.toFixed(6)}, ${waypoint.longitude.toFixed(6)}</div>
+        <div class="flex-1">
+          <div class="flex items-center mb-1">
+            <input type="text"
+                   value="${waypoint.name}"
+                   class="waypoint-name-input text-sm font-medium text-gray-900 bg-transparent border-none outline-none focus:bg-white focus:border focus:border-blue-300 focus:rounded px-2 py-1 -ml-2"
+                   placeholder="Waypoint name"
+                   maxlength="100">
+          </div>
+          <div class="text-xs text-gray-600 waypoint-coordinates">${waypoint.latitude.toFixed(6)}, ${waypoint.longitude.toFixed(6)}</div>
         </div>
       </div>
     `
+
+    // Add event listener for name changes
+    const nameInput = element.querySelector('.waypoint-name-input')
+    this.addNameInputListeners(nameInput)
 
     return element
   }
@@ -412,7 +434,7 @@ export default class extends Controller {
       waypoint.longitude = lng
 
       // Update popup content
-      marker.setPopupContent(`<strong>Waypoint ${waypoint.position}</strong><br>Drag to reposition, click to remove`)
+      marker.setPopupContent(`<strong>${waypoint.name}</strong><br>Drag to reposition, click to remove`)
 
       // Update data and refresh route
       this.updateWaypointsData()
@@ -658,17 +680,21 @@ export default class extends Controller {
       // Find the existing waypoint by ID
       const existingWaypoint = this.waypoints.find(w => w.id === waypointId)
       if (existingWaypoint) {
+        // Get current name from DOM element or use existing name
+        const currentName = item.dataset.name || existingWaypoint.name
+
         // Update the position and add to reordered array
         const updatedWaypoint = {
           ...existingWaypoint,
-          position: newPosition
+          position: newPosition,
+          name: currentName
         }
         reorderedWaypoints.push(updatedWaypoint)
 
         // Update the marker icon and popup
         if (existingWaypoint.marker) {
           existingWaypoint.marker.setIcon(this.createWaypointIcon(newPosition))
-          existingWaypoint.marker.setPopupContent(`<strong>Waypoint ${newPosition}</strong><br>Drag to reposition, click to remove`)
+          existingWaypoint.marker.setPopupContent(`<strong>${currentName}</strong><br>Drag to reposition, click to remove`)
         }
       }
     })
@@ -680,6 +706,62 @@ export default class extends Controller {
     this.updateWaypointsData()
     // Use debounced route update for reordering operations
     this.debouncedUpdateRoute()
+  }
+
+  bindNameInputEvents() {
+    // Bind events to existing waypoint name inputs
+    const nameInputs = document.querySelectorAll('.waypoint-name-input')
+    nameInputs.forEach(input => {
+      this.addNameInputListeners(input)
+    })
+  }
+
+  addNameInputListeners(input) {
+    const waypointElement = input.closest('[data-waypoint-id]')
+    if (!waypointElement) return
+
+    const waypointId = parseInt(waypointElement.dataset.waypointId)
+    const waypoint = this.waypoints.find(w => w.id === waypointId)
+
+    if (!waypoint) return
+
+    // Remove existing listeners to prevent duplicates
+    input.removeEventListener('input', this.handleNameInput)
+    input.removeEventListener('blur', this.handleNameBlur)
+
+    // Create bound handlers
+    const handleInput = (e) => {
+      waypoint.name = e.target.value || `Waypoint ${waypoint.position}`
+      waypointElement.setAttribute('data-name', waypoint.name)
+      this.updateWaypointsData()
+
+      // Update map marker popup if it exists
+      if (waypoint.marker) {
+        waypoint.marker.setPopupContent(`<strong>${waypoint.name}</strong><br>Drag to reposition, click to remove`)
+      }
+    }
+
+    const handleBlur = (e) => {
+      if (!e.target.value.trim()) {
+        e.target.value = `Waypoint ${waypoint.position}`
+        waypoint.name = e.target.value
+        waypointElement.setAttribute('data-name', waypoint.name)
+        this.updateWaypointsData()
+
+        // Update map marker popup
+        if (waypoint.marker) {
+          waypoint.marker.setPopupContent(`<strong>${waypoint.name}</strong><br>Drag to reposition, click to remove`)
+        }
+      }
+    }
+
+    // Add event listeners
+    input.addEventListener('input', handleInput)
+    input.addEventListener('blur', handleBlur)
+
+    // Store handlers for cleanup
+    input.handleNameInput = handleInput
+    input.handleNameBlur = handleBlur
   }
 
   showError(message) {

@@ -131,7 +131,8 @@ class RoutesController < ApplicationController
           @route.waypoints.create!(
             latitude: waypoint_data["latitude"],
             longitude: waypoint_data["longitude"],
-            position: waypoint_data["position"]
+            position: waypoint_data["position"],
+            name: waypoint_data["name"]
           )
         end
 

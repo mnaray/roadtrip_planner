@@ -163,9 +163,11 @@ class Routes::EditWaypointsComponent < ApplicationComponent
                            waypoint_id: waypoint.id,
                            position: waypoint.position,
                            latitude: waypoint.latitude.to_f,
-                           longitude: waypoint.longitude.to_f
-                         } do
-                      div class: "flex items-center" do
+                           longitude: waypoint.longitude.to_f,
+                           name: waypoint.name.presence || "Waypoint #{waypoint.position}"
+                         },
+                         draggable: true do
+                      div class: "flex items-center flex-1" do
                         # Drag handle
                         div class: "mr-3 text-gray-400 hover:text-gray-600 cursor-move" do
                           svg_icon path_d: "M10 6h4v1H10V6zM10 8h4v1H10V8zM10 10h4v1H10v-1zM8 6H6v1h2V6zM8 8H6v1h2V8zM8 10H6v1h2v-1z",
@@ -175,11 +177,15 @@ class Routes::EditWaypointsComponent < ApplicationComponent
                         div class: "w-6 h-6 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center mr-3 waypoint-position-badge" do
                           waypoint.position.to_s
                         end
-                        div class: "text-sm" do
-                          div class: "font-medium text-gray-900 waypoint-position-text" do
-                            "Waypoint #{waypoint.position}"
+                        div class: "flex-1" do
+                          div class: "flex items-center mb-1" do
+                            input type: "text",
+                                  value: waypoint.name.presence || "Waypoint #{waypoint.position}",
+                                  class: "waypoint-name-input text-sm font-medium text-gray-900 bg-transparent border-none outline-none focus:bg-white focus:border focus:border-blue-300 focus:rounded px-2 py-1 -ml-2",
+                                  placeholder: "Waypoint name",
+                                  maxlength: 100
                           end
-                          div class: "text-gray-600" do
+                          div class: "text-xs text-gray-600 waypoint-coordinates" do
                             "#{waypoint.latitude.to_f.round(6)}, #{waypoint.longitude.to_f.round(6)}"
                           end
                         end
@@ -218,7 +224,8 @@ class Routes::EditWaypointsComponent < ApplicationComponent
         id: waypoint.id,
         latitude: waypoint.latitude.to_f,
         longitude: waypoint.longitude.to_f,
-        position: waypoint.position
+        position: waypoint.position,
+        name: waypoint.name.presence || "Waypoint #{waypoint.position}"
       }
     end.to_json
   end
