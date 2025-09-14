@@ -3,6 +3,7 @@ ENV['RAILS_ENV'] ||= 'test'
 require_relative '../config/environment'
 abort("The Rails environment is running in production mode!") if Rails.env.production?
 require 'rspec/rails'
+require 'selenium-webdriver'
 
 # Load support files
 Rails.root.glob('spec/support/**/*.rb').sort_by(&:to_s).each { |f| require f }
@@ -33,6 +34,27 @@ RSpec.configure do |config|
   # Configure system tests
   config.before(:each, type: :system) do
     driven_by :rack_test
+    Capybara.default_host = 'http://localhost'
+  end
+
+# Register Chrome driver once
+Capybara.register_driver :headless_chrome do |app|
+  options = Selenium::WebDriver::Chrome::Options.new
+  options.add_argument('--headless')
+  options.add_argument('--disable-gpu')
+  options.add_argument('--disable-dev-shm-usage')
+  options.add_argument('--no-sandbox')
+  options.add_argument('--disable-extensions')
+  options.add_argument('--disable-background-timer-throttling')
+  options.add_argument('--disable-backgrounding-occluded-windows')
+  options.add_argument('--disable-renderer-backgrounding')
+
+  Capybara::Selenium::Driver.new(app, browser: :chrome, options: options)
+end
+
+  # Configure JavaScript tests to use Selenium Chrome headless
+  config.before(:each, type: :system, js: true) do
+    driven_by :headless_chrome
     Capybara.default_host = 'http://localhost'
   end
 

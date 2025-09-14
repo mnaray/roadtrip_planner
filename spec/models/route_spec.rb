@@ -63,7 +63,11 @@ RSpec.describe Route, type: :model do
   end
 
   describe 'scopes' do
-    before { Route.delete_all }
+    before do
+      # Delete waypoints first to avoid foreign key constraint violation
+      Waypoint.delete_all
+      Route.delete_all
+    end
 
     let(:user1) { create(:user) }
     let(:user2) { create(:user) }
