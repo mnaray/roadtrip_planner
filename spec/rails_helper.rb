@@ -5,6 +5,7 @@ abort("The Rails environment is running in production mode!") if Rails.env.produ
 require 'rspec/rails'
 require 'selenium-webdriver'
 require 'webmock/rspec'
+require 'rails-controller-testing'
 
 # Load support files
 Rails.root.glob('spec/support/**/*.rb').sort_by(&:to_s).each { |f| require f }
@@ -18,6 +19,10 @@ end
 RSpec.configure do |config|
   # Include FactoryBot methods
   config.include FactoryBot::Syntax::Methods
+
+  # Include Rails controller testing methods for assigns support
+  config.include Rails::Controller::Testing::TestProcess, type: :request
+  config.include Rails::Controller::Testing::TemplateAssertions, type: :request
 
   # Clear class caching to prevent class reloading issues
   config.before(:suite) do

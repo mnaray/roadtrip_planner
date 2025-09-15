@@ -3,7 +3,7 @@ require 'webmock/rspec'
 # Disable all real HTTP connections except localhost for Capybara
 WebMock.disable_net_connect!(
   allow_localhost: true,
-  allow: ['chromedriver.storage.googleapis.com', 'googlechromelabs.github.io']
+  allow: [ 'chromedriver.storage.googleapis.com', 'googlechromelabs.github.io' ]
 )
 
 RSpec.configure do |config|
@@ -22,37 +22,37 @@ RSpec.configure do |config|
           end_lon, end_lat = coords[-1]
 
           route_coords = [
-            [start_lon, start_lat],
-            [start_lon * 0.7 + end_lon * 0.3, start_lat * 0.7 + end_lat * 0.3],
-            [start_lon * 0.3 + end_lon * 0.7, start_lat * 0.3 + end_lat * 0.7],
-            [end_lon, end_lat]
+            [ start_lon, start_lat ],
+            [ start_lon * 0.7 + end_lon * 0.3, start_lat * 0.7 + end_lat * 0.3 ],
+            [ start_lon * 0.3 + end_lon * 0.7, start_lat * 0.3 + end_lat * 0.7 ],
+            [ end_lon, end_lat ]
           ]
 
           {
             code: "Ok",
-            routes: [{
+            routes: [ {
               geometry: {
                 type: "LineString",
                 coordinates: route_coords
               },
-              legs: [{
+              legs: [ {
                 summary: "",
                 weight: 3600,
                 duration: 3600,
                 steps: [],
                 distance: 350000
-              }],
+              } ],
               weight_name: "routability",
               weight: 3600,
               duration: 3600,
               distance: 350000
-            }],
+            } ],
             waypoints: coords.map do |lon, lat|
               {
                 hint: "",
                 distance: 4.1,
                 name: "Street Name",
-                location: [lon, lat]
+                location: [ lon, lat ]
               }
             end
           }.to_json
@@ -72,36 +72,36 @@ RSpec.configure do |config|
           # Return appropriate coordinates based on location
           lat, lon = case query
           when /San Francisco/i
-            [37.7749, -122.4194]
+            [ 37.7749, -122.4194 ]
           when /Los Angeles/i
-            [34.0522, -118.2437]
+            [ 34.0522, -118.2437 ]
           when /New York/i
-            [40.7128, -74.0060]
+            [ 40.7128, -74.0060 ]
           when /Chicago/i
-            [41.8781, -87.6298]
+            [ 41.8781, -87.6298 ]
           when /Boston/i
-            [42.3601, -71.0589]
+            [ 42.3601, -71.0589 ]
           when /Zürich/i
-            [47.3769, 8.5417]
+            [ 47.3769, 8.5417 ]
           when /München|Munich/i
-            [48.1351, 11.5820]
+            [ 48.1351, 11.5820 ]
           else
-            [0.0, 0.0]
+            [ 0.0, 0.0 ]
           end
 
-          [{
+          [ {
             place_id: 123456789,
             licence: "Data © OpenStreetMap contributors",
             osm_type: "node",
             osm_id: 123456789,
-            boundingbox: [lat - 0.1, lat + 0.1, lon - 0.1, lon + 0.1],
+            boundingbox: [ lat - 0.1, lat + 0.1, lon - 0.1, lon + 0.1 ],
             lat: lat.to_s,
             lon: lon.to_s,
             display_name: query,
             class: "place",
             type: "city",
             importance: 0.75
-          }].to_json
+          } ].to_json
         end,
         headers: { 'Content-Type' => 'application/json' }
       )
@@ -121,41 +121,41 @@ RSpec.configure do |config|
 
           # Generate more points for highway avoidance route
           route_coords = [
-            [start_lon, start_lat],
-            [start_lon * 0.9 + end_lon * 0.1, start_lat * 0.9 + end_lat * 0.1],
-            [start_lon * 0.7 + end_lon * 0.3, start_lat * 0.7 + end_lat * 0.3],
-            [start_lon * 0.5 + end_lon * 0.5, start_lat * 0.5 + end_lat * 0.5],
-            [start_lon * 0.3 + end_lon * 0.7, start_lat * 0.3 + end_lat * 0.7],
-            [start_lon * 0.1 + end_lon * 0.9, start_lat * 0.1 + end_lat * 0.9],
-            [end_lon, end_lat]
+            [ start_lon, start_lat ],
+            [ start_lon * 0.9 + end_lon * 0.1, start_lat * 0.9 + end_lat * 0.1 ],
+            [ start_lon * 0.7 + end_lon * 0.3, start_lat * 0.7 + end_lat * 0.3 ],
+            [ start_lon * 0.5 + end_lon * 0.5, start_lat * 0.5 + end_lat * 0.5 ],
+            [ start_lon * 0.3 + end_lon * 0.7, start_lat * 0.3 + end_lat * 0.7 ],
+            [ start_lon * 0.1 + end_lon * 0.9, start_lat * 0.1 + end_lat * 0.9 ],
+            [ end_lon, end_lat ]
           ]
 
           {
             type: "FeatureCollection",
-            features: [{
+            features: [ {
               type: "Feature",
               properties: {
-                segments: [{
+                segments: [ {
                   distance: 450000,
                   duration: 5400,
                   steps: []
-                }],
+                } ],
                 summary: {
                   distance: 450000,
                   duration: 5400
                 },
-                way_points: [0, route_coords.length - 1]
+                way_points: [ 0, route_coords.length - 1 ]
               },
               geometry: {
                 type: "LineString",
                 coordinates: route_coords
               }
-            }],
+            } ],
             bbox: [
-              [start_lon, start_lat].min,
-              [start_lon, start_lat].min,
-              [end_lon, end_lat].max,
-              [end_lon, end_lat].max
+              [ start_lon, start_lat ].min,
+              [ start_lon, start_lat ].min,
+              [ end_lon, end_lat ].max,
+              [ end_lon, end_lat ].max
             ],
             metadata: {
               attribution: "openrouteservice.org",
@@ -180,9 +180,9 @@ RSpec.configure do |config|
           # Parse the JSON body to get coordinates
           begin
             body = JSON.parse(request.body)
-            coords = body["coordinates"] || [[0.0, 0.0], [0.0, 0.0]]
+            coords = body["coordinates"] || [ [ 0.0, 0.0 ], [ 0.0, 0.0 ] ]
           rescue
-            coords = [[0.0, 0.0], [0.0, 0.0]]
+            coords = [ [ 0.0, 0.0 ], [ 0.0, 0.0 ] ]
           end
 
           start_lon, start_lat = coords[0]
@@ -190,41 +190,41 @@ RSpec.configure do |config|
 
           # Generate more points for highway avoidance route (longer route)
           route_coords = [
-            [start_lon, start_lat],
-            [start_lon * 0.9 + end_lon * 0.1, start_lat * 0.9 + end_lat * 0.1],
-            [start_lon * 0.7 + end_lon * 0.3, start_lat * 0.7 + end_lat * 0.3],
-            [start_lon * 0.5 + end_lon * 0.5, start_lat * 0.5 + end_lat * 0.5],
-            [start_lon * 0.3 + end_lon * 0.7, start_lat * 0.3 + end_lat * 0.7],
-            [start_lon * 0.1 + end_lon * 0.9, start_lat * 0.1 + end_lat * 0.9],
-            [end_lon, end_lat]
+            [ start_lon, start_lat ],
+            [ start_lon * 0.9 + end_lon * 0.1, start_lat * 0.9 + end_lat * 0.1 ],
+            [ start_lon * 0.7 + end_lon * 0.3, start_lat * 0.7 + end_lat * 0.3 ],
+            [ start_lon * 0.5 + end_lon * 0.5, start_lat * 0.5 + end_lat * 0.5 ],
+            [ start_lon * 0.3 + end_lon * 0.7, start_lat * 0.3 + end_lat * 0.7 ],
+            [ start_lon * 0.1 + end_lon * 0.9, start_lat * 0.1 + end_lat * 0.9 ],
+            [ end_lon, end_lat ]
           ]
 
           {
             type: "FeatureCollection",
-            features: [{
+            features: [ {
               type: "Feature",
               properties: {
-                segments: [{
+                segments: [ {
                   distance: 450000,
                   duration: 5400,
                   steps: []
-                }],
+                } ],
                 summary: {
                   distance: 450000,
                   duration: 5400
                 },
-                way_points: [0, route_coords.length - 1]
+                way_points: [ 0, route_coords.length - 1 ]
               },
               geometry: {
                 type: "LineString",
                 coordinates: route_coords
               }
-            }],
+            } ],
             bbox: [
-              [start_lon, start_lat].min,
-              [start_lon, start_lat].min,
-              [end_lon, end_lat].max,
-              [end_lon, end_lat].max
+              [ start_lon, start_lat ].min,
+              [ start_lon, start_lat ].min,
+              [ end_lon, end_lat ].max,
+              [ end_lon, end_lat ].max
             ],
             metadata: {
               attribution: "openrouteservice.org",

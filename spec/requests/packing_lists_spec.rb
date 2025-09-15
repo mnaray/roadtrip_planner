@@ -177,7 +177,7 @@ RSpec.describe PackingListsController, type: :request do
       get edit_road_trip_packing_list_path(road_trip, other_users_list)
 
       expect(response).to redirect_to(road_trip_packing_lists_path(road_trip))
-      expect(flash[:alert]).to eq("You can only edit your own packing lists.")
+      expect(flash[:alert]).to eq("Packing list not found.")
     end
   end
 
@@ -212,7 +212,7 @@ RSpec.describe PackingListsController, type: :request do
       patch road_trip_packing_list_path(road_trip, other_users_list), params: update_params
 
       expect(response).to redirect_to(road_trip_packing_lists_path(road_trip))
-      expect(flash[:alert]).to eq("You can only edit your own packing lists.")
+      expect(flash[:alert]).to eq("Packing list not found.")
     end
 
     context 'with invalid params' do
@@ -265,7 +265,7 @@ RSpec.describe PackingListsController, type: :request do
       end.not_to change(PackingList, :count)
 
       expect(response).to redirect_to(road_trip_packing_lists_path(road_trip))
-      expect(flash[:alert]).to eq("You can only edit your own packing lists.")
+      expect(flash[:alert]).to eq("Packing list not found.")
     end
   end
 

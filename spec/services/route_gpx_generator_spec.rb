@@ -86,7 +86,7 @@ RSpec.describe RouteGpxGenerator, type: :service do
               status: 200,
               body: {
                 code: "Ok",
-                routes: [{
+                routes: [ {
                   geometry: {
                     type: "LineString",
                     coordinates: [
@@ -96,10 +96,10 @@ RSpec.describe RouteGpxGenerator, type: :service do
                       [ -71.0589, 42.3601 ]  # Boston
                     ]
                   },
-                  legs: [{ distance: 350000, duration: 14400, steps: [] }],
+                  legs: [ { distance: 350000, duration: 14400, steps: [] } ],
                   distance: 350000,
                   duration: 14400
-                }],
+                } ],
                 waypoints: [
                   { location: [ -74.0060, 40.7128 ] },
                   { location: [ -71.0589, 42.3601 ] }
@@ -251,7 +251,7 @@ RSpec.describe RouteGpxGenerator, type: :service do
             status: 200,
             body: {
               code: "Ok",
-              routes: [{
+              routes: [ {
                 geometry: {
                   type: "LineString",
                   coordinates: [
@@ -259,10 +259,10 @@ RSpec.describe RouteGpxGenerator, type: :service do
                     [ -71.0589, 42.3601 ]
                   ]
                 },
-                legs: [{ distance: 250500, duration: 13500, steps: [] }],
+                legs: [ { distance: 250500, duration: 13500, steps: [] } ],
                 distance: 250500, # 250.5 km in meters
                 duration: 13500   # 3.75 hours in seconds
-              }],
+              } ],
               waypoints: [
                 { location: [ -74.0060, 40.7128 ] },
                 { location: [ -71.0589, 42.3601 ] }

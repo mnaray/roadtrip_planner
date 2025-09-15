@@ -217,21 +217,21 @@ RSpec.configure do |config|
     allow_any_instance_of(RouteGpxExporter).to receive(:geocode) do |_, location|
       case location
       when /San Francisco/i
-        [37.7749, -122.4194]
+        [ 37.7749, -122.4194 ]
       when /Los Angeles/i
-        [34.0522, -118.2437]
+        [ 34.0522, -118.2437 ]
       when /New York/i
-        [40.7128, -74.0060]
+        [ 40.7128, -74.0060 ]
       when /Chicago/i
-        [41.8781, -87.6298]
+        [ 41.8781, -87.6298 ]
       when /Boston/i
-        [42.3601, -71.0589]
+        [ 42.3601, -71.0589 ]
       when /Zürich/i
-        [47.3769, 8.5417]
+        [ 47.3769, 8.5417 ]
       when /München/i, /Munich/i
-        [48.1351, 11.5820]
+        [ 48.1351, 11.5820 ]
       else
-        [0.0, 0.0]
+        [ 0.0, 0.0 ]
       end
     end
 

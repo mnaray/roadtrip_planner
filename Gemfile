@@ -69,4 +69,6 @@ group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
   gem "selenium-webdriver"
+  # Controller testing support for assigns method
+  gem "rails-controller-testing"
 end
