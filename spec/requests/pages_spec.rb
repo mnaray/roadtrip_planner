@@ -101,7 +101,7 @@ RSpec.describe "Pages", type: :request do
         get about_path
         expect(response.body).to include("Create and manage multiple road trips")
         expect(response.body).to include("Share road trips with friends and family")
-        expect(response.body).to include("Plan detailed routes with waypoints and destinations together")
+        expect(response.body).to include("Plan detailed routes with interactive waypoint placement on maps")
         expect(response.body).to include("Create and manage shared packing lists with your travel companions")
       end
 

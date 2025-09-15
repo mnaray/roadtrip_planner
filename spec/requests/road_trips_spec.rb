@@ -144,12 +144,16 @@ RSpec.describe "RoadTrips", type: :request do
 
         it "associates road trip with current user" do
           post road_trips_path, params: { road_trip: { name: "Test Road Trip" } }
-          expect(RoadTrip.last.user).to eq(user)
+          road_trip = RoadTrip.find_by(name: "Test Road Trip", user: user)
+          expect(road_trip).not_to be_nil
+          expect(road_trip.user).to eq(user)
         end
 
         it "redirects to road trip show page" do
           post road_trips_path, params: { road_trip: { name: "Test Road Trip" } }
-          expect(response).to redirect_to(road_trip_path(RoadTrip.last))
+          road_trip = RoadTrip.find_by(name: "Test Road Trip", user: user)
+          expect(road_trip).not_to be_nil
+          expect(response).to redirect_to(road_trip_path(road_trip))
           follow_redirect!
           expect(response.body).to include("Road trip was successfully created")
         end

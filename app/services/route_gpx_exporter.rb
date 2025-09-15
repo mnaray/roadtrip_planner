@@ -123,8 +123,8 @@ class RouteGpxExporter
       xml.wpt(lat: end_point[:lat], lon: end_point[:lon]) do
         xml.ele end_point[:ele] if end_point[:ele]
 
-        # Calculate arrival time based on duration
-        arrival_time = @route.datetime + @route.duration_hours.hours
+        # Calculate arrival time based on duration (including waypoints)
+        arrival_time = @route.datetime + @route.current_duration_hours.hours
         xml.time arrival_time.utc.iso8601
 
         xml.name "End: #{@route.destination}"
@@ -372,11 +372,11 @@ class RouteGpxExporter
   # Calculate interpolated time for a track point
   def calculate_point_time(index)
     return @route.datetime if index == 0
-    return @route.datetime + @route.duration_hours.hours if index == @track_points.length - 1
+    return @route.datetime + @route.current_duration_hours.hours if index == @track_points.length - 1
 
     # Interpolate time based on position in route
     progress = index.to_f / (@track_points.length - 1)
-    @route.datetime + (progress * @route.duration_hours).hours
+    @route.datetime + (progress * @route.current_duration_hours).hours
   end
 
   # Generate route name
@@ -389,7 +389,7 @@ class RouteGpxExporter
     parts = []
     parts << "Road trip route from #{@route.starting_location} to #{@route.destination}"
     parts << "Distance: #{@route.distance_in_km} km" if @route.distance_in_km
-    parts << "Duration: #{format_duration(@route.duration_hours)}" if @route.duration_hours
+    parts << "Duration: #{format_duration(@route.current_duration_hours)}" if @route.current_duration_hours
     parts << "Scheduled: #{@route.datetime.strftime('%B %d, %Y at %l:%M %p')}"
     parts << "Trip: #{@route.road_trip.name}" if @route.road_trip
 

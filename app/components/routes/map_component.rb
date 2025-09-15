@@ -74,7 +74,8 @@ class Routes::MapComponent < ApplicationComponent
                data: {
                  controller: "route-map",
                  route_map_start_location_value: @route.starting_location,
-                 route_map_end_location_value: @route.destination
+                 route_map_end_location_value: @route.destination,
+                 route_map_waypoints_value: waypoints_json
                } do
             # Map will be rendered here by Stimulus controller
           end
@@ -122,10 +123,10 @@ class Routes::MapComponent < ApplicationComponent
                 "Duration"
               end
               p class: "text-lg font-semibold text-gray-900" do
-                if @route.duration_hours < 1
-                  "#{(@route.duration_hours * 60).round} minutes"
+                if @route.current_duration_hours < 1
+                  "#{(@route.current_duration_hours * 60).round} minutes"
                 else
-                  "#{@route.duration_hours.round(1)} hours"
+                  "#{@route.current_duration_hours.round(1)} hours"
                 end
               end
               p class: "text-sm text-gray-600" do
@@ -193,4 +194,14 @@ class Routes::MapComponent < ApplicationComponent
   end
 
   private
+
+  def waypoints_json
+    @route.waypoints.order(:position).map do |waypoint|
+      {
+        latitude: waypoint.latitude.to_f,
+        longitude: waypoint.longitude.to_f,
+        position: waypoint.position
+      }
+    end.to_json
+  end
 end

@@ -101,7 +101,7 @@ RSpec.describe "About Page Navigation", type: :system do
       it "displays features list" do
         expect(page).to have_content("Create and manage multiple road trips")
         expect(page).to have_content("Share road trips with friends and family")
-        expect(page).to have_content("Plan detailed routes with waypoints and destinations together")
+        expect(page).to have_content("Plan detailed routes with interactive waypoint placement on maps")
         expect(page).to have_content("Create and manage shared packing lists with your travel companions")
       end
 

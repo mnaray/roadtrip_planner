@@ -72,9 +72,9 @@ RSpec.describe "Routes", type: :request do
             )
           end
 
-          it "redirects to confirm_route page" do
+          it "redirects to set_waypoints page" do
             post road_trip_routes_path(road_trip), params: valid_params
-            expect(response).to redirect_to(confirm_route_path)
+            expect(response).to redirect_to(set_waypoints_path)
           end
 
           it "does not create a route yet" do
@@ -135,8 +135,17 @@ RSpec.describe "Routes", type: :request do
               destination: "Los Angeles, CA"
             }
           }
-          # The create action should set session data and redirect to confirm_route
-          expect(response).to redirect_to(confirm_route_path)
+          # The create action should set session data and redirect to set_waypoints
+          expect(response).to redirect_to(set_waypoints_path)
+
+          # Then go through the waypoints flow to get to confirm route
+          # For these tests, we'll manually set the session data to simulate completing waypoints
+          session[:route_data] = {
+            "road_trip_id" => road_trip.id,
+            "starting_location" => "San Francisco, CA",
+            "destination" => "Los Angeles, CA",
+            "waypoints" => []
+          }
         end
 
         it "returns successful response" do
@@ -202,7 +211,8 @@ RSpec.describe "Routes", type: :request do
           }
 
           post approve_route_path, params: { datetime: datetime_param }
-          new_route = Route.last
+          new_route = Route.order(created_at: :desc).first
+          expect(new_route).not_to be_nil
           expect(new_route.user).to eq(user)
           expect(new_route.road_trip).to eq(road_trip)
         end
