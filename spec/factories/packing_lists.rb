@@ -2,6 +2,8 @@ FactoryBot.define do
   factory :packing_list do
     sequence(:name) { |n| "Packing List #{n}" }
     association :road_trip
+    association :user
+    visibility { 'private' }
 
     trait :with_items do
       after(:create) do |packing_list|
@@ -15,6 +17,14 @@ FactoryBot.define do
 
     trait :electronics_list do
       name { "Electronics & Gadgets" }
+    end
+
+    trait :public_list do
+      visibility { 'public' }
+    end
+
+    trait :private_list do
+      visibility { 'private' }
     end
   end
 end
