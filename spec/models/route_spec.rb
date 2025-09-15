@@ -473,7 +473,7 @@ RSpec.describe Route, type: :model do
           waypoint = create(:waypoint, route: route, latitude: 40.7128, longitude: -74.0060)
 
           expect(RouteDistanceCalculator).to receive(:new)
-            .with(route.starting_location, route.destination, [waypoint], avoid_motorways: true)
+            .with(route.starting_location, route.destination, [ waypoint ], avoid_motorways: true)
             .and_call_original
 
           route.send(:calculate_route_metrics)

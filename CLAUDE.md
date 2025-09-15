@@ -123,6 +123,7 @@ end
 - Road trip sharing with other users (add participants, leave functionality, access control)
 - Fuel economy calculator with real-time cost calculations (client-side JavaScript)
 - Route waypoints for route manipulation (interactive map-based waypoint setting, ordering, removal)
+- Motorway avoidance option for routes (checkbox in route creation forms affects route calculation)
 
 ### 🚧 In Progress
 - None currently
