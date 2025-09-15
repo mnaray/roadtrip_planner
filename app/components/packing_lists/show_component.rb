@@ -63,27 +63,72 @@ class PackingLists::ShowComponent < ApplicationComponent
             h1 class: "text-3xl font-bold text-gray-900" do
               @packing_list.name
             end
+
+            # Visibility and ownership info
+            div class: "mt-2 flex items-center space-x-4 text-sm text-gray-600" do
+              div class: "flex items-center" do
+                if @packing_list.private?
+                  svg_icon path_d: "M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88",
+                           class: "w-4 h-4 mr-1 text-gray-500",
+                           stroke_linecap: "round",
+                           stroke_linejoin: "round",
+                           stroke_width: "1.5"
+                  span { "Private list" }
+                else
+                  svg_icon path_d: "M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z",
+                           class: "w-4 h-4 mr-1 text-blue-500",
+                           stroke_linecap: "round",
+                           stroke_linejoin: "round",
+                           stroke_width: "1.5"
+                  span { "Public list" }
+                end
+              end
+
+              unless @packing_list.owned_by?(@current_user)
+                div class: "flex items-center border-l border-gray-300 pl-4" do
+                  svg_icon path_d: "M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z",
+                           class: "w-4 h-4 mr-1",
+                           stroke_linecap: "round",
+                           stroke_linejoin: "round",
+                           stroke_width: "1.5"
+                  span { "Created by #{@packing_list.user.username}" }
+                end
+              end
+            end
           end
 
           div class: "flex items-center space-x-3" do
-            link_to edit_road_trip_packing_list_path(@road_trip, @packing_list),
-                    class: "inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" do
-              svg_icon path_d: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z",
-                       class: "w-4 h-4 mr-1.5",
-                       stroke_linecap: "round",
-                       stroke_linejoin: "round",
-                       stroke_width: "2"
-              span { "Edit" }
-            end
+            if @packing_list.owned_by?(@current_user)
+              link_to edit_road_trip_packing_list_path(@road_trip, @packing_list),
+                      class: "inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" do
+                svg_icon path_d: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z",
+                         class: "w-4 h-4 mr-1.5",
+                         stroke_linecap: "round",
+                         stroke_linejoin: "round",
+                         stroke_width: "2"
+                span { "Edit" }
+              end
 
-            link_to new_road_trip_packing_list_packing_list_item_path(@road_trip, @packing_list),
-                    class: "inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" do
-              svg_icon path_d: "M12 4v16m8-8H4",
-                       class: "w-4 h-4 mr-1.5",
-                       stroke_linecap: "round",
-                       stroke_linejoin: "round",
-                       stroke_width: "2"
-              span { "Add Item" }
+              link_to new_road_trip_packing_list_packing_list_item_path(@road_trip, @packing_list),
+                      class: "inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" do
+                svg_icon path_d: "M12 4v16m8-8H4",
+                         class: "w-4 h-4 mr-1.5",
+                         stroke_linecap: "round",
+                         stroke_linejoin: "round",
+                         stroke_width: "2"
+                span { "Add Item" }
+              end
+            else
+              # For read-only access, just show a back button
+              link_to road_trip_packing_lists_path(@road_trip),
+                      class: "inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" do
+                svg_icon path_d: "M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18",
+                         class: "w-4 h-4 mr-1.5",
+                         stroke_linecap: "round",
+                         stroke_linejoin: "round",
+                         stroke_width: "2"
+                span { "Back to Lists" }
+              end
             end
           end
         end
@@ -185,23 +230,42 @@ class PackingLists::ShowComponent < ApplicationComponent
     div class: "#{border_class} px-6 py-4" do
       div class: "flex items-center justify-between" do
         div class: "flex items-center space-x-4" do
-          # Checkbox
-          button_to toggle_packed_road_trip_packing_list_packing_list_item_path(@road_trip, @packing_list, item),
-                    method: :patch,
-                    class: "flex-shrink-0",
-                    form: { class: "inline" } do
-            if item.packed?
-              svg_icon path_d: "M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
-                       class: "w-6 h-6 text-green-500 hover:text-green-600",
-                       stroke_linecap: "round",
-                       stroke_linejoin: "round",
-                       stroke_width: "2"
-            else
-              svg_icon path_d: "M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
-                       class: "w-6 h-6 text-gray-300 hover:text-gray-400",
-                       stroke_linecap: "round",
-                       stroke_linejoin: "round",
-                       stroke_width: "2"
+          # Checkbox (only interactive for owned lists)
+          if @packing_list.owned_by?(@current_user)
+            button_to toggle_packed_road_trip_packing_list_packing_list_item_path(@road_trip, @packing_list, item),
+                      method: :patch,
+                      class: "flex-shrink-0",
+                      form: { class: "inline" } do
+              if item.packed?
+                svg_icon path_d: "M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+                         class: "w-6 h-6 text-green-500 hover:text-green-600",
+                         stroke_linecap: "round",
+                         stroke_linejoin: "round",
+                         stroke_width: "2"
+              else
+                svg_icon path_d: "M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+                         class: "w-6 h-6 text-gray-300 hover:text-gray-400",
+                         stroke_linecap: "round",
+                         stroke_linejoin: "round",
+                         stroke_width: "2"
+              end
+            end
+          else
+            # Static checkbox for read-only lists
+            div class: "flex-shrink-0" do
+              if item.packed?
+                svg_icon path_d: "M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+                         class: "w-6 h-6 text-green-500",
+                         stroke_linecap: "round",
+                         stroke_linejoin: "round",
+                         stroke_width: "2"
+              else
+                svg_icon path_d: "M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+                         class: "w-6 h-6 text-gray-300",
+                         stroke_linecap: "round",
+                         stroke_linejoin: "round",
+                         stroke_width: "2"
+              end
             end
           end
 
@@ -220,27 +284,29 @@ class PackingLists::ShowComponent < ApplicationComponent
           end
         end
 
-        # Actions
+        # Actions (only for owned lists)
         div class: "flex items-center space-x-2" do
-          link_to edit_road_trip_packing_list_packing_list_item_path(@road_trip, @packing_list, item),
-                  class: "inline-flex items-center p-1.5 border border-transparent rounded-md text-gray-400 hover:text-gray-600" do
-            svg_icon path_d: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z",
-                     class: "w-4 h-4",
-                     stroke_linecap: "round",
-                     stroke_linejoin: "round",
-                     stroke_width: "2"
-          end
+          if @packing_list.owned_by?(@current_user)
+            link_to edit_road_trip_packing_list_packing_list_item_path(@road_trip, @packing_list, item),
+                    class: "inline-flex items-center p-1.5 border border-transparent rounded-md text-gray-400 hover:text-gray-600" do
+              svg_icon path_d: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z",
+                       class: "w-4 h-4",
+                       stroke_linecap: "round",
+                       stroke_linejoin: "round",
+                       stroke_width: "2"
+            end
 
-          button_to road_trip_packing_list_packing_list_item_path(@road_trip, @packing_list, item),
-                    method: :delete,
-                    class: "inline-flex items-center p-1.5 border border-transparent rounded-md text-gray-400 hover:text-red-600",
-                    data: { turbo_confirm: "Are you sure you want to delete this item?" },
-                    form: { class: "inline" } do
-            svg_icon path_d: "M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16",
-                     class: "w-4 h-4",
-                     stroke_linecap: "round",
-                     stroke_linejoin: "round",
-                     stroke_width: "2"
+            button_to road_trip_packing_list_packing_list_item_path(@road_trip, @packing_list, item),
+                      method: :delete,
+                      class: "inline-flex items-center p-1.5 border border-transparent rounded-md text-gray-400 hover:text-red-600",
+                      data: { turbo_confirm: "Are you sure you want to delete this item?" },
+                      form: { class: "inline" } do
+              svg_icon path_d: "M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16",
+                       class: "w-4 h-4",
+                       stroke_linecap: "round",
+                       stroke_linejoin: "round",
+                       stroke_width: "2"
+            end
           end
         end
       end

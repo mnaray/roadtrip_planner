@@ -20,8 +20,8 @@ RSpec.describe RouteGpxExporter, type: :service do
   before do
     # Stub OSRM route fetching
     allow_any_instance_of(RouteGpxExporter).to receive(:fetch_osrm_route).and_return([
-      [-122.4194, 37.7749], # San Francisco
-      [-118.2437, 34.0522]  # Los Angeles
+      [ -122.4194, 37.7749 ], # San Francisco
+      [ -118.2437, 34.0522 ]  # Los Angeles
     ])
   end
 
@@ -98,13 +98,16 @@ RSpec.describe RouteGpxExporter, type: :service do
 
       context "when OSRM returns detailed route" do
         before do
-          # Override WebMock to return specific coordinates for this test
-          stub_request(:get, /router\.project-osrm\.org\/route\/v1\/driving/).
-            to_return(
+          # First reset the global stub to original behavior
+          allow_any_instance_of(RouteGpxExporter).to receive(:fetch_osrm_route).and_call_original
+
+          # Use WebMock to override the OSRM API for this specific test
+          stub_request(:get, /router\.project-osrm\.org\/route\/v1\/driving/)
+            .to_return(
               status: 200,
               body: {
                 code: "Ok",
-                routes: [{
+                routes: [ {
                   geometry: {
                     type: "LineString",
                     coordinates: [
@@ -114,10 +117,10 @@ RSpec.describe RouteGpxExporter, type: :service do
                       [ -122.4140, 37.7600 ]  # End point (close - not LA to avoid distance issues)
                     ]
                   },
-                  legs: [{ distance: 350000, duration: 3600, steps: [] }],
+                  legs: [ { distance: 350000, duration: 3600, steps: [] } ],
                   distance: 350000,
                   duration: 3600
-                }],
+                } ],
                 waypoints: [
                   { location: [ -122.4194, 37.7749 ] },
                   { location: [ -122.4140, 37.7600 ] }
@@ -150,7 +153,6 @@ RSpec.describe RouteGpxExporter, type: :service do
           expect(track_points).not_to be_empty
         end
       end
-
     end
 
     context "with route containing special characters" do
@@ -214,13 +216,8 @@ RSpec.describe RouteGpxExporter, type: :service do
 
   describe "integration with real route" do
     before do
-      # Mock geocoding
-      allow_any_instance_of(RouteGpxExporter).to receive(:geocode)
-        .with("San Francisco, CA")
-        .and_return([ 37.7749, -122.4194 ])
-      allow_any_instance_of(RouteGpxExporter).to receive(:geocode)
-        .with("Los Angeles, CA")
-        .and_return([ 34.0522, -118.2437 ])
+      # First reset the global stub to original behavior
+      allow_any_instance_of(RouteGpxExporter).to receive(:fetch_osrm_route).and_call_original
 
       # Mock OSRM route with realistic intermediate points (small increments)
       # SF to LA is about 600km, we need points every ~8km to stay under 10km limit
@@ -236,21 +233,21 @@ RSpec.describe RouteGpxExporter, type: :service do
         mock_coordinates << [ lon, lat ]
       end
 
-      # Override WebMock to return the 100 generated coordinates
-      stub_request(:get, /router\.project-osrm\.org\/route\/v1\/driving/).
-        to_return(
+      # Use WebMock to override the OSRM API for this integration test
+      stub_request(:get, /router\.project-osrm\.org\/route\/v1\/driving/)
+        .to_return(
           status: 200,
           body: {
             code: "Ok",
-            routes: [{
+            routes: [ {
               geometry: {
                 type: "LineString",
                 coordinates: mock_coordinates
               },
-              legs: [{ distance: 600000, duration: 7200, steps: [] }],
+              legs: [ { distance: 600000, duration: 7200, steps: [] } ],
               distance: 600000,
               duration: 7200
-            }],
+            } ],
             waypoints: [
               { location: mock_coordinates.first },
               { location: mock_coordinates.last }

@@ -2,9 +2,10 @@ class PackingListsController < ApplicationController
   before_action :require_login
   before_action :set_road_trip
   before_action :set_packing_list, only: [ :show, :edit, :update, :destroy ]
+  before_action :ensure_owner_for_modifications, only: [ :edit, :update, :destroy ]
 
   def index
-    @packing_lists = @road_trip.packing_lists.includes(:packing_list_items)
+    @packing_lists = @road_trip.packing_lists.includes(:packing_list_items).visible_to_user(current_user)
     render PackingLists::IndexComponent.new(road_trip: @road_trip, packing_lists: @packing_lists, current_user: current_user)
   end
 
@@ -20,6 +21,7 @@ class PackingListsController < ApplicationController
 
   def create
     @packing_list = @road_trip.packing_lists.build(packing_list_params)
+    @packing_list.user = current_user
 
     if @packing_list.save
       redirect_to [ @road_trip, @packing_list ], notice: "Packing list was successfully created."
@@ -59,12 +61,18 @@ class PackingListsController < ApplicationController
   end
 
   def set_packing_list
-    @packing_list = @road_trip.packing_lists.find(params[:id])
+    @packing_list = @road_trip.packing_lists.visible_to_user(current_user).find(params[:id])
   rescue ActiveRecord::RecordNotFound
     redirect_to [ @road_trip, :packing_lists ], alert: "Packing list not found."
   end
 
+  def ensure_owner_for_modifications
+    unless @packing_list.owned_by?(current_user)
+      redirect_to [ @road_trip, :packing_lists ], alert: "You can only edit your own packing lists."
+    end
+  end
+
   def packing_list_params
-    params.require(:packing_list).permit(:name)
+    params.require(:packing_list).permit(:name, :visibility)
   end
 end

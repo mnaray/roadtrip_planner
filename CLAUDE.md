@@ -140,7 +140,7 @@ The application uses OpenRouteService for guaranteed highway and toll avoidance 
 - RSpec test suite setup
 - Basic navigation and layout components
 - Road trip management with route planning
-- Packing list functionality with categories and progress tracking
+- Packing list functionality with categories, progress tracking, and privacy controls (private/public visibility)
 - About page with feature descriptions and user onboarding
 - Road trip sharing with other users (add participants, leave functionality, access control)
 - Fuel economy calculator with real-time cost calculations (client-side JavaScript)

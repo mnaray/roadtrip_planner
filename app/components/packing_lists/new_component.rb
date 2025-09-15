@@ -87,6 +87,12 @@ class PackingLists::NewComponent < ApplicationComponent
               end
             end
 
+            # Visibility toggle
+            render Shared::VisibilityToggleComponent.new(
+              form: form,
+              help_text: "Choose who can see this packing list. Private lists are only visible to you."
+            )
+
             div class: "flex items-center justify-between pt-4" do
               link_to road_trip_packing_lists_path(@road_trip),
                       class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" do
