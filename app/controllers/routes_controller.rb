@@ -18,7 +18,8 @@ class RoutesController < ApplicationController
     session[:route_data] = {
       "road_trip_id" => @road_trip.id,
       "starting_location" => @route.starting_location,
-      "destination" => @route.destination
+      "destination" => @route.destination,
+      "avoid_motorways" => @route.avoid_motorways
     }
 
     if @route.valid?(:location_only)
@@ -71,6 +72,7 @@ class RoutesController < ApplicationController
       starting_location: route_data["starting_location"],
       destination: route_data["destination"],
       datetime: params[:datetime],
+      avoid_motorways: route_data["avoid_motorways"] || false,
       user: current_user
     )
 
@@ -182,10 +184,10 @@ class RoutesController < ApplicationController
   end
 
   def route_create_params
-    params.require(:route).permit(:starting_location, :destination)
+    params.require(:route).permit(:starting_location, :destination, :avoid_motorways)
   end
 
   def route_params
-    params.require(:route).permit(:starting_location, :destination, :datetime)
+    params.require(:route).permit(:starting_location, :destination, :datetime, :avoid_motorways)
   end
 end
