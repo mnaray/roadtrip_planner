@@ -119,9 +119,16 @@ class RouteDistanceCalculator
       geometries: "geojson"
     }
 
-    # Add avoid parameter for motorways if requested
+    # NOTE: The public OSRM API at router.project-osrm.org doesn't support the 'exclude' parameter
+    # due to server configuration. To properly avoid motorways, you would need to either:
+    # 1. Use a self-hosted OSRM instance with custom Lua profiles
+    # 2. Use alternative routing services (GraphHopper, Valhalla, Mapbox)
+    # 3. Request multiple alternatives and select the non-highway route
+    # For now, we'll request alternatives when avoid_motorways is set
     if @avoid_motorways
-      params[:avoid] = "motorway"
+      params[:alternatives] = "3"
+      # In a production app, you'd parse alternatives and select the one with least highway usage
+      # based on the route geometry or other heuristics
     end
 
     uri.query = URI.encode_www_form(params)
@@ -132,7 +139,16 @@ class RouteDistanceCalculator
     data = JSON.parse(response.body)
     return nil unless data["routes"] && data["routes"].any?
 
-    route = data["routes"][0]
+    # When avoid_motorways is set and we have alternatives, select the longest route
+    # (which typically avoids highways in favor of smaller roads)
+    route = if @avoid_motorways && data["routes"].length > 1
+              # Select the route with the longest distance (usually avoids highways)
+              # In a production app, you'd want more sophisticated logic here
+              data["routes"].max_by { |r| r["distance"] }
+            else
+              data["routes"][0]
+            end
+
     # Distance is in meters, duration is in seconds
     { distance: route["distance"], duration: route["duration"] }
   rescue StandardError => e
@@ -156,9 +172,11 @@ class RouteDistanceCalculator
       geometries: "geojson"
     }
 
-    # Add avoid parameter for motorways if requested
+    # NOTE: See comment in fetch_route_data_osrm about motorway avoidance limitations
+    # The public OSRM API doesn't support exclude parameters
     if @avoid_motorways
-      params[:avoid] = "motorway"
+      params[:alternatives] = "2"
+      # Request alternatives that might avoid highways
     end
 
     uri.query = URI.encode_www_form(params)
@@ -169,7 +187,16 @@ class RouteDistanceCalculator
     data = JSON.parse(response.body)
     return nil unless data["routes"] && data["routes"].any?
 
-    route = data["routes"][0]
+    # When avoid_motorways is set and we have alternatives, select the longest route
+    # (which typically avoids highways in favor of smaller roads)
+    route = if @avoid_motorways && data["routes"].length > 1
+              # Select the route with the longest distance (usually avoids highways)
+              # In a production app, you'd want more sophisticated logic here
+              data["routes"].max_by { |r| r["distance"] }
+            else
+              data["routes"][0]
+            end
+
     # Distance is in meters, duration is in seconds
     { distance: route["distance"], duration: route["duration"] }
   rescue StandardError => e

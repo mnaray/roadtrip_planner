@@ -94,19 +94,26 @@ class Routes::FormPageComponent < ApplicationComponent
             end
 
             # Avoid Motorways Option
-            div class: "flex items-center" do
-              form.check_box :avoid_motorways,
-                             class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            div class: "space-y-2" do
+              div class: "flex items-center" do
+                form.check_box :avoid_motorways,
+                               class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
 
-              form.label :avoid_motorways,
-                         class: "ml-2 block text-sm text-gray-900" do
-                "Avoid motorways and highways"
+                form.label :avoid_motorways,
+                           class: "ml-2 block text-sm text-gray-900" do
+                  "Avoid motorways and highways (experimental)"
+                end
+
+                if @route.errors[:avoid_motorways].any?
+                  div class: "ml-6 mt-1 text-sm text-red-600" do
+                    @route.errors[:avoid_motorways].first
+                  end
+                end
               end
 
-              if @route.errors[:avoid_motorways].any?
-                div class: "ml-6 mt-1 text-sm text-red-600" do
-                  @route.errors[:avoid_motorways].first
-                end
+              # Info message about limitations
+              div class: "ml-6 text-xs text-gray-500 italic" do
+                "Note: The routing service will attempt to find alternative routes that may avoid highways, but complete avoidance cannot be guaranteed with the current API."
               end
             end
 
@@ -178,19 +185,26 @@ class Routes::FormPageComponent < ApplicationComponent
               end
 
               # Avoid Motorways Option
-              div class: "flex items-center" do
-                form.check_box :avoid_motorways,
-                               class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              div class: "space-y-2" do
+                div class: "flex items-center" do
+                  form.check_box :avoid_motorways,
+                                 class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
 
-                form.label :avoid_motorways,
-                           class: "ml-2 block text-sm text-gray-900" do
-                  "Avoid motorways and highways"
+                  form.label :avoid_motorways,
+                             class: "ml-2 block text-sm text-gray-900" do
+                    "Avoid motorways and highways (experimental)"
+                  end
+
+                  if @route.errors[:avoid_motorways].any?
+                    div class: "ml-6 mt-1 text-sm text-red-600" do
+                      @route.errors[:avoid_motorways].first
+                    end
+                  end
                 end
 
-                if @route.errors[:avoid_motorways].any?
-                  div class: "ml-6 mt-1 text-sm text-red-600" do
-                    @route.errors[:avoid_motorways].first
-                  end
+                # Info message about limitations
+                div class: "ml-6 text-xs text-gray-500 italic" do
+                  "Note: The routing service will attempt to find alternative routes that may avoid highways, but complete avoidance cannot be guaranteed with the current API."
                 end
               end
 
