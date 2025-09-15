@@ -5,10 +5,11 @@ require "uri"
 class RouteDistanceCalculator
   attr_reader :distance_km, :duration_hours
 
-  def initialize(starting_location, destination, waypoints = [])
+  def initialize(starting_location, destination, waypoints = [], avoid_motorways: false)
     @starting_location = starting_location
     @destination = destination
     @waypoints = waypoints || []
+    @avoid_motorways = avoid_motorways
     @distance_km = nil
     @duration_hours = nil
   end
@@ -117,6 +118,12 @@ class RouteDistanceCalculator
       overview: "false",
       geometries: "geojson"
     }
+
+    # Add avoid parameter for motorways if requested
+    if @avoid_motorways
+      params[:avoid] = "motorway"
+    end
+
     uri.query = URI.encode_www_form(params)
 
     response = Net::HTTP.get_response(uri)
@@ -148,6 +155,12 @@ class RouteDistanceCalculator
       overview: "false",
       geometries: "geojson"
     }
+
+    # Add avoid parameter for motorways if requested
+    if @avoid_motorways
+      params[:avoid] = "motorway"
+    end
+
     uri.query = URI.encode_www_form(params)
 
     response = Net::HTTP.get_response(uri)
