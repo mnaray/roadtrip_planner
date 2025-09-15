@@ -13,8 +13,8 @@ class PackingList < ApplicationRecord
       user.id
     )
   }
-  scope :public_lists, -> { where(visibility: 'public') }
-  scope :private_lists, -> { where(visibility: 'private') }
+  scope :public_lists, -> { where(visibility: "public") }
+  scope :private_lists, -> { where(visibility: "private") }
 
   def total_items_count
     packing_list_items.sum(:quantity)
@@ -35,11 +35,11 @@ class PackingList < ApplicationRecord
 
   # Visibility and ownership methods
   def private?
-    visibility == 'private'
+    visibility == "private"
   end
 
   def public?
-    visibility == 'public'
+    visibility == "public"
   end
 
   def owned_by?(check_user)
