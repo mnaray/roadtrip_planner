@@ -91,7 +91,7 @@ class PackingLists::ShowComponent < ApplicationComponent
                            stroke_linecap: "round",
                            stroke_linejoin: "round",
                            stroke_width: "1.5"
-                  span { "Created by #{@packing_list.user.email}" }
+                  span { "Created by #{@packing_list.user.username}" }
                 end
               end
             end

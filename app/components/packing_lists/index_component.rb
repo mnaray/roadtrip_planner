@@ -207,7 +207,7 @@ class PackingLists::IndexComponent < ApplicationComponent
           else
             # Show creator name for public lists not owned by current user
             div class: "text-sm text-gray-500" do
-              "by #{packing_list.user.email}"
+              "by #{packing_list.user.username}"
             end
           end
         end
