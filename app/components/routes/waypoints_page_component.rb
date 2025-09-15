@@ -138,7 +138,8 @@ class Routes::WaypointsPageComponent < ApplicationComponent
                      data: {
                        controller: "waypoints-map",
                        waypoints_map_start_location_value: @route_data["starting_location"],
-                       waypoints_map_end_location_value: @route_data["destination"]
+                       waypoints_map_end_location_value: @route_data["destination"],
+                       waypoints_map_avoid_motorways_value: @route_data["avoid_motorways"] || false
                      } do
                   # Map will be rendered here by Stimulus controller
                 end

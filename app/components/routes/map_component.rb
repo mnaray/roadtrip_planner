@@ -75,7 +75,8 @@ class Routes::MapComponent < ApplicationComponent
                  controller: "route-map",
                  route_map_start_location_value: @route.starting_location,
                  route_map_end_location_value: @route.destination,
-                 route_map_waypoints_value: waypoints_json
+                 route_map_waypoints_value: waypoints_json,
+                 route_map_avoid_motorways_value: @route.avoid_motorways
                } do
             # Map will be rendered here by Stimulus controller
           end

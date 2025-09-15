@@ -5,11 +5,12 @@ require "uri"
 class RouteDistanceCalculator
   attr_reader :distance_km, :duration_hours
 
-  def initialize(starting_location, destination, waypoints = [])
+  def initialize(starting_location, destination, waypoints = [], avoid_motorways: false)
     @starting_location = starting_location
     @destination = destination
     @waypoints = waypoints || []
-    @distance_km = nil
+    @avoid_motorways = avoid_motorways
+    @distance_km = nil  # Actually stores meters for database consistency
     @duration_hours = nil
   end
 
@@ -19,20 +20,31 @@ class RouteDistanceCalculator
 
     return { distance: nil, duration: nil } unless start_coords && end_coords
 
-    # If waypoints are present, calculate route with waypoints
-    route_data = if @waypoints.any?
-                   calculate_with_waypoints(start_coords, end_coords)
+    # Choose routing service based on avoid_motorways setting
+    route_data = if @avoid_motorways
+                   # Use OpenRouteService for guaranteed highway/toll avoidance
+                   if @waypoints.any?
+                     fetch_route_data_openrouteservice_with_waypoints(start_coords, end_coords)
+                   else
+                     fetch_route_data_openrouteservice(start_coords, end_coords)
+                   end
     else
-                   # Original behavior for routes without waypoints
-                   fetch_route_data_osrm(start_coords, end_coords)
+                   # Use OSRM for normal routing (free, no API key required)
+                   if @waypoints.any?
+                     calculate_with_waypoints(start_coords, end_coords)
+                   else
+                     fetch_route_data_osrm(start_coords, end_coords)
+                   end
     end
 
-    # Fallback to straight-line calculations if routing fails
-    route_data ||= calculate_straight_line_estimates(start_coords, end_coords)
+    # Only fallback to straight-line for normal routing, NOT for highway avoidance
+    if route_data.nil? && !@avoid_motorways
+      route_data = calculate_straight_line_estimates(start_coords, end_coords)
+    end
 
     if route_data
-      # Convert from meters to kilometers and seconds to hours
-      @distance_km = route_data[:distance] ? (route_data[:distance] / 1000.0).round(1) : nil
+      # Store distance in meters (as expected by Route model), convert duration to hours
+      @distance_km = route_data[:distance] # Keep in meters for database storage
       @duration_hours = route_data[:duration] ? (route_data[:duration] / 3600.0).round(2) : nil
     end
 
@@ -117,6 +129,19 @@ class RouteDistanceCalculator
       overview: "false",
       geometries: "geojson"
     }
+
+    # NOTE: The public OSRM API at router.project-osrm.org doesn't support the 'exclude' parameter
+    # due to server configuration. To properly avoid motorways, you would need to either:
+    # 1. Use a self-hosted OSRM instance with custom Lua profiles
+    # 2. Use alternative routing services (GraphHopper, Valhalla, Mapbox)
+    # 3. Request multiple alternatives and select the non-highway route
+    # For now, we'll request alternatives when avoid_motorways is set
+    if @avoid_motorways
+      params[:alternatives] = "3"
+      # In a production app, you'd parse alternatives and select the one with least highway usage
+      # based on the route geometry or other heuristics
+    end
+
     uri.query = URI.encode_www_form(params)
 
     response = Net::HTTP.get_response(uri)
@@ -125,7 +150,16 @@ class RouteDistanceCalculator
     data = JSON.parse(response.body)
     return nil unless data["routes"] && data["routes"].any?
 
-    route = data["routes"][0]
+    # When avoid_motorways is set and we have alternatives, select the longest route
+    # (which typically avoids highways in favor of smaller roads)
+    route = if @avoid_motorways && data["routes"].length > 1
+              # Select the route with the longest distance (usually avoids highways)
+              # In a production app, you'd want more sophisticated logic here
+              data["routes"].max_by { |r| r["distance"] }
+    else
+              data["routes"][0]
+    end
+
     # Distance is in meters, duration is in seconds
     { distance: route["distance"], duration: route["duration"] }
   rescue StandardError => e
@@ -148,6 +182,14 @@ class RouteDistanceCalculator
       overview: "false",
       geometries: "geojson"
     }
+
+    # NOTE: See comment in fetch_route_data_osrm about motorway avoidance limitations
+    # The public OSRM API doesn't support exclude parameters
+    if @avoid_motorways
+      params[:alternatives] = "2"
+      # Request alternatives that might avoid highways
+    end
+
     uri.query = URI.encode_www_form(params)
 
     response = Net::HTTP.get_response(uri)
@@ -156,7 +198,16 @@ class RouteDistanceCalculator
     data = JSON.parse(response.body)
     return nil unless data["routes"] && data["routes"].any?
 
-    route = data["routes"][0]
+    # When avoid_motorways is set and we have alternatives, select the longest route
+    # (which typically avoids highways in favor of smaller roads)
+    route = if @avoid_motorways && data["routes"].length > 1
+              # Select the route with the longest distance (usually avoids highways)
+              # In a production app, you'd want more sophisticated logic here
+              data["routes"].max_by { |r| r["distance"] }
+    else
+              data["routes"][0]
+    end
+
     # Distance is in meters, duration is in seconds
     { distance: route["distance"], duration: route["duration"] }
   rescue StandardError => e
@@ -224,5 +275,118 @@ class RouteDistanceCalculator
 
     # Distance in meters
     radius * c
+  end
+
+  # OpenRouteService methods for guaranteed highway/toll avoidance
+  def fetch_route_data_openrouteservice(start_coords, end_coords)
+    start_lat, start_lon = start_coords
+    end_lat, end_lon = end_coords
+
+    uri = URI("https://api.openrouteservice.org/v2/directions/driving-car")
+
+    request_body = {
+      coordinates: [ [ start_lon, start_lat ], [ end_lon, end_lat ] ],
+      options: {
+        avoid_features: [ "highways", "tollways" ]
+      }
+    }
+
+    # Check if API key is configured
+    api_key = ENV["OPENROUTESERVICE_API_KEY"] || Rails.application.credentials.dig(:openrouteservice, :api_key)
+
+    unless api_key
+      Rails.logger.warn "OpenRouteService API key not configured. Cannot guarantee highway/toll avoidance."
+      return nil
+    end
+
+    begin
+      response = make_openrouteservice_request(uri, request_body, api_key)
+      return nil unless response
+
+      data = JSON.parse(response.body)
+      return nil unless data["routes"] && data["routes"].any?
+
+      route = data["routes"][0]
+      # OpenRouteService returns distance in meters, duration in seconds
+      { distance: route["summary"]["distance"], duration: route["summary"]["duration"] }
+    rescue StandardError => e
+      Rails.logger.error "OpenRouteService routing error: #{e.message}"
+      nil
+    end
+  end
+
+  def fetch_route_data_openrouteservice_with_waypoints(start_coords, end_coords)
+    # Convert waypoints to coordinates
+    waypoint_coords = @waypoints.map do |waypoint|
+      if waypoint.respond_to?(:latitude) && waypoint.respond_to?(:longitude)
+        [ waypoint.longitude, waypoint.latitude ]
+      elsif waypoint.is_a?(Hash) && waypoint[:latitude] && waypoint[:longitude]
+        [ waypoint[:longitude], waypoint[:latitude] ]
+      elsif waypoint.is_a?(Array) && waypoint.length >= 2
+        [ waypoint[1], waypoint[0] ] # Reverse lat,lon to lon,lat
+      else
+        coords = geocode(waypoint.to_s)
+        coords ? [ coords[1], coords[0] ] : nil # Reverse lat,lon to lon,lat
+      end
+    end.compact
+
+    return nil if waypoint_coords.empty?
+
+    start_lat, start_lon = start_coords
+    end_lat, end_lon = end_coords
+
+    # Build coordinates array: start -> waypoints -> end
+    all_coordinates = [ [ start_lon, start_lat ] ] + waypoint_coords + [ [ end_lon, end_lat ] ]
+
+    uri = URI("https://api.openrouteservice.org/v2/directions/driving-car")
+
+    request_body = {
+      coordinates: all_coordinates,
+      options: {
+        avoid_features: [ "highways", "tollways" ]
+      }
+    }
+
+    api_key = ENV["OPENROUTESERVICE_API_KEY"] || Rails.application.credentials.dig(:openrouteservice, :api_key)
+
+    unless api_key
+      Rails.logger.warn "OpenRouteService API key not configured. Cannot guarantee highway/toll avoidance."
+      return nil
+    end
+
+    begin
+      response = make_openrouteservice_request(uri, request_body, api_key)
+      return nil unless response
+
+      data = JSON.parse(response.body)
+      return nil unless data["routes"] && data["routes"].any?
+
+      route = data["routes"][0]
+      { distance: route["summary"]["distance"], duration: route["summary"]["duration"] }
+    rescue StandardError => e
+      Rails.logger.error "OpenRouteService waypoint routing error: #{e.message}"
+      nil
+    end
+  end
+
+  private
+
+  def make_openrouteservice_request(uri, request_body, api_key)
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = true
+
+    request = Net::HTTP::Post.new(uri)
+    request["Content-Type"] = "application/json"
+    request["Authorization"] = api_key
+    request.body = request_body.to_json
+
+    response = http.request(request)
+
+    if response.is_a?(Net::HTTPSuccess)
+      response
+    else
+      Rails.logger.error "OpenRouteService API error: #{response.code} - #{response.body}"
+      nil
+    end
   end
 end

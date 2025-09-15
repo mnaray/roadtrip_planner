@@ -93,6 +93,30 @@ class Routes::FormPageComponent < ApplicationComponent
               end
             end
 
+            # Avoid Motorways Option
+            div class: "space-y-2" do
+              div class: "flex items-center" do
+                form.check_box :avoid_motorways,
+                               class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+
+                form.label :avoid_motorways,
+                           class: "ml-2 block text-sm text-gray-900" do
+                  "Avoid highways and tolls"
+                end
+
+                if @route.errors[:avoid_motorways].any?
+                  div class: "ml-6 mt-1 text-sm text-red-600" do
+                    @route.errors[:avoid_motorways].first
+                  end
+                end
+              end
+
+              # Info message about the feature
+              div class: "ml-6 text-xs text-gray-500 italic" do
+                "Uses specialized routing to guarantee avoidance of highways and toll roads. May increase travel time but saves on toll costs."
+              end
+            end
+
             # Date & Time (only for edit mode)
             if @is_edit_mode
               render Shared::DateInputComponent.new(
@@ -157,6 +181,30 @@ class Routes::FormPageComponent < ApplicationComponent
                   div class: "mt-1 text-sm text-red-600" do
                     @route.errors[:destination].first
                   end
+                end
+              end
+
+              # Avoid Motorways Option
+              div class: "space-y-2" do
+                div class: "flex items-center" do
+                  form.check_box :avoid_motorways,
+                                 class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+
+                  form.label :avoid_motorways,
+                             class: "ml-2 block text-sm text-gray-900" do
+                    "Avoid highways and tolls"
+                  end
+
+                  if @route.errors[:avoid_motorways].any?
+                    div class: "ml-6 mt-1 text-sm text-red-600" do
+                      @route.errors[:avoid_motorways].first
+                    end
+                  end
+                end
+
+                # Info message about the feature
+                div class: "ml-6 text-xs text-gray-500 italic" do
+                  "Uses specialized routing to guarantee avoidance of highways and toll roads. May increase travel time but saves on toll costs."
                 end
               end
 

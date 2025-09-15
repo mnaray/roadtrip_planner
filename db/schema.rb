@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_14_204131) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_15_091544) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -62,6 +62,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_14_204131) do
     t.float "distance"
     t.float "duration"
     t.datetime "waypoints_updated_at"
+    t.boolean "avoid_motorways", default: false, null: false
     t.index ["road_trip_id"], name: "index_routes_on_road_trip_id"
     t.index ["user_id"], name: "index_routes_on_user_id"
   end

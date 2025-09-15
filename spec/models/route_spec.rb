@@ -234,7 +234,7 @@ RSpec.describe Route, type: :model do
     let(:route) { create(:route, user: user, road_trip: road_trip) }
 
     context 'when distance is already stored' do
-      before { route.update_column(:distance, 150.5) }
+      before { route.update_column(:distance, 150500) } # 150.5 km stored as meters
 
       it 'returns the stored distance' do
         expect(route.distance_in_km).to eq(150.5)
@@ -247,12 +247,12 @@ RSpec.describe Route, type: :model do
       it 'calculates and saves the distance' do
         calculator = instance_double(RouteDistanceCalculator)
         allow(RouteDistanceCalculator).to receive(:new)
-          .with(route.starting_location, route.destination, [])
+          .with(route.starting_location, route.destination, [], avoid_motorways: false)
           .and_return(calculator)
-        allow(calculator).to receive(:calculate).and_return({ distance: 120.5, duration: 2.5 })
+        allow(calculator).to receive(:calculate).and_return({ distance: 120500, duration: 2.5 }) # 120.5 km in meters
 
         expect(route.distance_in_km).to eq(120.5)
-        expect(route.reload.distance).to eq(120.5)
+        expect(route.reload.distance).to eq(120500) # Distance stored in meters
       end
     end
   end
@@ -264,7 +264,7 @@ RSpec.describe Route, type: :model do
     it 'calculates distance and duration when creating a new route' do
       calculator = instance_double(RouteDistanceCalculator)
       allow(RouteDistanceCalculator).to receive(:new)
-        .with("New York", "Boston", [])
+        .with("New York", "Boston", [], avoid_motorways: false)
         .and_return(calculator)
       allow(calculator).to receive(:calculate).and_return({ distance: 250.0, duration: 4.5 })
 
@@ -286,7 +286,7 @@ RSpec.describe Route, type: :model do
 
       calculator = instance_double(RouteDistanceCalculator)
       allow(RouteDistanceCalculator).to receive(:new)
-        .with("Chicago", route.destination, [])
+        .with("Chicago", route.destination, [], avoid_motorways: false)
         .and_return(calculator)
       allow(calculator).to receive(:calculate).and_return({ distance: 300.0, duration: 5.5 })
 
@@ -332,7 +332,7 @@ RSpec.describe Route, type: :model do
       it 'forces recalculation of route metrics' do
         calculator = instance_double(RouteDistanceCalculator)
         allow(RouteDistanceCalculator).to receive(:new)
-          .with(route.starting_location, route.destination, [])
+          .with(route.starting_location, route.destination, [], avoid_motorways: false)
           .and_return(calculator)
         allow(calculator).to receive(:calculate).and_return({ distance: 500.0, duration: 7.5 })
 
@@ -349,7 +349,7 @@ RSpec.describe Route, type: :model do
 
         calculator = instance_double(RouteDistanceCalculator)
         allow(RouteDistanceCalculator).to receive(:new)
-          .with(route.starting_location, route.destination, [ waypoint ])
+          .with(route.starting_location, route.destination, [ waypoint ], avoid_motorways: false)
           .and_return(calculator)
         allow(calculator).to receive(:calculate).and_return({ distance: 600.0, duration: 8.5 })
 
@@ -419,11 +419,64 @@ RSpec.describe Route, type: :model do
         it 'triggers recalculation and returns updated duration' do
           calculator = instance_double(RouteDistanceCalculator)
           allow(RouteDistanceCalculator).to receive(:new)
-            .with(route.starting_location, route.destination, [ waypoint ])
+            .with(route.starting_location, route.destination, [ waypoint ], avoid_motorways: false)
             .and_return(calculator)
           allow(calculator).to receive(:calculate).and_return({ distance: 400.0, duration: 5.0 })
 
           expect(route.current_duration_hours).to eq(5.0)
+        end
+      end
+    end
+
+    describe 'avoid_motorways functionality' do
+      describe 'defaults' do
+        it 'defaults avoid_motorways to false' do
+          route = Route.new
+          expect(route.avoid_motorways).to be false
+        end
+
+        it 'persists avoid_motorways setting from database' do
+          route = create(:route, user: user, road_trip: road_trip, avoid_motorways: false)
+          expect(route.reload.avoid_motorways).to be false
+        end
+      end
+
+      describe 'recalculation on avoid_motorways change' do
+        it 'recalculates route metrics when avoid_motorways changes' do
+          route = create(:route, user: user, road_trip: road_trip, avoid_motorways: false)
+          route.update_columns(distance: 100.0, duration: 2.0)
+
+          calculator = instance_double(RouteDistanceCalculator)
+          allow(RouteDistanceCalculator).to receive(:new)
+            .with(route.starting_location, route.destination, [], avoid_motorways: true)
+            .and_return(calculator)
+          allow(calculator).to receive(:calculate).and_return({ distance: 120.0, duration: 2.5 })
+
+          route.update!(avoid_motorways: true)
+
+          expect(route.distance).to eq(120.0)
+          expect(route.duration).to eq(2.5)
+        end
+
+        it 'passes avoid_motorways parameter to RouteDistanceCalculator' do
+          route = create(:route, user: user, road_trip: road_trip, avoid_motorways: true)
+
+          expect(RouteDistanceCalculator).to receive(:new)
+            .with(route.starting_location, route.destination, [], avoid_motorways: true)
+            .and_call_original
+
+          route.send(:calculate_route_metrics)
+        end
+
+        it 'passes avoid_motorways parameter with waypoints' do
+          route = create(:route, user: user, road_trip: road_trip, avoid_motorways: true)
+          waypoint = create(:waypoint, route: route, latitude: 40.7128, longitude: -74.0060)
+
+          expect(RouteDistanceCalculator).to receive(:new)
+            .with(route.starting_location, route.destination, [ waypoint ], avoid_motorways: true)
+            .and_call_original
+
+          route.send(:calculate_route_metrics)
         end
       end
     end

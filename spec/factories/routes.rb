@@ -30,5 +30,9 @@ FactoryBot.define do
       end
       datetime { hours_from_now.hours.from_now }
     end
+
+    trait :avoiding_motorways do
+      avoid_motorways { true }
+    end
   end
 end

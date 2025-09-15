@@ -20,6 +20,16 @@ RSpec.describe RouteDistanceCalculator do
       calculator = described_class.new(start_location, destination)
       expect(calculator.instance_variable_get(:@waypoints)).to eq([])
     end
+
+    it 'accepts avoid_motorways parameter' do
+      calculator = described_class.new(start_location, destination, [], avoid_motorways: true)
+      expect(calculator.instance_variable_get(:@avoid_motorways)).to be true
+    end
+
+    it 'defaults avoid_motorways to false' do
+      calculator = described_class.new(start_location, destination)
+      expect(calculator.instance_variable_get(:@avoid_motorways)).to be false
+    end
   end
 
   describe '#calculate' do
@@ -38,8 +48,8 @@ RSpec.describe RouteDistanceCalculator do
       it 'calculates distance and duration without waypoints' do
         result = calculator.calculate
 
-        expect(result[:distance]).to eq(300.0) # km
-        expect(result[:duration]).to eq(4.0)   # hours
+        expect(result[:distance]).to eq(300000) # meters (300 km)
+        expect(result[:duration]).to eq(4.0)    # hours
       end
     end
 
@@ -59,8 +69,8 @@ RSpec.describe RouteDistanceCalculator do
       it 'calculates route with waypoints' do
         result = calculator.calculate
 
-        expect(result[:distance]).to eq(450.0) # km (longer due to waypoint)
-        expect(result[:duration]).to eq(6.0)   # hours (longer due to waypoint)
+        expect(result[:distance]).to eq(450000) # meters (450 km, longer due to waypoint)
+        expect(result[:duration]).to eq(6.0)    # hours (longer due to waypoint)
       end
     end
 
@@ -91,8 +101,8 @@ RSpec.describe RouteDistanceCalculator do
       it 'falls back to straight-line calculations' do
         result = calculator.calculate
 
-        expect(result[:distance]).to eq(250.0) # km
-        expect(result[:duration]).to eq(3.33)  # hours (rounded)
+        expect(result[:distance]).to eq(250000) # meters (250 km)
+        expect(result[:duration]).to eq(3.33)   # hours (rounded)
       end
     end
   end
@@ -153,7 +163,7 @@ RSpec.describe RouteDistanceCalculator do
 
       it 'extracts coordinates from waypoint models' do
         result = calculator.calculate
-        expect(result[:distance]).to eq(450.0)
+        expect(result[:distance]).to eq(450000) # meters (450 km)
       end
     end
 
@@ -172,7 +182,7 @@ RSpec.describe RouteDistanceCalculator do
 
       it 'handles hash format waypoints' do
         result = calculator.calculate
-        expect(result[:distance]).to eq(450.0)
+        expect(result[:distance]).to eq(450000) # meters (450 km)
       end
     end
 
@@ -191,8 +201,23 @@ RSpec.describe RouteDistanceCalculator do
 
       it 'handles coordinate array format waypoints' do
         result = calculator.calculate
-        expect(result[:distance]).to eq(450.0)
+        expect(result[:distance]).to eq(450000) # meters (450 km)
       end
+    end
+  end
+
+  describe 'avoid_motorways functionality' do
+    it 'stores avoid_motorways setting correctly' do
+      calculator_enabled = described_class.new(start_location, destination, [], avoid_motorways: true)
+      expect(calculator_enabled.instance_variable_get(:@avoid_motorways)).to be true
+
+      calculator_disabled = described_class.new(start_location, destination, [], avoid_motorways: false)
+      expect(calculator_disabled.instance_variable_get(:@avoid_motorways)).to be false
+    end
+
+    it 'defaults avoid_motorways to false when not specified' do
+      calculator = described_class.new(start_location, destination, [])
+      expect(calculator.instance_variable_get(:@avoid_motorways)).to be false
     end
   end
 end

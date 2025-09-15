@@ -222,7 +222,7 @@ RSpec.describe Waypoint, type: :model do
 
       # When route metrics are recalculated, they should include the waypoint
       allow(RouteDistanceCalculator).to receive(:new)
-        .with(route.starting_location, route.destination, [ waypoint ])
+        .with(route.starting_location, route.destination, [ waypoint ], avoid_motorways: false)
         .and_return(calculator)
       allow(calculator).to receive(:calculate)
         .and_return({ distance: 250.0, duration: 4.5 })

@@ -114,7 +114,8 @@ class Routes::ConfirmPageComponent < ApplicationComponent
                        controller: "route-map",
                        route_map_start_location_value: @route_data["starting_location"],
                        route_map_end_location_value: @route_data["destination"],
-                       route_map_waypoints_value: waypoints_data_json
+                       route_map_waypoints_value: waypoints_data_json,
+                       route_map_avoid_motorways_value: @route_data["avoid_motorways"] || false
                      } do
                   # Map will be rendered here by Stimulus controller
                 end

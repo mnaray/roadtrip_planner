@@ -9,7 +9,7 @@ class Route < ApplicationRecord
   validate :datetime_not_overlapping_with_other_routes, unless: -> { validation_context == :location_only }
   validate :user_matches_road_trip_user
 
-  before_save :calculate_route_metrics, if: :locations_changed?
+  before_save :calculate_route_metrics, if: :locations_changed_or_motorway_setting_changed?
 
   scope :for_user, ->(user) { where(user: user) }
   scope :ordered_by_datetime, -> { order(:datetime) }
@@ -21,7 +21,9 @@ class Route < ApplicationRecord
   end
 
   def distance_in_km
-    distance || calculate_and_save_route_metrics[:distance]
+    # Distance is stored in meters, convert to kilometers for display
+    distance_meters = distance || calculate_and_save_route_metrics[:distance]
+    distance_meters ? (distance_meters / 1000.0).round(1) : nil
   end
 
   # Force recalculation of route metrics including waypoints
@@ -59,12 +61,16 @@ class Route < ApplicationRecord
     starting_location_changed? || destination_changed?
   end
 
+  def locations_changed_or_motorway_setting_changed?
+    locations_changed? || avoid_motorways_changed?
+  end
+
   def calculate_route_metrics
     return unless starting_location.present? && destination.present?
 
     # Include waypoints in calculation if they exist - convert to array for compatibility
     ordered_waypoints = waypoints.ordered.to_a
-    calculator = RouteDistanceCalculator.new(starting_location, destination, ordered_waypoints)
+    calculator = RouteDistanceCalculator.new(starting_location, destination, ordered_waypoints, avoid_motorways: avoid_motorways?)
     result = calculator.calculate
 
     self.distance = result[:distance]
@@ -75,8 +81,8 @@ class Route < ApplicationRecord
   def calculate_and_save_route_metrics
     return { distance: nil, duration: nil } unless starting_location.present? && destination.present?
 
-    # Only calculate if we don't have both values
-    if distance.nil? || duration.nil?
+    # Only calculate if we don't have both values or if motorway setting may have changed metrics
+    if distance.nil? || duration.nil? || avoid_motorways_changed?
       calculate_route_metrics
       save if persisted? && (distance_changed? || duration_changed?)
     end
