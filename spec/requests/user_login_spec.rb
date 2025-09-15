@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe "User Login", type: :request do
-  let(:user) { create(:user, username: "testuser", password: "password123") }
+  let(:user) { create(:user, password: "password123") }
 
   describe "GET /login" do
     it "returns successful response" do

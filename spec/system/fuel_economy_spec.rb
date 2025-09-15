@@ -106,7 +106,10 @@ RSpec.describe "Fuel Economy Calculator", type: :system, js: true do
       # Wait for JavaScript to process the input events and show results
       expect(page).to have_selector("[data-fuel-economy-target='results']", visible: true)
 
-      # Check round trip option and ensure it's actually checked
+      # Ensure round trip checkbox is unchecked, then check it
+      if page.has_checked_field?("Calculate for round trip")
+        uncheck "Calculate for round trip"
+      end
       check "Calculate for round trip"
       expect(page).to have_checked_field("Calculate for round trip")
 

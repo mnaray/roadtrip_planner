@@ -48,8 +48,8 @@ RSpec.describe RouteDistanceCalculator do
       it 'calculates distance and duration without waypoints' do
         result = calculator.calculate
 
-        expect(result[:distance]).to eq(300.0) # km
-        expect(result[:duration]).to eq(4.0)   # hours
+        expect(result[:distance]).to eq(300000) # meters (300 km)
+        expect(result[:duration]).to eq(4.0)    # hours
       end
     end
 
@@ -69,8 +69,8 @@ RSpec.describe RouteDistanceCalculator do
       it 'calculates route with waypoints' do
         result = calculator.calculate
 
-        expect(result[:distance]).to eq(450.0) # km (longer due to waypoint)
-        expect(result[:duration]).to eq(6.0)   # hours (longer due to waypoint)
+        expect(result[:distance]).to eq(450000) # meters (450 km, longer due to waypoint)
+        expect(result[:duration]).to eq(6.0)    # hours (longer due to waypoint)
       end
     end
 
@@ -101,8 +101,8 @@ RSpec.describe RouteDistanceCalculator do
       it 'falls back to straight-line calculations' do
         result = calculator.calculate
 
-        expect(result[:distance]).to eq(250.0) # km
-        expect(result[:duration]).to eq(3.33)  # hours (rounded)
+        expect(result[:distance]).to eq(250000) # meters (250 km)
+        expect(result[:duration]).to eq(3.33)   # hours (rounded)
       end
     end
   end
@@ -163,7 +163,7 @@ RSpec.describe RouteDistanceCalculator do
 
       it 'extracts coordinates from waypoint models' do
         result = calculator.calculate
-        expect(result[:distance]).to eq(450.0)
+        expect(result[:distance]).to eq(450000) # meters (450 km)
       end
     end
 
@@ -182,7 +182,7 @@ RSpec.describe RouteDistanceCalculator do
 
       it 'handles hash format waypoints' do
         result = calculator.calculate
-        expect(result[:distance]).to eq(450.0)
+        expect(result[:distance]).to eq(450000) # meters (450 km)
       end
     end
 
@@ -201,7 +201,7 @@ RSpec.describe RouteDistanceCalculator do
 
       it 'handles coordinate array format waypoints' do
         result = calculator.calculate
-        expect(result[:distance]).to eq(450.0)
+        expect(result[:distance]).to eq(450000) # meters (450 km)
       end
     end
   end

@@ -234,7 +234,7 @@ RSpec.describe Route, type: :model do
     let(:route) { create(:route, user: user, road_trip: road_trip) }
 
     context 'when distance is already stored' do
-      before { route.update_column(:distance, 150.5) }
+      before { route.update_column(:distance, 150500) } # 150.5 km stored as meters
 
       it 'returns the stored distance' do
         expect(route.distance_in_km).to eq(150.5)
@@ -249,10 +249,10 @@ RSpec.describe Route, type: :model do
         allow(RouteDistanceCalculator).to receive(:new)
           .with(route.starting_location, route.destination, [], avoid_motorways: false)
           .and_return(calculator)
-        allow(calculator).to receive(:calculate).and_return({ distance: 120.5, duration: 2.5 })
+        allow(calculator).to receive(:calculate).and_return({ distance: 120500, duration: 2.5 }) # 120.5 km in meters
 
         expect(route.distance_in_km).to eq(120.5)
-        expect(route.reload.distance).to eq(120.5)
+        expect(route.reload.distance).to eq(120500) # Distance stored in meters
       end
     end
   end
