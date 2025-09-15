@@ -35,28 +35,22 @@ class AboutPage < ApplicationComponent
             end
             ul class: "space-y-3 text-gray-700 list-disc list-inside" do
               li do
-                "Create and manage multiple road trips with custom names and descriptions"
+                "Collaborate with friends and family by sharing trips and managing participants"
               end
               li do
-                "Share road trips with friends and family for collaborative planning"
+                "Plan interactive routes with custom waypoints by clicking directly on the map"
               end
               li do
-                "Plan detailed routes with interactive waypoint placement on maps"
+                "Choose more cost efficient routes with highway and toll avoidance options"
               end
               li do
-                "Customize your route by clicking on roads to add waypoints and modify your path"
+                "Calculate fuel costs in real-time with the built-in fuel economy calculator"
               end
               li do
-                "Create and manage shared packing lists with your travel companions"
+                "Organize packing lists with categories, checkboxes, and progress tracking"
               end
               li do
-                "Track packing progress with checkboxes for each item"
-              end
-              li do
-                "Export route data for use with GPS devices and mapping apps"
-              end
-              li do
-                "View routes on interactive maps"
+                "Export route data for GPS devices and navigation apps"
               end
             end
           end
