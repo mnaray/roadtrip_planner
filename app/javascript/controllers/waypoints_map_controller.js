@@ -4,7 +4,8 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static values = {
     startLocation: String,
-    endLocation: String
+    endLocation: String,
+    avoidMotorways: Boolean
   }
 
   connect() {
@@ -95,9 +96,11 @@ export default class extends Controller {
 
       if (routeData && routeData.geometry) {
         // Draw the actual route following roads
+        // Use different color for highway-avoiding routes
+        const routeColor = this.avoidMotorwaysValue ? '#10B981' : '#3B82F6' // Green for highway-free, blue for normal
         this.routeLine = L.geoJSON(routeData.geometry, {
           style: {
-            color: '#3B82F6',
+            color: routeColor,
             weight: 4,
             opacity: 0.8
           }
@@ -109,14 +112,46 @@ export default class extends Controller {
 
         // Store route coordinates for waypoint validation
         this.routeCoordinates = routeData.geometry.coordinates
+
+        // Update popup with route information
+        if (routeData.properties) {
+          const distance = routeData.properties.segments?.[0]?.distance
+          const duration = routeData.properties.segments?.[0]?.duration
+
+          if (distance && duration) {
+            const distanceKm = (distance / 1000).toFixed(1)
+            const durationHours = (duration / 3600).toFixed(1)
+            const avoidanceNote = this.avoidMotorwaysValue ?
+              '<br><span style="color: #10B981; font-weight: bold;">🛣️ Avoiding highways & tolls</span>' : ''
+
+            startMarker.bindPopup(`
+              <strong>Start:</strong><br>
+              ${this.startLocationValue}<br><br>
+              <strong>Route:</strong><br>
+              Distance: ${distanceKm} km<br>
+              Duration: ${durationHours} hours${avoidanceNote}
+            `)
+          }
+        }
       } else {
-        // Fallback to straight line if routing fails
-        console.warn('Unable to get route, falling back to straight line')
-        this.drawStraightLine(startCoords, endCoords, startMarker, endMarker)
+        // Handle routing failure based on highway avoidance setting
+        if (this.avoidMotorwaysValue) {
+          console.warn('Highway avoidance routing failed, cannot guarantee highway-free route')
+          this.showHighwayAvoidanceError(startMarker, endMarker, [])
+        } else {
+          console.warn('Unable to get route data, falling back to straight line')
+          this.drawStraightLine(startCoords, endCoords, startMarker, endMarker, false)
+        }
       }
     } catch (error) {
-      console.warn('Routing failed, falling back to straight line:', error)
-      this.drawStraightLine(startCoords, endCoords, startMarker, endMarker)
+      console.warn('Routing failed:', error)
+      if (this.avoidMotorwaysValue) {
+        console.warn('Highway avoidance routing failed, cannot guarantee highway-free route')
+        this.showHighwayAvoidanceError(startMarker, endMarker, [])
+      } else {
+        console.warn('Falling back to straight line')
+        this.drawStraightLine(startCoords, endCoords, startMarker, endMarker, false)
+      }
     }
 
     // Open the start popup by default
@@ -257,9 +292,10 @@ export default class extends Controller {
         }
 
         // Draw new route with waypoints
+        // Use red color to show modified route (regardless of highway avoidance)
         this.routeLine = L.geoJSON(routeWithWaypoints.geometry, {
           style: {
-            color: '#DC2626', // Red color to show modified route
+            color: '#DC2626', // Red color to show modified route with waypoints
             weight: 4,
             opacity: 0.8
           }
@@ -307,36 +343,115 @@ export default class extends Controller {
     }
   }
 
-  // Copy methods from route_map_controller.js
   async getRoute(startCoords, endCoords) {
+    // If avoid_motorways is enabled, use OpenRouteService with highway avoidance
+    if (this.avoidMotorwaysValue) {
+      return await this.getRouteOpenRouteService(startCoords, endCoords)
+    } else {
+      return await this.getRouteOSRM(startCoords, endCoords)
+    }
+  }
+
+  async getRouteOpenRouteService(startCoords, endCoords) {
     try {
-      // Use OpenRouteService for routing (free, no API key required for basic usage)
       const [startLat, startLon] = startCoords
       const [endLat, endLon] = endCoords
 
-      const url = `https://api.openrouteservice.org/v2/directions/driving-car?start=${startLon},${startLat}&end=${endLon},${endLat}`
+      console.log('Using Rails API proxy for OpenRouteService:')
+      console.log('- Start coords:', [startLat, startLon])
+      console.log('- End coords:', [endLat, endLon])
+
+      // Use Rails API endpoint to avoid CORS issues
+      const url = `/api/route_data?start_lat=${startLat}&start_lon=${startLon}&end_lat=${endLat}&end_lon=${endLon}&avoid_motorways=true`
+      console.log('- API URL:', url)
 
       const response = await fetch(url, {
+        method: 'GET',
         headers: {
-          'Accept': 'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8'
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
         }
       })
 
+      console.log('- Response status:', response.status)
+      console.log('- Response ok:', response.ok)
+
       if (!response.ok) {
-        throw new Error(`Routing request failed: ${response.status}`)
+        const errorText = await response.text()
+        console.error('Rails API error:', response.status, errorText)
+        return null
       }
 
       const data = await response.json()
+      console.log('- Response data structure:', {
+        type: data?.type || 'N/A',
+        hasGeometry: !!(data && data.geometry),
+        hasProperties: !!(data && data.properties)
+      })
 
-      if (data && data.features && data.features.length > 0) {
-        return data.features[0]
+      if (data && data.type === 'Feature' && data.geometry) {
+        console.log('- SUCCESS: Got route data via Rails API')
+        return data
       }
 
+      console.warn('- No valid route feature in response')
       return null
     } catch (error) {
-      console.error('Routing error:', error)
-      // Try alternative routing service as fallback
-      return await this.getRouteAlternative(startCoords, endCoords)
+      console.error('Rails API routing error:', error)
+      // Don't fall back to OSRM as it doesn't avoid highways
+      return null
+    }
+  }
+
+  async getRouteOSRM(startCoords, endCoords) {
+    try {
+      // Use Rails API endpoint for OSRM routing
+      const [startLat, startLon] = startCoords
+      const [endLat, endLon] = endCoords
+
+      console.log('Using Rails API proxy for OSRM:')
+      console.log('- Start coords:', [startLat, startLon])
+      console.log('- End coords:', [endLat, endLon])
+
+      const url = `/api/route_data?start_lat=${startLat}&start_lon=${startLon}&end_lat=${endLat}&end_lon=${endLon}&avoid_motorways=false`
+      console.log('- API URL:', url)
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+
+      console.log('- Response status:', response.status)
+      console.log('- Response ok:', response.ok)
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Rails API error:', response.status, errorText)
+        return null
+      }
+
+      const data = await response.json()
+      console.log('- Response data structure:', {
+        type: data?.type || 'N/A',
+        hasGeometry: !!(data && data.geometry),
+        hasProperties: !!(data && data.properties)
+      })
+
+      if (data && data.type === 'Feature' && data.geometry) {
+        console.log('- SUCCESS: Got OSRM route data via Rails API')
+        return data
+      }
+
+      console.warn('- No valid route feature in response')
+      return null
+    } catch (error) {
+      console.error('Rails API OSRM routing error:', error)
+      return null
     }
   }
 
@@ -376,21 +491,60 @@ export default class extends Controller {
     }
   }
 
-  drawStraightLine(startCoords, endCoords, startMarker, endMarker) {
+  drawStraightLine(startCoords, endCoords, startMarker, endMarker, isHighwayAvoidanceFallback = false) {
     // Fallback: Draw a straight line between the points
-    this.routeLine = L.polyline([startCoords, endCoords], {
-      color: '#DC2626', // Red color to indicate it's not a real route
+    const routeLine = L.polyline([startCoords, endCoords], {
+      color: isHighwayAvoidanceFallback ? '#10B981' : '#DC2626', // Green for highway avoidance fallback, red for general fallback
       weight: 4,
       opacity: 0.8,
       dashArray: '10, 5' // Dashed line to indicate it's approximate
     }).addTo(this.map)
 
     // Fit the map to show both points
-    const group = L.featureGroup([startMarker, endMarker, this.routeLine])
+    const group = L.featureGroup([startMarker, endMarker, routeLine])
     this.map.fitBounds(group.getBounds(), { padding: [20, 20] })
+
+    // Add a note about the straight line with context-specific message
+    const message = isHighwayAvoidanceFallback ?
+      `<strong>Start:</strong><br>
+       ${this.startLocationValue}<br><br>
+       <em style="color: #10B981;">
+         🛣️ Highway avoidance requested<br>
+         Showing straight line distance<br>
+         (highway-free routing unavailable)
+       </em>` :
+      `<strong>Start:</strong><br>
+       ${this.startLocationValue}<br><br>
+       <em style="color: #DC2626;">
+         Note: Showing straight line distance<br>
+         (routing service unavailable)
+       </em>`
+
+    startMarker.bindPopup(message)
 
     // Store a simplified route for waypoint validation
     this.routeCoordinates = [[startCoords[1], startCoords[0]], [endCoords[1], endCoords[0]]]
+  }
+
+  showHighwayAvoidanceError(startMarker, endMarker, waypointMarkers = []) {
+    // Show markers without any route lines
+    const allMarkers = [startMarker, endMarker, ...waypointMarkers]
+    const group = L.featureGroup(allMarkers)
+    this.map.fitBounds(group.getBounds(), { padding: [20, 20] })
+
+    // Add error message to start popup
+    startMarker.bindPopup(`
+      <strong>Start:</strong><br>
+      ${this.startLocationValue}<br><br>
+      <div style="color: #DC2626;">
+        <strong>⚠️ Highway Avoidance Error</strong><br>
+        Cannot calculate highway-free route.<br>
+        Please check your API configuration.
+      </div>
+    `)
+
+    // Open the popup to show the error
+    startMarker.openPopup()
   }
 
   async geocode(location) {
