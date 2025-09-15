@@ -247,7 +247,7 @@ RSpec.describe Route, type: :model do
       it 'calculates and saves the distance' do
         calculator = instance_double(RouteDistanceCalculator)
         allow(RouteDistanceCalculator).to receive(:new)
-          .with(route.starting_location, route.destination, [])
+          .with(route.starting_location, route.destination, [], avoid_motorways: false)
           .and_return(calculator)
         allow(calculator).to receive(:calculate).and_return({ distance: 120.5, duration: 2.5 })
 
@@ -264,7 +264,7 @@ RSpec.describe Route, type: :model do
     it 'calculates distance and duration when creating a new route' do
       calculator = instance_double(RouteDistanceCalculator)
       allow(RouteDistanceCalculator).to receive(:new)
-        .with("New York", "Boston", [])
+        .with("New York", "Boston", [], avoid_motorways: false)
         .and_return(calculator)
       allow(calculator).to receive(:calculate).and_return({ distance: 250.0, duration: 4.5 })
 
@@ -286,7 +286,7 @@ RSpec.describe Route, type: :model do
 
       calculator = instance_double(RouteDistanceCalculator)
       allow(RouteDistanceCalculator).to receive(:new)
-        .with("Chicago", route.destination, [])
+        .with("Chicago", route.destination, [], avoid_motorways: false)
         .and_return(calculator)
       allow(calculator).to receive(:calculate).and_return({ distance: 300.0, duration: 5.5 })
 
@@ -332,7 +332,7 @@ RSpec.describe Route, type: :model do
       it 'forces recalculation of route metrics' do
         calculator = instance_double(RouteDistanceCalculator)
         allow(RouteDistanceCalculator).to receive(:new)
-          .with(route.starting_location, route.destination, [])
+          .with(route.starting_location, route.destination, [], avoid_motorways: false)
           .and_return(calculator)
         allow(calculator).to receive(:calculate).and_return({ distance: 500.0, duration: 7.5 })
 
@@ -349,7 +349,7 @@ RSpec.describe Route, type: :model do
 
         calculator = instance_double(RouteDistanceCalculator)
         allow(RouteDistanceCalculator).to receive(:new)
-          .with(route.starting_location, route.destination, [ waypoint ])
+          .with(route.starting_location, route.destination, [ waypoint ], avoid_motorways: false)
           .and_return(calculator)
         allow(calculator).to receive(:calculate).and_return({ distance: 600.0, duration: 8.5 })
 
@@ -419,7 +419,7 @@ RSpec.describe Route, type: :model do
         it 'triggers recalculation and returns updated duration' do
           calculator = instance_double(RouteDistanceCalculator)
           allow(RouteDistanceCalculator).to receive(:new)
-            .with(route.starting_location, route.destination, [ waypoint ])
+            .with(route.starting_location, route.destination, [ waypoint ], avoid_motorways: false)
             .and_return(calculator)
           allow(calculator).to receive(:calculate).and_return({ distance: 400.0, duration: 5.0 })
 
