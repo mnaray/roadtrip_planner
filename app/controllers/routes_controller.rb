@@ -1,5 +1,5 @@
 class RoutesController < ApplicationController
-  before_action :require_login, except: [:route_data]
+  before_action :require_login, except: [ :route_data ]
   before_action :set_road_trip, only: [ :new, :create ]
   before_action :set_route, only: [ :show, :edit, :update, :destroy, :map, :export_gpx, :edit_waypoints, :update_waypoints ]
   before_action :set_road_trip_for_route, only: [ :edit, :update ]
@@ -156,7 +156,7 @@ class RoutesController < ApplicationController
     start_lon = params[:start_lon].to_f
     end_lat = params[:end_lat].to_f
     end_lon = params[:end_lon].to_f
-    avoid_motorways = params[:avoid_motorways] == 'true'
+    avoid_motorways = params[:avoid_motorways] == "true"
 
     if start_lat == 0 || start_lon == 0 || end_lat == 0 || end_lon == 0
       render json: { error: "Invalid coordinates" }, status: :bad_request
@@ -166,7 +166,7 @@ class RoutesController < ApplicationController
     begin
       if avoid_motorways
         # Use OpenRouteService for highway avoidance
-        route_feature = fetch_openrouteservice_route([start_lat, start_lon], [end_lat, end_lon])
+        route_feature = fetch_openrouteservice_route([ start_lat, start_lon ], [ end_lat, end_lon ])
 
         if route_feature
           render json: route_feature
@@ -175,7 +175,7 @@ class RoutesController < ApplicationController
         end
       else
         # Use OSRM for normal routing
-        route_data = fetch_osrm_route([start_lat, start_lon], [end_lat, end_lon])
+        route_data = fetch_osrm_route([ start_lat, start_lon ], [ end_lat, end_lon ])
 
         if route_data
           render json: route_data
@@ -231,9 +231,9 @@ class RoutesController < ApplicationController
   end
 
   def fetch_openrouteservice_route(start_coords, end_coords)
-    require 'net/http'
-    require 'json'
-    require 'uri'
+    require "net/http"
+    require "json"
+    require "uri"
 
     start_lat, start_lon = start_coords
     end_lat, end_lon = end_coords
@@ -241,13 +241,13 @@ class RoutesController < ApplicationController
     uri = URI("https://api.openrouteservice.org/v2/directions/driving-car/geojson")
 
     request_body = {
-      coordinates: [[start_lon, start_lat], [end_lon, end_lat]],
+      coordinates: [ [ start_lon, start_lat ], [ end_lon, end_lat ] ],
       options: {
-        avoid_features: ["highways", "tollways"]
+        avoid_features: [ "highways", "tollways" ]
       }
     }
 
-    api_key = ENV['OPENROUTESERVICE_API_KEY'] || Rails.application.credentials.dig(:openrouteservice, :api_key)
+    api_key = ENV["OPENROUTESERVICE_API_KEY"] || Rails.application.credentials.dig(:openrouteservice, :api_key)
 
     return nil unless api_key
 
@@ -274,10 +274,10 @@ class RoutesController < ApplicationController
             type: "Feature",
             geometry: feature["geometry"],
             properties: {
-              segments: [{
+              segments: [ {
                 distance: feature["properties"]["segments"].first["distance"],
                 duration: feature["properties"]["segments"].first["duration"]
-              }]
+              } ]
             }
           }
         elsif data["routes"] && data["routes"].any?
@@ -288,10 +288,10 @@ class RoutesController < ApplicationController
             type: "Feature",
             geometry: route["geometry"],
             properties: {
-              segments: [{
+              segments: [ {
                 distance: route["summary"]["distance"],
                 duration: route["summary"]["duration"]
-              }]
+              } ]
             }
           }
         else
@@ -308,9 +308,9 @@ class RoutesController < ApplicationController
   end
 
   def fetch_osrm_route(start_coords, end_coords)
-    require 'net/http'
-    require 'json'
-    require 'uri'
+    require "net/http"
+    require "json"
+    require "uri"
 
     start_lat, start_lon = start_coords
     end_lat, end_lon = end_coords
@@ -329,10 +329,10 @@ class RoutesController < ApplicationController
             type: "Feature",
             geometry: route["geometry"],
             properties: {
-              segments: [{
+              segments: [ {
                 distance: route["distance"],
                 duration: route["duration"]
-              }]
+              } ]
             }
           }
         end

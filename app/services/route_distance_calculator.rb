@@ -28,14 +28,14 @@ class RouteDistanceCalculator
                    else
                      fetch_route_data_openrouteservice(start_coords, end_coords)
                    end
-                 else
+    else
                    # Use OSRM for normal routing (free, no API key required)
                    if @waypoints.any?
                      calculate_with_waypoints(start_coords, end_coords)
                    else
                      fetch_route_data_osrm(start_coords, end_coords)
                    end
-                 end
+    end
 
     # Only fallback to straight-line for normal routing, NOT for highway avoidance
     if route_data.nil? && !@avoid_motorways
@@ -156,9 +156,9 @@ class RouteDistanceCalculator
               # Select the route with the longest distance (usually avoids highways)
               # In a production app, you'd want more sophisticated logic here
               data["routes"].max_by { |r| r["distance"] }
-            else
+    else
               data["routes"][0]
-            end
+    end
 
     # Distance is in meters, duration is in seconds
     { distance: route["distance"], duration: route["duration"] }
@@ -204,9 +204,9 @@ class RouteDistanceCalculator
               # Select the route with the longest distance (usually avoids highways)
               # In a production app, you'd want more sophisticated logic here
               data["routes"].max_by { |r| r["distance"] }
-            else
+    else
               data["routes"][0]
-            end
+    end
 
     # Distance is in meters, duration is in seconds
     { distance: route["distance"], duration: route["duration"] }
@@ -285,14 +285,14 @@ class RouteDistanceCalculator
     uri = URI("https://api.openrouteservice.org/v2/directions/driving-car")
 
     request_body = {
-      coordinates: [[start_lon, start_lat], [end_lon, end_lat]],
+      coordinates: [ [ start_lon, start_lat ], [ end_lon, end_lat ] ],
       options: {
-        avoid_features: ["highways", "tollways"]
+        avoid_features: [ "highways", "tollways" ]
       }
     }
 
     # Check if API key is configured
-    api_key = ENV['OPENROUTESERVICE_API_KEY'] || Rails.application.credentials.dig(:openrouteservice, :api_key)
+    api_key = ENV["OPENROUTESERVICE_API_KEY"] || Rails.application.credentials.dig(:openrouteservice, :api_key)
 
     unless api_key
       Rails.logger.warn "OpenRouteService API key not configured. Cannot guarantee highway/toll avoidance."
@@ -319,14 +319,14 @@ class RouteDistanceCalculator
     # Convert waypoints to coordinates
     waypoint_coords = @waypoints.map do |waypoint|
       if waypoint.respond_to?(:latitude) && waypoint.respond_to?(:longitude)
-        [waypoint.longitude, waypoint.latitude]
+        [ waypoint.longitude, waypoint.latitude ]
       elsif waypoint.is_a?(Hash) && waypoint[:latitude] && waypoint[:longitude]
-        [waypoint[:longitude], waypoint[:latitude]]
+        [ waypoint[:longitude], waypoint[:latitude] ]
       elsif waypoint.is_a?(Array) && waypoint.length >= 2
-        [waypoint[1], waypoint[0]] # Reverse lat,lon to lon,lat
+        [ waypoint[1], waypoint[0] ] # Reverse lat,lon to lon,lat
       else
         coords = geocode(waypoint.to_s)
-        coords ? [coords[1], coords[0]] : nil # Reverse lat,lon to lon,lat
+        coords ? [ coords[1], coords[0] ] : nil # Reverse lat,lon to lon,lat
       end
     end.compact
 
@@ -336,18 +336,18 @@ class RouteDistanceCalculator
     end_lat, end_lon = end_coords
 
     # Build coordinates array: start -> waypoints -> end
-    all_coordinates = [[start_lon, start_lat]] + waypoint_coords + [[end_lon, end_lat]]
+    all_coordinates = [ [ start_lon, start_lat ] ] + waypoint_coords + [ [ end_lon, end_lat ] ]
 
     uri = URI("https://api.openrouteservice.org/v2/directions/driving-car")
 
     request_body = {
       coordinates: all_coordinates,
       options: {
-        avoid_features: ["highways", "tollways"]
+        avoid_features: [ "highways", "tollways" ]
       }
     }
 
-    api_key = ENV['OPENROUTESERVICE_API_KEY'] || Rails.application.credentials.dig(:openrouteservice, :api_key)
+    api_key = ENV["OPENROUTESERVICE_API_KEY"] || Rails.application.credentials.dig(:openrouteservice, :api_key)
 
     unless api_key
       Rails.logger.warn "OpenRouteService API key not configured. Cannot guarantee highway/toll avoidance."
