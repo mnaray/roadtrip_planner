@@ -79,7 +79,34 @@ RSpec.describe RouteGpxGenerator, type: :service do
           # Mock geocoding
           allow_any_instance_of(RouteGpxGenerator).to receive(:geocode).with("New York, NY").and_return([ 40.7128, -74.0060 ])
           allow_any_instance_of(RouteGpxGenerator).to receive(:geocode).with("Boston, MA").and_return([ 42.3601, -71.0589 ])
-          allow_any_instance_of(RouteGpxGenerator).to receive(:fetch_route_data).and_return(mock_route_data)
+
+          # Override WebMock with specific coordinates for this test
+          stub_request(:get, /router\.project-osrm\.org\/route\/v1\/driving/).
+            to_return(
+              status: 200,
+              body: {
+                code: "Ok",
+                routes: [{
+                  geometry: {
+                    type: "LineString",
+                    coordinates: [
+                      [ -74.0060, 40.7128 ], # New York
+                      [ -73.9900, 40.7500 ], # Intermediate
+                      [ -73.9700, 40.7800 ], # Intermediate
+                      [ -71.0589, 42.3601 ]  # Boston
+                    ]
+                  },
+                  legs: [{ distance: 350000, duration: 14400, steps: [] }],
+                  distance: 350000,
+                  duration: 14400
+                }],
+                waypoints: [
+                  { location: [ -74.0060, 40.7128 ] },
+                  { location: [ -71.0589, 42.3601 ] }
+                ]
+              }.to_json,
+              headers: { 'Content-Type' => 'application/json' }
+            )
         end
 
         it "includes waypoints for start and destination" do
@@ -163,7 +190,9 @@ RSpec.describe RouteGpxGenerator, type: :service do
           # Mock geocoding
           allow_any_instance_of(RouteGpxGenerator).to receive(:geocode).with("New York, NY").and_return([ 40.7128, -74.0060 ])
           allow_any_instance_of(RouteGpxGenerator).to receive(:geocode).with("Boston, MA").and_return([ 42.3601, -71.0589 ])
-          allow_any_instance_of(RouteGpxGenerator).to receive(:fetch_route_data).and_return(nil)
+          # Override WebMock to return error for OSRM
+          stub_request(:get, /router\.project-osrm\.org\/route\/v1\/driving/).
+            to_return(status: 500, body: "Internal Server Error")
         end
 
         it "falls back to waypoint-only GPX" do
@@ -215,7 +244,32 @@ RSpec.describe RouteGpxGenerator, type: :service do
         # Mock geocoding
         allow_any_instance_of(RouteGpxGenerator).to receive(:geocode).with("New York, NY").and_return([ 40.7128, -74.0060 ])
         allow_any_instance_of(RouteGpxGenerator).to receive(:geocode).with("Boston, MA").and_return([ 42.3601, -71.0589 ])
-        allow_any_instance_of(RouteGpxGenerator).to receive(:fetch_route_data).and_return(mock_route_data)
+
+        # Override WebMock with specific distance/duration for this test
+        stub_request(:get, /router\.project-osrm\.org\/route\/v1\/driving/).
+          to_return(
+            status: 200,
+            body: {
+              code: "Ok",
+              routes: [{
+                geometry: {
+                  type: "LineString",
+                  coordinates: [
+                    [ -74.0060, 40.7128 ],
+                    [ -71.0589, 42.3601 ]
+                  ]
+                },
+                legs: [{ distance: 250500, duration: 13500, steps: [] }],
+                distance: 250500, # 250.5 km in meters
+                duration: 13500   # 3.75 hours in seconds
+              }],
+              waypoints: [
+                { location: [ -74.0060, 40.7128 ] },
+                { location: [ -71.0589, 42.3601 ] }
+              ]
+            }.to_json,
+            headers: { 'Content-Type' => 'application/json' }
+          )
       end
 
       it "includes actual distance and duration in track description" do
@@ -234,6 +288,9 @@ RSpec.describe RouteGpxGenerator, type: :service do
       context "when geocoding fails" do
         before do
           allow_any_instance_of(RouteGpxGenerator).to receive(:geocode).and_return(nil)
+          # Override WebMock to simulate geocoding failure
+          stub_request(:get, /nominatim\.openstreetmap\.org\/search/).
+            to_return(status: 500, body: "Service Unavailable")
         end
 
         it "returns fallback GPX" do
@@ -247,7 +304,7 @@ RSpec.describe RouteGpxGenerator, type: :service do
           metadata = doc.at_xpath("//xmlns:metadata")
           desc = metadata.at_xpath("xmlns:desc")
 
-          expect(desc.text).to include("temporarily unavailable")
+          expect(desc.text).to include("Route data temporarily unavailable")
         end
       end
 

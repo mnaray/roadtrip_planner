@@ -4,6 +4,7 @@ require_relative '../config/environment'
 abort("The Rails environment is running in production mode!") if Rails.env.production?
 require 'rspec/rails'
 require 'selenium-webdriver'
+require 'webmock/rspec'
 
 # Load support files
 Rails.root.glob('spec/support/**/*.rb').sort_by(&:to_s).each { |f| require f }
@@ -17,6 +18,18 @@ end
 RSpec.configure do |config|
   # Include FactoryBot methods
   config.include FactoryBot::Syntax::Methods
+
+  # Clear class caching to prevent class reloading issues
+  config.before(:suite) do
+    Rails.application.reloader.reload! if defined?(Rails.application.reloader)
+    # Reset Faker unique values to prevent conflicts between test runs
+    Faker::UniqueGenerator.clear if defined?(Faker::UniqueGenerator)
+  end
+
+  # Reset Faker unique values between examples to prevent conflicts
+  config.before(:each) do
+    Faker::UniqueGenerator.clear if defined?(Faker::UniqueGenerator)
+  end
 
   # Use transactional fixtures for fast, isolated tests
   # But disable for JavaScript tests which run in separate process

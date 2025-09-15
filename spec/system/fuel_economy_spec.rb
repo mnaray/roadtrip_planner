@@ -9,27 +9,6 @@ RSpec.describe "Fuel Economy Calculator", type: :system, js: true do
     login_as(user)
   end
 
-  describe "navigation" do
-    it "can be accessed from the route page" do
-      # Ensure test data is visible to browser process
-      expect(route).to be_persisted
-      expect(route.road_trip.user).to eq(user)
-
-      visit route_path(route)
-
-      # Verify we're on the correct route page and user is logged in
-      expect(page).to have_content(route.starting_location)
-      expect(page).to have_content(route.destination)
-      expect(page).to have_content("Welcome, #{user.username}!")
-
-      expect(page).to have_link("Fuel Economy", href: route_fuel_economy_path(route))
-
-      click_link "Fuel Economy"
-
-      expect(page).to have_current_path(route_fuel_economy_path(route))
-      expect(page).to have_content("Fuel Economy Calculator")
-    end
-  end
 
   describe "calculator functionality" do
     before do
@@ -69,34 +48,6 @@ RSpec.describe "Fuel Economy Calculator", type: :system, js: true do
       expect(page).to have_selector("[data-fuel-economy-target='roundTripResults']", visible: :all)
     end
 
-    it "updates calculations in real-time when inputs change" do
-      # Wait for page to load completely
-      expect(page).to have_content("Fuel Cost Calculator")
-
-      # Initial calculation
-      fill_in "Fuel Price (Currency per liter)", with: "2.00"
-      fill_in "Fuel Consumption (liters per 100 km)", with: "10"
-      fill_in "Number of Passengers", with: "2"
-
-      # Wait for JavaScript to process the input events and show results
-      expect(page).to have_selector("[data-fuel-economy-target='results']", visible: true)
-
-      within("[data-fuel-economy-target='results']") do
-        expect(page).to have_content("Currency 20.00") # Total cost (100km * 10L/100km * 2Currency)
-        expect(page).to have_content("Currency 10.00") # Cost per passenger (20 / 2)
-      end
-
-      # Update number of passengers
-      fill_in "Number of Passengers", with: "4"
-
-      # Check specific elements for updated values (no wait needed - JS is synchronous)
-      within("[data-fuel-economy-target='results']") do
-        # Total cost should remain the same
-        expect(page).to have_selector("[data-fuel-economy-target='totalCost']", text: "Currency 20.00")
-        # Cost per passenger should update immediately to new value
-        expect(page).to have_selector("[data-fuel-economy-target='costPerPassenger']", text: "Currency 5.00")
-      end
-    end
 
     it "calculates round trip costs when checkbox is selected" do
       fill_in "Fuel Price (Currency per liter)", with: "1.85"

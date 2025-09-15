@@ -250,7 +250,38 @@ RSpec.describe Waypoint, type: :model do
       expect(route1.reload.waypoints_updated_at).to be_nil
 
       # Mock the recalculated duration to be longer due to waypoint
-      allow(route1).to receive(:current_duration_hours).and_return(4.0)
+      # Since validation queries the database for routes, we need to mock at class level
+      allow_any_instance_of(Route).to receive(:current_duration_hours) do |instance|
+        if instance.id == route1.id
+          4.0
+        else
+          instance.duration_hours
+        end
+      end
+
+      # Also mock duration_hours for the specific route
+      allow_any_instance_of(Route).to receive(:duration_hours) do |instance|
+        if instance.id == route1.id
+          4.0
+        else
+          instance.read_attribute(:duration) || 2.0
+        end
+      end
+
+      # Mock recalculate_metrics! to avoid API calls
+      allow_any_instance_of(Route).to receive(:recalculate_metrics!) do |instance|
+        if instance.id == route1.id
+          instance.update_columns(duration: 4.0, waypoints_updated_at: Time.current)
+          { distance: 450000, duration: 4.0 }
+        else
+          # For other routes, return default values without API calls
+          default_duration = instance.read_attribute(:duration) || 2.0
+          { distance: 100000, duration: default_duration }
+        end
+      end
+
+      # Set the actual duration attribute to ensure consistency
+      route1.update_columns(duration: 4.0)
 
       # Now the second route should overlap due to longer duration
       route2_overlap = build(:route, road_trip: road_trip, user: user, datetime: base_time + 3.hours)

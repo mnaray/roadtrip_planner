@@ -99,10 +99,13 @@ RSpec.describe "About Page Navigation", type: :system do
       end
 
       it "displays features list" do
-        expect(page).to have_content("Create and manage multiple road trips")
-        expect(page).to have_content("Share road trips with friends and family")
-        expect(page).to have_content("Plan detailed routes with interactive waypoint placement on maps")
-        expect(page).to have_content("Create and manage shared packing lists with your travel companions")
+        # Check for actual content from AboutPage component
+        expect(page).to have_content("Collaborate with friends and family by sharing trips and managing participants")
+        expect(page).to have_content("Plan interactive routes with custom waypoints by clicking directly on the map")
+        expect(page).to have_content("Choose more cost efficient routes with highway and toll avoidance options")
+        expect(page).to have_content("Calculate fuel costs in real-time with the built-in fuel economy calculator")
+        expect(page).to have_content("Organize packing lists with categories, checkboxes, and progress tracking")
+        expect(page).to have_content("Export route data for GPS devices and navigation apps")
       end
 
       it "displays action buttons for anonymous users" do

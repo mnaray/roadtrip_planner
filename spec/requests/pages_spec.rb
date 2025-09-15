@@ -99,10 +99,13 @@ RSpec.describe "Pages", type: :request do
 
       it "displays main features list" do
         get about_path
-        expect(response.body).to include("Create and manage multiple road trips")
-        expect(response.body).to include("Share road trips with friends and family")
-        expect(response.body).to include("Plan detailed routes with interactive waypoint placement on maps")
-        expect(response.body).to include("Create and manage shared packing lists with your travel companions")
+        # Check for actual content from AboutPage component
+        expect(response.body).to include("Collaborate with friends and family by sharing trips and managing participants")
+        expect(response.body).to include("Plan interactive routes with custom waypoints by clicking directly on the map")
+        expect(response.body).to include("Choose more cost efficient routes with highway and toll avoidance options")
+        expect(response.body).to include("Calculate fuel costs in real-time with the built-in fuel economy calculator")
+        expect(response.body).to include("Organize packing lists with categories, checkboxes, and progress tracking")
+        expect(response.body).to include("Export route data for GPS devices and navigation apps")
       end
 
       it "displays getting started steps for anonymous users" do

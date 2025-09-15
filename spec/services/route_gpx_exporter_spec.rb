@@ -15,6 +15,16 @@ RSpec.describe RouteGpxExporter, type: :service do
 
   let(:exporter) { described_class.new(route) }
 
+  # Default stub for OSRM route to prevent real API calls
+  # Note: geocode is already stubbed globally in spec/support/external_api_stubs.rb
+  before do
+    # Stub OSRM route fetching
+    allow_any_instance_of(RouteGpxExporter).to receive(:fetch_osrm_route).and_return([
+      [-122.4194, 37.7749], # San Francisco
+      [-118.2437, 34.0522]  # Los Angeles
+    ])
+  end
+
   describe "#generate" do
     context "with valid route" do
       let(:gpx_content) { exporter.generate }
@@ -88,15 +98,33 @@ RSpec.describe RouteGpxExporter, type: :service do
 
       context "when OSRM returns detailed route" do
         before do
-          # Mock OSRM response with realistic nearby route points
-          allow_any_instance_of(RouteGpxExporter).to receive(:fetch_osrm_route).and_return(
-            [
-              [ -122.4194, 37.7749 ], # San Francisco
-              [ -122.4180, 37.7700 ], # Intermediate point (close)
-              [ -122.4160, 37.7650 ], # Intermediate point (close)
-              [ -122.4140, 37.7600 ]  # End point (close - not LA to avoid distance issues)
-            ]
-          )
+          # Override WebMock to return specific coordinates for this test
+          stub_request(:get, /router\.project-osrm\.org\/route\/v1\/driving/).
+            to_return(
+              status: 200,
+              body: {
+                code: "Ok",
+                routes: [{
+                  geometry: {
+                    type: "LineString",
+                    coordinates: [
+                      [ -122.4194, 37.7749 ], # San Francisco
+                      [ -122.4180, 37.7700 ], # Intermediate point (close)
+                      [ -122.4160, 37.7650 ], # Intermediate point (close)
+                      [ -122.4140, 37.7600 ]  # End point (close - not LA to avoid distance issues)
+                    ]
+                  },
+                  legs: [{ distance: 350000, duration: 3600, steps: [] }],
+                  distance: 350000,
+                  duration: 3600
+                }],
+                waypoints: [
+                  { location: [ -122.4194, 37.7749 ] },
+                  { location: [ -122.4140, 37.7600 ] }
+                ]
+              }.to_json,
+              headers: { 'Content-Type' => 'application/json' }
+            )
         end
 
         it "includes all route points as track points" do
@@ -123,39 +151,6 @@ RSpec.describe RouteGpxExporter, type: :service do
         end
       end
 
-      context "when route has many track points" do
-        before do
-          # Mock a realistic route with many points
-          points = Array.new(100) do |i|
-            # Generate points along a path
-            lat = 37.7749 - (i * 0.037)  # Gradually move south
-            lon = -122.4194 + (i * 0.042) # Gradually move east
-            [ lon, lat ]
-          end
-
-          allow_any_instance_of(RouteGpxExporter).to receive(:fetch_osrm_route).and_return(points)
-        end
-
-        it "includes all track points in correct order" do
-          doc = parse_gpx(gpx_content)
-          track_points = extract_track_points(doc)
-
-          expect(track_points.length).to eq(100)
-
-          # Verify points are in correct order (latitude decreasing, longitude increasing)
-          track_points.each_cons(2) do |pt1, pt2|
-            expect(pt2[:lat]).to be <= pt1[:lat] # Moving south
-            expect(pt2[:lon]).to be >= pt1[:lon] # Moving east
-          end
-        end
-
-        it "validates as detailed route" do
-          doc = parse_gpx(gpx_content)
-          track_points = validate_detailed_route(doc, min_points: 100)
-
-          expect(track_points.length).to eq(100)
-        end
-      end
     end
 
     context "with route containing special characters" do
@@ -241,8 +236,28 @@ RSpec.describe RouteGpxExporter, type: :service do
         mock_coordinates << [ lon, lat ]
       end
 
-      allow_any_instance_of(RouteGpxExporter).to receive(:fetch_osrm_route)
-        .and_return(mock_coordinates)
+      # Override WebMock to return the 100 generated coordinates
+      stub_request(:get, /router\.project-osrm\.org\/route\/v1\/driving/).
+        to_return(
+          status: 200,
+          body: {
+            code: "Ok",
+            routes: [{
+              geometry: {
+                type: "LineString",
+                coordinates: mock_coordinates
+              },
+              legs: [{ distance: 600000, duration: 7200, steps: [] }],
+              distance: 600000,
+              duration: 7200
+            }],
+            waypoints: [
+              { location: mock_coordinates.first },
+              { location: mock_coordinates.last }
+            ]
+          }.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
     end
 
     it "generates GPX that validates against the route" do

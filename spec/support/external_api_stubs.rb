@@ -213,6 +213,28 @@ RSpec.configure do |config|
       duration: 7200     # 2 hours in seconds
     })
 
+    # Stub geocode method for RouteGpxExporter to prevent real API calls
+    allow_any_instance_of(RouteGpxExporter).to receive(:geocode) do |_, location|
+      case location
+      when /San Francisco/i
+        [37.7749, -122.4194]
+      when /Los Angeles/i
+        [34.0522, -118.2437]
+      when /New York/i
+        [40.7128, -74.0060]
+      when /Chicago/i
+        [41.8781, -87.6298]
+      when /Boston/i
+        [42.3601, -71.0589]
+      when /Zürich/i
+        [47.3769, 8.5417]
+      when /München/i, /Munich/i
+        [48.1351, 11.5820]
+      else
+        [0.0, 0.0]
+      end
+    end
+
     # Stub GPX service methods to return properly structured GPX XML
     allow_any_instance_of(RouteGpxGenerator).to receive(:generate) do |instance|
       route = instance.instance_variable_get(:@route)
@@ -268,23 +290,12 @@ RSpec.configure do |config|
       end
     end
 
-    allow_any_instance_of(RouteGpxExporter).to receive(:generate) do |instance|
-      route = instance.instance_variable_get(:@route)
-
-      # Try to get OSRM route points if the method exists and is stubbed
-      begin
-        route_points = instance.send(:fetch_osrm_route)
-        generate_dynamic_gpx(route, route_points)
-      rescue => e
-        generate_dynamic_gpx(route)
-      end
-    end
+    # Don't stub RouteGpxExporter#generate globally - let the real method run
+    # The geocode stub above prevents real API calls
+    # Individual tests can stub fetch_osrm_route as needed
 
     # Don't stub generate_with_validation - let the real method handle validation
-    # The real method will call our stubbed generate method and then validate it
-
-    # Don't stub fetch_osrm_route globally - let individual tests control it
-    # The generate stub will handle both cases - with or without fetch_osrm_route stub
+    # The real method will call the real generate method and then validate it
   end
 end
 
