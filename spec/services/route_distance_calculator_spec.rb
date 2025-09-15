@@ -20,6 +20,16 @@ RSpec.describe RouteDistanceCalculator do
       calculator = described_class.new(start_location, destination)
       expect(calculator.instance_variable_get(:@waypoints)).to eq([])
     end
+
+    it 'accepts avoid_motorways parameter' do
+      calculator = described_class.new(start_location, destination, [], avoid_motorways: true)
+      expect(calculator.instance_variable_get(:@avoid_motorways)).to be true
+    end
+
+    it 'defaults avoid_motorways to false' do
+      calculator = described_class.new(start_location, destination)
+      expect(calculator.instance_variable_get(:@avoid_motorways)).to be false
+    end
   end
 
   describe '#calculate' do
@@ -192,6 +202,60 @@ RSpec.describe RouteDistanceCalculator do
       it 'handles coordinate array format waypoints' do
         result = calculator.calculate
         expect(result[:distance]).to eq(450.0)
+      end
+    end
+  end
+
+  describe 'avoid_motorways functionality' do
+    context 'when avoid_motorways is enabled' do
+      let(:calculator) { described_class.new(start_location, destination, [], avoid_motorways: true) }
+
+      before do
+        allow(calculator).to receive(:geocode).with(start_location)
+                                              .and_return([ 40.7128, -74.0060 ])
+        allow(calculator).to receive(:geocode).with(destination)
+                                              .and_return([ 42.3601, -71.0589 ])
+        allow(Net::HTTP).to receive(:get_response).and_return(
+          instance_double(Net::HTTPSuccess, is_a?: true, body: {
+            routes: [{ distance: 350000, duration: 16200 }] # Longer route avoiding motorways
+          }.to_json)
+        )
+      end
+
+      it 'passes avoid parameter to OSRM API' do
+        expect(URI).to receive(:new).with(
+          "https://router.project-osrm.org/route/v1/driving/-74.0060,40.7128;-71.0589,42.3601"
+        ).and_call_original
+
+        expect(URI).to receive(:encode_www_form).with(
+          hash_including(avoid: "motorway")
+        ).and_call_original
+
+        calculator.calculate
+      end
+    end
+
+    context 'when avoid_motorways is disabled' do
+      let(:calculator) { described_class.new(start_location, destination, [], avoid_motorways: false) }
+
+      before do
+        allow(calculator).to receive(:geocode).with(start_location)
+                                              .and_return([ 40.7128, -74.0060 ])
+        allow(calculator).to receive(:geocode).with(destination)
+                                              .and_return([ 42.3601, -71.0589 ])
+        allow(Net::HTTP).to receive(:get_response).and_return(
+          instance_double(Net::HTTPSuccess, is_a?: true, body: {
+            routes: [{ distance: 300000, duration: 14400 }] # Normal route
+          }.to_json)
+        )
+      end
+
+      it 'does not pass avoid parameter to OSRM API' do
+        expect(URI).to receive(:encode_www_form).with(
+          hash_not_including(:avoid)
+        ).and_call_original
+
+        calculator.calculate
       end
     end
   end
