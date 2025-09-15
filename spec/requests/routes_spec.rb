@@ -211,7 +211,8 @@ RSpec.describe "Routes", type: :request do
           }
 
           post approve_route_path, params: { datetime: datetime_param }
-          new_route = Route.last
+          new_route = Route.order(created_at: :desc).first
+          expect(new_route).not_to be_nil
           expect(new_route.user).to eq(user)
           expect(new_route.road_trip).to eq(road_trip)
         end

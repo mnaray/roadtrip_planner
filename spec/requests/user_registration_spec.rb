@@ -6,7 +6,7 @@ RSpec.describe "User Registration", type: :request do
       let(:valid_attributes) do
         {
           user: {
-            username: "testuser#{rand(1000)}",
+            username: "testuser_#{SecureRandom.hex(8)}",
             password: "password123",
             password_confirmation: "password123"
           }
@@ -20,7 +20,7 @@ RSpec.describe "User Registration", type: :request do
       end
 
       it "creates user with correct attributes" do
-        test_username = "testuser#{rand(1000)}"
+        test_username = "testuser_#{SecureRandom.hex(8)}"
         test_attributes = {
           user: {
             username: test_username,
@@ -31,7 +31,8 @@ RSpec.describe "User Registration", type: :request do
 
         post "/register", params: test_attributes
 
-        user = User.last
+        user = User.find_by(username: test_username.downcase)
+        expect(user).not_to be_nil
         expect(user.username).to eq(test_username.downcase)
         expect(user.authenticate("password123")).to be_truthy
       end
@@ -42,7 +43,7 @@ RSpec.describe "User Registration", type: :request do
       end
 
       it "logs in the user after successful registration" do
-        test_username = "testuser#{rand(1000)}"
+        test_username = "testuser_#{SecureRandom.hex(8)}"
         test_attributes = {
           user: {
             username: test_username,

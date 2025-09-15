@@ -85,7 +85,7 @@ RSpec.describe RoadTrip, type: :model do
     end
 
     context 'with routes spanning multiple days' do
-      let(:start_time) { Time.current.beginning_of_day }
+      let(:start_time) { Time.zone.parse('2025-01-15 00:00:00') }
 
       before do
         # Create routes without validation to test day count logic
@@ -100,7 +100,7 @@ RSpec.describe RoadTrip, type: :model do
     end
 
     context 'with routes on the same day' do
-      let(:start_time) { Time.current.beginning_of_day }
+      let(:start_time) { Time.zone.parse('2025-01-15 00:00:00') }
 
       before do
         # Create routes without validation to test day count logic

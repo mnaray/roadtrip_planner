@@ -434,7 +434,7 @@ RSpec.describe Route, type: :model do
       it 'uses current_duration_hours for overlap validation' do
         # Create a route with standard 2-hour duration initially
         route1 = create(:route, road_trip: road_trip, user: user, datetime: base_time)
-        route1.update_columns(duration: 2.0, waypoints_updated_at: Time.current)
+        route1.update_columns(duration: 2.0, waypoints_updated_at: Time.zone.parse('2025-01-15 10:00:00'))
 
         # Should be able to create non-overlapping route at 3 hours later initially
         route2 = build(:route, road_trip: road_trip, user: user, datetime: base_time + 3.hours)

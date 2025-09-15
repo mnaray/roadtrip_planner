@@ -19,6 +19,7 @@ RSpec.configure do |config|
   config.include FactoryBot::Syntax::Methods
 
   # Use transactional fixtures for fast, isolated tests
+  # But disable for JavaScript tests which run in separate process
   config.use_transactional_fixtures = true
 
   # Configure default host for request specs
@@ -35,6 +36,9 @@ RSpec.configure do |config|
   config.before(:each, type: :system) do
     driven_by :rack_test
     Capybara.default_host = 'http://localhost'
+    # Minimal wait time - only for true async operations like page loads
+    # Synchronous JS calculations don't need any waiting
+    Capybara.default_max_wait_time = 2
   end
 
 # Register Chrome driver once
@@ -56,6 +60,15 @@ end
   config.before(:each, type: :system, js: true) do
     driven_by :headless_chrome
     Capybara.default_host = 'http://localhost'
+  end
+
+  # Clean database after JavaScript tests since they can't use transactions
+  config.after(:each, type: :system, js: true) do
+    # Truncate all tables except schema_migrations and ar_internal_metadata
+    ActiveRecord::Base.connection.tables.each do |table|
+      next if ['schema_migrations', 'ar_internal_metadata'].include?(table)
+      ActiveRecord::Base.connection.execute("TRUNCATE TABLE #{table} RESTART IDENTITY CASCADE")
+    end
   end
 
   config.fixture_paths = [ Rails.root.join('spec/fixtures') ]

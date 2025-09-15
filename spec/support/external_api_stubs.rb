@@ -47,7 +47,7 @@ def generate_dynamic_gpx(route, track_points = nil)
     <author>
       <name>RoadTrip Planner v1.0</name>
     </author>
-    <time>#{Time.current.iso8601}</time>
+    <time>2025-01-15T10:00:00Z</time>
   </metadata>
   <wpt lat="#{start_coords[0]}" lon="#{start_coords[1]}">
     <name>Start: #{route.starting_location}</name>

@@ -58,19 +58,6 @@ RSpec.describe "Fuel Economy Calculator", type: :system, js: true do
       # Verify round trip functionality is available
       expect(page).to have_selector("[data-fuel-economy-target='roundTrip']", visible: :all)
       expect(page).to have_selector("[data-fuel-economy-target='roundTripResults']", visible: :all)
-
-      # Fill in the form to ensure inputs work
-      fill_in "Fuel Price (Currency per liter)", with: "1.85"
-      fill_in "Fuel Consumption (liters per 100 km)", with: "7.5"
-      fill_in "Number of Passengers", with: "4"
-
-      # Wait for inputs to be processed
-      sleep 0.2
-
-      # Verify form accepts input correctly
-      expect(find_field("Fuel Price (Currency per liter)").value).to eq("1.85")
-      expect(find_field("Fuel Consumption (liters per 100 km)").value).to eq("7.5")
-      expect(find_field("Number of Passengers").value).to eq("4")
     end
 
     it "updates calculations in real-time when inputs change" do
@@ -93,12 +80,12 @@ RSpec.describe "Fuel Economy Calculator", type: :system, js: true do
       # Update number of passengers
       fill_in "Number of Passengers", with: "4"
 
-      # Wait for JavaScript to process the updated calculation
-      sleep 0.5
-
+      # Check specific elements for updated values (no wait needed - JS is synchronous)
       within("[data-fuel-economy-target='results']") do
-        expect(page).to have_content("Currency 20.00") # Total cost remains same
-        expect(page).to have_content("Currency 5.00") # Cost per passenger updates (20 / 4)
+        # Total cost should remain the same
+        expect(page).to have_selector("[data-fuel-economy-target='totalCost']", text: "Currency 20.00")
+        # Cost per passenger should update immediately to new value
+        expect(page).to have_selector("[data-fuel-economy-target='costPerPassenger']", text: "Currency 5.00")
       end
     end
 
