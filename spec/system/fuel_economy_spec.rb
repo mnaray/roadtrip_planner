@@ -11,7 +11,16 @@ RSpec.describe "Fuel Economy Calculator", type: :system, js: true do
 
   describe "navigation" do
     it "can be accessed from the route page" do
+      # Ensure test data is visible to browser process
+      expect(route).to be_persisted
+      expect(route.road_trip.user).to eq(user)
+
       visit route_path(route)
+
+      # Verify we're on the correct route page and user is logged in
+      expect(page).to have_content(route.starting_location)
+      expect(page).to have_content(route.destination)
+      expect(page).to have_content("Welcome, #{user.username}!")
 
       expect(page).to have_link("Fuel Economy", href: route_fuel_economy_path(route))
 

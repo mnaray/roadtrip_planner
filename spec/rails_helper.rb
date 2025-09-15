@@ -22,6 +22,11 @@ RSpec.configure do |config|
   # But disable for JavaScript tests which run in separate process
   config.use_transactional_fixtures = true
 
+  # Disable transactional fixtures for JavaScript tests since they run in separate process
+  config.before(:each, type: :system, js: true) do
+    self.use_transactional_tests = false
+  end
+
   # Configure default host for request specs
   config.before(:each, type: :request) do
     host! 'localhost'
@@ -64,11 +69,17 @@ end
 
   # Clean database after JavaScript tests since they can't use transactions
   config.after(:each, type: :system, js: true) do
+    # Disable foreign key checks temporarily for faster cleanup
+    ActiveRecord::Base.connection.execute("SET session_replication_role = replica;")
+
     # Truncate all tables except schema_migrations and ar_internal_metadata
     ActiveRecord::Base.connection.tables.each do |table|
-      next if ['schema_migrations', 'ar_internal_metadata'].include?(table)
+      next if [ 'schema_migrations', 'ar_internal_metadata' ].include?(table)
       ActiveRecord::Base.connection.execute("TRUNCATE TABLE #{table} RESTART IDENTITY CASCADE")
     end
+
+    # Re-enable foreign key checks
+    ActiveRecord::Base.connection.execute("SET session_replication_role = DEFAULT;")
   end
 
   config.fixture_paths = [ Rails.root.join('spec/fixtures') ]
