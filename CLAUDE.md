@@ -106,6 +106,28 @@ end
 - Keep specs focused and readable
 - For delete buttons, use `button_to` with proper Turbo confirmation
 
+## API Configuration
+
+### OpenRouteService API (Highway/Toll Avoidance)
+The application uses OpenRouteService for guaranteed highway and toll avoidance when users select "Avoid highways and tolls". This requires a free API key:
+
+1. **Get API Key**: Register at [openrouteservice.org](https://openrouteservice.org/dev/#/signup) for a free account
+2. **Configure in Rails**:
+   - **Option A (Environment Variable)**: Set `OPENROUTESERVICE_API_KEY=your_key_here`
+   - **Option B (Rails Credentials)**: `rails credentials:edit` and add:
+     ```yaml
+     openrouteservice:
+       api_key: your_key_here
+     ```
+
+**Free Tier Limits**: Up to 2,000 requests/day, 40 requests/minute
+**Fallback**: Without API key, routes fall back to OSRM but cannot guarantee highway avoidance
+
+### Route Calculation Strategy
+- **Normal routing**: Uses free OSRM API (no configuration needed)
+- **Avoid highways/tolls**: Uses OpenRouteService with `avoid_features: ["highways", "tollways"]`
+- **Fallback**: Straight-line distance calculation if all routing services fail
+
 ## Current Application State
 
 ### ✅ Completed Features

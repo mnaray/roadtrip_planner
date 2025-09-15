@@ -20,13 +20,22 @@ class RouteDistanceCalculator
 
     return { distance: nil, duration: nil } unless start_coords && end_coords
 
-    # If waypoints are present, calculate route with waypoints
-    route_data = if @waypoints.any?
-                   calculate_with_waypoints(start_coords, end_coords)
-    else
-                   # Original behavior for routes without waypoints
-                   fetch_route_data_osrm(start_coords, end_coords)
-    end
+    # Choose routing service based on avoid_motorways setting
+    route_data = if @avoid_motorways
+                   # Use OpenRouteService for guaranteed highway/toll avoidance
+                   if @waypoints.any?
+                     fetch_route_data_openrouteservice_with_waypoints(start_coords, end_coords)
+                   else
+                     fetch_route_data_openrouteservice(start_coords, end_coords)
+                   end
+                 else
+                   # Use OSRM for normal routing (free, no API key required)
+                   if @waypoints.any?
+                     calculate_with_waypoints(start_coords, end_coords)
+                   else
+                     fetch_route_data_osrm(start_coords, end_coords)
+                   end
+                 end
 
     # Fallback to straight-line calculations if routing fails
     route_data ||= calculate_straight_line_estimates(start_coords, end_coords)
@@ -264,5 +273,118 @@ class RouteDistanceCalculator
 
     # Distance in meters
     radius * c
+  end
+
+  # OpenRouteService methods for guaranteed highway/toll avoidance
+  def fetch_route_data_openrouteservice(start_coords, end_coords)
+    start_lat, start_lon = start_coords
+    end_lat, end_lon = end_coords
+
+    uri = URI("https://api.openrouteservice.org/v2/directions/driving-car")
+
+    request_body = {
+      coordinates: [[start_lon, start_lat], [end_lon, end_lat]],
+      options: {
+        avoid_features: ["highways", "tollways"]
+      }
+    }
+
+    # Check if API key is configured
+    api_key = ENV['OPENROUTESERVICE_API_KEY'] || Rails.application.credentials.dig(:openrouteservice, :api_key)
+
+    unless api_key
+      Rails.logger.warn "OpenRouteService API key not configured. Cannot guarantee highway/toll avoidance."
+      return nil
+    end
+
+    begin
+      response = make_openrouteservice_request(uri, request_body, api_key)
+      return nil unless response
+
+      data = JSON.parse(response.body)
+      return nil unless data["routes"] && data["routes"].any?
+
+      route = data["routes"][0]
+      # OpenRouteService returns distance in meters, duration in seconds
+      { distance: route["summary"]["distance"], duration: route["summary"]["duration"] }
+    rescue StandardError => e
+      Rails.logger.error "OpenRouteService routing error: #{e.message}"
+      nil
+    end
+  end
+
+  def fetch_route_data_openrouteservice_with_waypoints(start_coords, end_coords)
+    # Convert waypoints to coordinates
+    waypoint_coords = @waypoints.map do |waypoint|
+      if waypoint.respond_to?(:latitude) && waypoint.respond_to?(:longitude)
+        [waypoint.longitude, waypoint.latitude]
+      elsif waypoint.is_a?(Hash) && waypoint[:latitude] && waypoint[:longitude]
+        [waypoint[:longitude], waypoint[:latitude]]
+      elsif waypoint.is_a?(Array) && waypoint.length >= 2
+        [waypoint[1], waypoint[0]] # Reverse lat,lon to lon,lat
+      else
+        coords = geocode(waypoint.to_s)
+        coords ? [coords[1], coords[0]] : nil # Reverse lat,lon to lon,lat
+      end
+    end.compact
+
+    return nil if waypoint_coords.empty?
+
+    start_lat, start_lon = start_coords
+    end_lat, end_lon = end_coords
+
+    # Build coordinates array: start -> waypoints -> end
+    all_coordinates = [[start_lon, start_lat]] + waypoint_coords + [[end_lon, end_lat]]
+
+    uri = URI("https://api.openrouteservice.org/v2/directions/driving-car")
+
+    request_body = {
+      coordinates: all_coordinates,
+      options: {
+        avoid_features: ["highways", "tollways"]
+      }
+    }
+
+    api_key = ENV['OPENROUTESERVICE_API_KEY'] || Rails.application.credentials.dig(:openrouteservice, :api_key)
+
+    unless api_key
+      Rails.logger.warn "OpenRouteService API key not configured. Cannot guarantee highway/toll avoidance."
+      return nil
+    end
+
+    begin
+      response = make_openrouteservice_request(uri, request_body, api_key)
+      return nil unless response
+
+      data = JSON.parse(response.body)
+      return nil unless data["routes"] && data["routes"].any?
+
+      route = data["routes"][0]
+      { distance: route["summary"]["distance"], duration: route["summary"]["duration"] }
+    rescue StandardError => e
+      Rails.logger.error "OpenRouteService waypoint routing error: #{e.message}"
+      nil
+    end
+  end
+
+  private
+
+  def make_openrouteservice_request(uri, request_body, api_key)
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = true
+
+    request = Net::HTTP::Post.new(uri)
+    request["Content-Type"] = "application/json"
+    request["Authorization"] = api_key
+    request.body = request_body.to_json
+
+    response = http.request(request)
+
+    if response.is_a?(Net::HTTPSuccess)
+      response
+    else
+      Rails.logger.error "OpenRouteService API error: #{response.code} - #{response.body}"
+      nil
+    end
   end
 end

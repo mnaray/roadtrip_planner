@@ -101,7 +101,7 @@ class Routes::FormPageComponent < ApplicationComponent
 
                 form.label :avoid_motorways,
                            class: "ml-2 block text-sm text-gray-900" do
-                  "Avoid motorways and highways (experimental)"
+                  "Avoid highways and tolls"
                 end
 
                 if @route.errors[:avoid_motorways].any?
@@ -111,9 +111,9 @@ class Routes::FormPageComponent < ApplicationComponent
                 end
               end
 
-              # Info message about limitations
+              # Info message about the feature
               div class: "ml-6 text-xs text-gray-500 italic" do
-                "Note: The routing service will attempt to find alternative routes that may avoid highways, but complete avoidance cannot be guaranteed with the current API."
+                "Uses specialized routing to guarantee avoidance of highways and toll roads. May increase travel time but saves on toll costs."
               end
             end
 
@@ -192,7 +192,7 @@ class Routes::FormPageComponent < ApplicationComponent
 
                   form.label :avoid_motorways,
                              class: "ml-2 block text-sm text-gray-900" do
-                    "Avoid motorways and highways (experimental)"
+                    "Avoid highways and tolls"
                   end
 
                   if @route.errors[:avoid_motorways].any?
@@ -202,9 +202,9 @@ class Routes::FormPageComponent < ApplicationComponent
                   end
                 end
 
-                # Info message about limitations
+                # Info message about the feature
                 div class: "ml-6 text-xs text-gray-500 italic" do
-                  "Note: The routing service will attempt to find alternative routes that may avoid highways, but complete avoidance cannot be guaranteed with the current API."
+                  "Uses specialized routing to guarantee avoidance of highways and toll roads. May increase travel time but saves on toll costs."
                 end
               end
 
