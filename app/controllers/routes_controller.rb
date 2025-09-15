@@ -1,5 +1,5 @@
 class RoutesController < ApplicationController
-  before_action :require_login
+  before_action :require_login, except: [:route_data]
   before_action :set_road_trip, only: [ :new, :create ]
   before_action :set_route, only: [ :show, :edit, :update, :destroy, :map, :export_gpx, :edit_waypoints, :update_waypoints ]
   before_action :set_road_trip_for_route, only: [ :edit, :update ]
@@ -150,6 +150,45 @@ class RoutesController < ApplicationController
     end
   end
 
+  # API endpoint for map route calculations (avoids CORS issues)
+  def route_data
+    start_lat = params[:start_lat].to_f
+    start_lon = params[:start_lon].to_f
+    end_lat = params[:end_lat].to_f
+    end_lon = params[:end_lon].to_f
+    avoid_motorways = params[:avoid_motorways] == 'true'
+
+    if start_lat == 0 || start_lon == 0 || end_lat == 0 || end_lon == 0
+      render json: { error: "Invalid coordinates" }, status: :bad_request
+      return
+    end
+
+    begin
+      if avoid_motorways
+        # Use OpenRouteService for highway avoidance
+        route_feature = fetch_openrouteservice_route([start_lat, start_lon], [end_lat, end_lon])
+
+        if route_feature
+          render json: route_feature
+        else
+          render json: { error: "Highway avoidance routing failed" }, status: :service_unavailable
+        end
+      else
+        # Use OSRM for normal routing
+        route_data = fetch_osrm_route([start_lat, start_lon], [end_lat, end_lon])
+
+        if route_data
+          render json: route_data
+        else
+          render json: { error: "Normal routing failed" }, status: :service_unavailable
+        end
+      end
+    rescue => e
+      Rails.logger.error "Route data API error: #{e.message}"
+      render json: { error: "Route calculation failed" }, status: :internal_server_error
+    end
+  end
+
   private
 
   def set_road_trip
@@ -189,5 +228,121 @@ class RoutesController < ApplicationController
 
   def route_params
     params.require(:route).permit(:starting_location, :destination, :datetime, :avoid_motorways)
+  end
+
+  def fetch_openrouteservice_route(start_coords, end_coords)
+    require 'net/http'
+    require 'json'
+    require 'uri'
+
+    start_lat, start_lon = start_coords
+    end_lat, end_lon = end_coords
+
+    uri = URI("https://api.openrouteservice.org/v2/directions/driving-car/geojson")
+
+    request_body = {
+      coordinates: [[start_lon, start_lat], [end_lon, end_lat]],
+      options: {
+        avoid_features: ["highways", "tollways"]
+      }
+    }
+
+    api_key = ENV['OPENROUTESERVICE_API_KEY'] || Rails.application.credentials.dig(:openrouteservice, :api_key)
+
+    return nil unless api_key
+
+    begin
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = true
+
+      request = Net::HTTP::Post.new(uri)
+      request["Content-Type"] = "application/json"
+      request["Authorization"] = api_key
+      request.body = request_body.to_json
+
+      response = http.request(request)
+
+      if response.is_a?(Net::HTTPSuccess)
+        data = JSON.parse(response.body)
+        Rails.logger.info "OpenRouteService response structure: #{data.keys}"
+
+        if data["features"] && data["features"].any?
+          # OpenRouteService returns GeoJSON with features array
+          feature = data["features"].first
+          Rails.logger.info "OpenRouteService feature: type=#{feature['type']}, geometry=#{feature['geometry'] ? 'present' : 'missing'}"
+          return {
+            type: "Feature",
+            geometry: feature["geometry"],
+            properties: {
+              segments: [{
+                distance: feature["properties"]["segments"].first["distance"],
+                duration: feature["properties"]["segments"].first["duration"]
+              }]
+            }
+          }
+        elsif data["routes"] && data["routes"].any?
+          # Fallback for different response format
+          route = data["routes"].first
+          Rails.logger.info "OpenRouteService route: geometry=#{route['geometry'] ? 'present' : 'missing'}"
+          return {
+            type: "Feature",
+            geometry: route["geometry"],
+            properties: {
+              segments: [{
+                distance: route["summary"]["distance"],
+                duration: route["summary"]["duration"]
+              }]
+            }
+          }
+        else
+          Rails.logger.warn "OpenRouteService response missing expected data: #{data.keys}"
+        end
+      else
+        Rails.logger.error "OpenRouteService API error: #{response.code} - #{response.body}"
+      end
+    rescue => e
+      Rails.logger.error "OpenRouteService routing error: #{e.message}"
+    end
+
+    nil
+  end
+
+  def fetch_osrm_route(start_coords, end_coords)
+    require 'net/http'
+    require 'json'
+    require 'uri'
+
+    start_lat, start_lon = start_coords
+    end_lat, end_lon = end_coords
+
+    url = "https://router.project-osrm.org/route/v1/driving/#{start_lon},#{start_lat};#{end_lon},#{end_lat}?overview=full&geometries=geojson"
+
+    begin
+      response = Net::HTTP.get_response(URI(url))
+
+      if response.is_a?(Net::HTTPSuccess)
+        data = JSON.parse(response.body)
+
+        if data && data["routes"] && data["routes"].any?
+          route = data["routes"].first
+          return {
+            type: "Feature",
+            geometry: route["geometry"],
+            properties: {
+              segments: [{
+                distance: route["distance"],
+                duration: route["duration"]
+              }]
+            }
+          }
+        end
+      else
+        Rails.logger.error "OSRM API error: #{response.code} - #{response.body}"
+      end
+    rescue => e
+      Rails.logger.error "OSRM routing error: #{e.message}"
+    end
+
+    nil
   end
 end

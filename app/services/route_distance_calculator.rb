@@ -10,7 +10,7 @@ class RouteDistanceCalculator
     @destination = destination
     @waypoints = waypoints || []
     @avoid_motorways = avoid_motorways
-    @distance_km = nil
+    @distance_km = nil  # Actually stores meters for database consistency
     @duration_hours = nil
   end
 
@@ -37,12 +37,14 @@ class RouteDistanceCalculator
                    end
                  end
 
-    # Fallback to straight-line calculations if routing fails
-    route_data ||= calculate_straight_line_estimates(start_coords, end_coords)
+    # Only fallback to straight-line for normal routing, NOT for highway avoidance
+    if route_data.nil? && !@avoid_motorways
+      route_data = calculate_straight_line_estimates(start_coords, end_coords)
+    end
 
     if route_data
-      # Convert from meters to kilometers and seconds to hours
-      @distance_km = route_data[:distance] ? (route_data[:distance] / 1000.0).round(1) : nil
+      # Store distance in meters (as expected by Route model), convert duration to hours
+      @distance_km = route_data[:distance] # Keep in meters for database storage
       @duration_hours = route_data[:duration] ? (route_data[:duration] / 3600.0).round(2) : nil
     end
 

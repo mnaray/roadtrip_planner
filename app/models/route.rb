@@ -21,7 +21,9 @@ class Route < ApplicationRecord
   end
 
   def distance_in_km
-    distance || calculate_and_save_route_metrics[:distance]
+    # Distance is stored in meters, convert to kilometers for display
+    distance_meters = distance || calculate_and_save_route_metrics[:distance]
+    distance_meters ? (distance_meters / 1000.0).round(1) : nil
   end
 
   # Force recalculation of route metrics including waypoints
