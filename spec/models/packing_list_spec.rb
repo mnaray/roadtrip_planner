@@ -69,12 +69,20 @@ RSpec.describe PackingList, type: :model do
       expect(packing_list.total_items_count).to eq(0)
     end
 
-    it 'returns the sum of all item quantities' do
-      create(:packing_list_item, packing_list: packing_list, quantity: 3)
-      create(:packing_list_item, packing_list: packing_list, quantity: 2)
-      create(:packing_list_item, packing_list: packing_list, quantity: 1)
+    it 'returns the sum of all required item quantities' do
+      create(:packing_list_item, packing_list: packing_list, quantity: 3, optional: false)
+      create(:packing_list_item, packing_list: packing_list, quantity: 2, optional: false)
+      create(:packing_list_item, packing_list: packing_list, quantity: 1, optional: false)
 
       expect(packing_list.total_items_count).to eq(6)
+    end
+
+    it 'excludes optional items from count' do
+      create(:packing_list_item, packing_list: packing_list, quantity: 3, optional: false)
+      create(:packing_list_item, packing_list: packing_list, quantity: 2, optional: true)
+      create(:packing_list_item, packing_list: packing_list, quantity: 1, optional: false)
+
+      expect(packing_list.total_items_count).to eq(4)
     end
   end
 
@@ -82,14 +90,22 @@ RSpec.describe PackingList, type: :model do
     let(:packing_list) { create(:packing_list) }
 
     it 'returns 0 for no packed items' do
-      create(:packing_list_item, packing_list: packing_list, packed: false, quantity: 3)
+      create(:packing_list_item, packing_list: packing_list, packed: false, quantity: 3, optional: false)
       expect(packing_list.packed_items_count).to eq(0)
     end
 
-    it 'returns the sum of packed item quantities' do
-      create(:packing_list_item, packing_list: packing_list, packed: true, quantity: 3)
-      create(:packing_list_item, packing_list: packing_list, packed: false, quantity: 2)
-      create(:packing_list_item, packing_list: packing_list, packed: true, quantity: 1)
+    it 'returns the sum of packed required item quantities' do
+      create(:packing_list_item, packing_list: packing_list, packed: true, quantity: 3, optional: false)
+      create(:packing_list_item, packing_list: packing_list, packed: false, quantity: 2, optional: false)
+      create(:packing_list_item, packing_list: packing_list, packed: true, quantity: 1, optional: false)
+
+      expect(packing_list.packed_items_count).to eq(4)
+    end
+
+    it 'excludes optional items from packed count' do
+      create(:packing_list_item, packing_list: packing_list, packed: true, quantity: 3, optional: false)
+      create(:packing_list_item, packing_list: packing_list, packed: true, quantity: 2, optional: true)
+      create(:packing_list_item, packing_list: packing_list, packed: true, quantity: 1, optional: false)
 
       expect(packing_list.packed_items_count).to eq(4)
     end
@@ -117,10 +133,20 @@ RSpec.describe PackingList, type: :model do
     end
 
     it 'rounds to one decimal place' do
-      create(:packing_list_item, packing_list: packing_list, packed: true, quantity: 1)
-      create(:packing_list_item, packing_list: packing_list, packed: false, quantity: 2)
+      create(:packing_list_item, packing_list: packing_list, packed: true, quantity: 1, optional: false)
+      create(:packing_list_item, packing_list: packing_list, packed: false, quantity: 2, optional: false)
 
       expect(packing_list.packing_progress).to eq(33.3)
+    end
+
+    it 'excludes optional items from progress calculation' do
+      create(:packing_list_item, packing_list: packing_list, packed: true, quantity: 2, optional: false)
+      create(:packing_list_item, packing_list: packing_list, packed: false, quantity: 2, optional: false)
+      create(:packing_list_item, packing_list: packing_list, packed: true, quantity: 5, optional: true)
+      create(:packing_list_item, packing_list: packing_list, packed: false, quantity: 3, optional: true)
+
+      # Progress should be 50% (2 packed / 4 total required items)
+      expect(packing_list.packing_progress).to eq(50.0)
     end
   end
 

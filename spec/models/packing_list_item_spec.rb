@@ -69,6 +69,18 @@ RSpec.describe PackingListItem, type: :model do
       subject.packed = false
       expect(subject).to be_valid
     end
+
+    it 'validates optional is boolean' do
+      subject.optional = nil
+      expect(subject).not_to be_valid
+      expect(subject.errors[:optional]).to include("is not included in the list")
+
+      subject.optional = true
+      expect(subject).to be_valid
+
+      subject.optional = false
+      expect(subject).to be_valid
+    end
   end
 
   describe 'enums' do
@@ -92,6 +104,8 @@ RSpec.describe PackingListItem, type: :model do
     let(:packing_list) { create(:packing_list) }
     let!(:packed_item) { create(:packing_list_item, packing_list: packing_list, packed: true) }
     let!(:unpacked_item) { create(:packing_list_item, packing_list: packing_list, packed: false) }
+    let!(:optional_item) { create(:packing_list_item, packing_list: packing_list, optional: true) }
+    let!(:required_item) { create(:packing_list_item, packing_list: packing_list, optional: false) }
     let!(:clothes_item) { create(:packing_list_item, packing_list: packing_list, category: "clothes") }
     let!(:tools_item) { create(:packing_list_item, packing_list: packing_list, category: "tools") }
 
@@ -105,7 +119,21 @@ RSpec.describe PackingListItem, type: :model do
     describe '.unpacked' do
       it 'returns only unpacked items' do
         unpacked_items_from_test = packing_list.packing_list_items.unpacked
-        expect(unpacked_items_from_test).to contain_exactly(unpacked_item, clothes_item, tools_item)
+        expect(unpacked_items_from_test).to contain_exactly(unpacked_item, optional_item, required_item, clothes_item, tools_item)
+      end
+    end
+
+    describe '.optional_items' do
+      it 'returns only optional items' do
+        optional_items_from_test = packing_list.packing_list_items.optional_items
+        expect(optional_items_from_test).to contain_exactly(optional_item)
+      end
+    end
+
+    describe '.required_items' do
+      it 'returns only required items' do
+        required_items_from_test = packing_list.packing_list_items.required_items
+        expect(required_items_from_test).to contain_exactly(packed_item, unpacked_item, required_item, clothes_item, tools_item)
       end
     end
 

@@ -17,11 +17,11 @@ class PackingList < ApplicationRecord
   scope :private_lists, -> { where(visibility: "private") }
 
   def total_items_count
-    packing_list_items.sum(:quantity)
+    packing_list_items.required_items.sum(:quantity)
   end
 
   def packed_items_count
-    packing_list_items.where(packed: true).sum(:quantity)
+    packing_list_items.required_items.where(packed: true).sum(:quantity)
   end
 
   def packing_progress

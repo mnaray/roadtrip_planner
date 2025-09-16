@@ -4,6 +4,7 @@ FactoryBot.define do
     quantity { 1 }
     category { "other" }
     packed { false }
+    optional { false }
     association :packing_list
 
     trait :packed do
@@ -12,6 +13,14 @@ FactoryBot.define do
 
     trait :unpacked do
       packed { false }
+    end
+
+    trait :optional do
+      optional { true }
+    end
+
+    trait :required do
+      optional { false }
     end
 
     trait :clothes_item do

@@ -152,6 +152,25 @@ class PackingListItems::NewComponent < ApplicationComponent
               end
             end
 
+            # Optional checkbox
+            div do
+              div class: "flex items-center" do
+                form.check_box :optional,
+                               class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+
+                form.label :optional,
+                          class: "ml-2 block text-sm text-gray-700" do
+                  "Optional item (won't count toward packing progress)"
+                end
+              end
+
+              if @packing_list_item.errors[:optional].any?
+                div class: "mt-1 text-sm text-red-600" do
+                  @packing_list_item.errors[:optional].first
+                end
+              end
+            end
+
             div class: "flex items-center justify-between pt-4" do
               link_to road_trip_packing_list_path(@road_trip, @packing_list),
                       class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" do
