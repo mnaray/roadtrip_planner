@@ -16,6 +16,7 @@ class Vehicle < ApplicationRecord
   scope :default_for_user, ->(user) { where(user: user, is_default: true) }
 
   before_save :ensure_single_default
+  after_destroy :set_new_default_if_needed
 
   def type_icon_class
     case vehicle_type
@@ -51,5 +52,19 @@ class Vehicle < ApplicationRecord
     Vehicle.where(user: user, is_default: true)
            .where.not(id: id)
            .update_all(is_default: false)
+  end
+
+  def set_new_default_if_needed
+    # Only proceed if this vehicle was the default
+    return unless is_default?
+
+    # Find the newest remaining vehicle for this user (by created_at)
+    newest_vehicle = Vehicle.where(user: user)
+                           .where.not(id: id)
+                           .order(created_at: :desc)
+                           .first
+
+    # Set the newest vehicle as default if one exists
+    newest_vehicle&.update_column(:is_default, true)
   end
 end
