@@ -127,7 +127,8 @@ class Routes::EditWaypointsComponent < ApplicationComponent
                      controller: "edit-waypoints-map",
                      edit_waypoints_map_start_location_value: @route.starting_location,
                      edit_waypoints_map_end_location_value: @route.destination,
-                     edit_waypoints_map_existing_waypoints_value: existing_waypoints_json
+                     edit_waypoints_map_existing_waypoints_value: existing_waypoints_json,
+                     edit_waypoints_map_avoid_motorways_value: @route.avoid_motorways
                    } do
                 # Map will be rendered here by Stimulus controller
               end
