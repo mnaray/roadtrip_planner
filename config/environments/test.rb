@@ -46,6 +46,9 @@ Rails.application.configure do
   # Set host to be used by links generated in mailer templates.
   config.action_mailer.default_url_options = { host: "example.com" }
 
+  # Configure Active Storage URL options for test environment
+  config.active_storage.url_options = { host: "example.com" }
+
   # Disable host authorization for tests to avoid blocked host errors
   config.hosts = nil
 
