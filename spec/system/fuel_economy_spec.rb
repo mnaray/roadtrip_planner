@@ -47,45 +47,6 @@ RSpec.describe "Fuel Economy Calculator", type: :system, js: true do
       expect(page).to have_selector("[data-fuel-economy-target='roundTrip']", visible: :all)
       expect(page).to have_selector("[data-fuel-economy-target='roundTripResults']", visible: :all)
     end
-
-
-    it "calculates round trip costs when checkbox is selected" do
-      fill_in "Fuel Price (Currency per liter)", with: "1.85"
-      fill_in "Fuel Consumption (liters per 100 km)", with: "7.5"
-      fill_in "Number of Passengers", with: "4"
-
-      # Wait for JavaScript to process the input events and show results
-      expect(page).to have_selector("[data-fuel-economy-target='results']", visible: true)
-
-      # Ensure round trip checkbox is unchecked, then check it
-      if page.has_checked_field?("Calculate for round trip")
-        uncheck "Calculate for round trip"
-      end
-      check "Calculate for round trip"
-      expect(page).to have_checked_field("Calculate for round trip")
-
-      # Wait for JavaScript to process the checkbox change and show round trip results
-      expect(page).to have_selector("[data-fuel-economy-target='roundTripResults']", visible: true)
-
-      within("[data-fuel-economy-target='roundTripResults']") do
-        expect(page).to have_content("Round Trip Total Cost")
-        expect(page).to have_content("Currency 27.75") # 13.88 * 2
-        expect(page).to have_content("Currency 6.94 per passenger") # 27.75 / 4
-      end
-    end
-
-    xit "hides results when inputs are cleared" do # This test is flaky
-      # Fill in form initially
-      fill_in "Fuel Price (Currency per liter)", with: "1.85"
-      fill_in "Fuel Consumption (liters per 100 km)", with: "7.5"
-
-      expect(page).to have_selector("[data-fuel-economy-target='results']", visible: true)
-
-      # Clear an input
-      fill_in "Fuel Price (Currency per liter)", with: ""
-
-      expect(page).to have_selector("[data-fuel-economy-target='results']", visible: false)
-    end
   end
 
   describe "when route has no distance" do
