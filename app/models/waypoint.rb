@@ -8,6 +8,7 @@ class Waypoint < ApplicationRecord
   validates :position, presence: true,
                        numericality: { greater_than: 0, only_integer: true }
   validates :position, uniqueness: { scope: :route_id }
+  validates :name, length: { maximum: 100 }
 
   scope :ordered, -> { order(:position) }
 
