@@ -272,12 +272,22 @@ class PackingLists::ShowComponent < ApplicationComponent
           # Item details
           div class: "flex-1" do
             div class: "flex items-center space-x-2" do
-              span class: "text-base font-medium #{item.packed? ? 'text-gray-500 line-through' : 'text-gray-900'}" do
+              text_classes = []
+              text_classes << (item.packed? ? 'line-through' : '')
+              text_classes << (item.optional? ? 'text-gray-400' : (item.packed? ? 'text-gray-500' : 'text-gray-900'))
+              text_classes << 'font-medium'
+
+              span class: "text-base #{text_classes.join(' ')}" do
                 item.name
               end
               if item.quantity > 1
                 span class: "inline-flex items-center px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full" do
                   "×#{item.quantity}"
+                end
+              end
+              if item.optional?
+                span class: "inline-flex items-center px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full" do
+                  "Optional"
                 end
               end
             end

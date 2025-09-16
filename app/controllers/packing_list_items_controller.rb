@@ -100,6 +100,6 @@ class PackingListItemsController < ApplicationController
   end
 
   def packing_list_item_params
-    params.require(:packing_list_item).permit(:name, :quantity, :category, :packed)
+    params.require(:packing_list_item).permit(:name, :quantity, :category, :packed, :optional)
   end
 end
