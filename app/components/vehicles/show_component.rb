@@ -73,9 +73,10 @@ class Vehicles::ShowComponent < ApplicationComponent
               end
 
               unless @vehicle.is_default?
-                link_to set_default_vehicle_path(@vehicle),
-                        method: :patch,
-                        class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors" do
+                button_to set_default_vehicle_path(@vehicle),
+                          method: :patch,
+                          class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors",
+                          form: { class: "inline" } do
                   svg_icon path_d: "M5 13l4 4L19 7",
                            class: "w-4 h-4 mr-2",
                            stroke_linecap: "round",
@@ -196,9 +197,10 @@ class Vehicles::ShowComponent < ApplicationComponent
         end
 
         unless @vehicle.is_default?
-          link_to set_default_vehicle_path(@vehicle),
-                  method: :patch,
-                  class: "flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors" do
+          button_to set_default_vehicle_path(@vehicle),
+                    method: :patch,
+                    class: "flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors border-0 bg-transparent cursor-pointer",
+                    form: { class: "w-full" } do
             svg_icon path_d: "M5 13l4 4L19 7",
                      class: "w-4 h-4 mr-3 text-gray-400",
                      stroke_linecap: "round",

@@ -151,9 +151,10 @@ class Vehicles::IndexComponent < ApplicationComponent
 
           div class: "flex space-x-2" do
             unless is_default
-              link_to set_default_vehicle_path(vehicle),
-                      method: :patch,
-                      class: "text-gray-600 hover:text-gray-500 text-sm font-medium" do
+              button_to set_default_vehicle_path(vehicle),
+                        method: :patch,
+                        class: "text-gray-600 hover:text-gray-500 text-sm font-medium border-0 bg-transparent p-0 cursor-pointer",
+                        form: { class: "inline" } do
                 span { "Set Default" }
               end
             end
