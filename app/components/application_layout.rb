@@ -6,7 +6,7 @@ class ApplicationLayout < Phlex::HTML
 
   register_value_helper :flash
 
-  def initialize(title: "App", current_user: nil)
+  def initialize(title: "Roadtrip Planner", current_user: nil)
     @title = title
     @current_user = current_user
   end
@@ -23,6 +23,7 @@ class ApplicationLayout < Phlex::HTML
         csrf_meta_tags
         csp_meta_tag
 
+        link rel: "icon", href: "/favicon.ico", type: "image/x-icon"
         link rel: "icon", href: "/icon.png", type: "image/png"
         link rel: "icon", href: "/icon.svg", type: "image/svg+xml"
         link rel: "apple-touch-icon", href: "/icon.png"
