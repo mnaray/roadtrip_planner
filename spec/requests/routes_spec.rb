@@ -488,4 +488,126 @@ RSpec.describe "Routes", type: :request do
       end
     end
   end
+
+  describe "GET /routes/:id/edit_waypoints" do
+    context "when user is logged in" do
+      before { sign_in_user(user) }
+
+      context "when route belongs to user" do
+        it "returns successful response" do
+          get edit_route_waypoints_path(route)
+          expect(response).to have_http_status(:success)
+        end
+
+        it "displays waypoints editor" do
+          get edit_route_waypoints_path(route)
+          expect(response.body).to include("Edit Waypoints for Route")
+          expect(response.body).to include("edit-waypoints-map")
+        end
+      end
+
+      context "when route does not belong to user" do
+        it "redirects with error message" do
+          get edit_route_waypoints_path(other_users_route)
+          expect(response).to redirect_to(road_trips_path)
+        end
+      end
+    end
+
+    context "when user is not logged in" do
+      it "redirects to login" do
+        get edit_route_waypoints_path(route)
+        expect(response).to redirect_to(login_path)
+      end
+    end
+  end
+
+  describe "PATCH /routes/:id/update_waypoints" do
+    let!(:existing_waypoint1) { create(:waypoint, route: route, position: 1, latitude: 37.7749, longitude: -122.4194, name: "Waypoint 1") }
+    let!(:existing_waypoint2) { create(:waypoint, route: route, position: 2, latitude: 34.0522, longitude: -118.2437, name: "Waypoint 2") }
+
+    context "when user is logged in" do
+      before { sign_in_user(user) }
+
+      context "when route belongs to user" do
+        it "updates waypoints successfully and redirects to road trip" do
+          new_waypoints_data = [
+            { "latitude" => 36.7783, "longitude" => -119.4179, "position" => 1, "name" => "Fresno" },
+            { "latitude" => 35.3733, "longitude" => -119.0187, "position" => 2, "name" => "Bakersfield" }
+          ]
+
+          initial_count = route.waypoints.count
+          expect(initial_count).to eq(2)
+
+          patch update_route_waypoints_path(route), params: { waypoints: new_waypoints_data.to_json }
+
+          expect(response).to redirect_to(road_trip_path(route.road_trip))
+          follow_redirect!
+          expect(response.body).to include("Waypoints updated successfully")
+
+          route.reload
+          final_count = route.waypoints.count
+          expect(final_count).to eq(2)
+
+          updated_waypoints = route.waypoints.ordered
+          expect(updated_waypoints.first.name).to eq("Fresno")
+          expect(updated_waypoints.second.name).to eq("Bakersfield")
+        end
+
+        it "handles empty waypoints by clearing all existing ones" do
+          expect {
+            patch update_route_waypoints_path(route), params: { waypoints: "" }
+          }.to change { route.waypoints.count }.from(2).to(0)
+
+          expect(response).to redirect_to(road_trip_path(route.road_trip))
+          follow_redirect!
+          expect(response.body).to include("All waypoints removed")
+        end
+
+        it "handles malformed JSON gracefully" do
+          patch update_route_waypoints_path(route), params: { waypoints: "invalid json" }
+
+          expect(response).to redirect_to(edit_route_waypoints_path(route))
+          expect(flash[:alert]).to eq("Invalid waypoints data format.")
+
+          # Ensure existing waypoints are not affected
+          route.reload
+          expect(route.waypoints.count).to eq(2)
+        end
+
+        it "adds new waypoints when none existed before" do
+          route_without_waypoints = create(:route, road_trip: road_trip, user: user)
+
+          new_waypoints_data = [
+            { "latitude" => 36.7783, "longitude" => -119.4179, "position" => 1, "name" => "Fresno" }
+          ]
+
+          expect {
+            patch update_route_waypoints_path(route_without_waypoints), params: { waypoints: new_waypoints_data.to_json }
+          }.to change { route_without_waypoints.waypoints.count }.from(0).to(1)
+
+          expect(response).to redirect_to(road_trip_path(route_without_waypoints.road_trip))
+        end
+      end
+
+      context "when route does not belong to user" do
+        it "redirects with error message and does not update waypoints" do
+          new_waypoints_data = [
+            { "latitude" => 36.7783, "longitude" => -119.4179, "position" => 1, "name" => "Fresno" }
+          ]
+
+          patch update_route_waypoints_path(other_users_route), params: { waypoints: new_waypoints_data.to_json }
+
+          expect(response).to redirect_to(road_trips_path)
+        end
+      end
+    end
+
+    context "when user is not logged in" do
+      it "redirects to login" do
+        patch update_route_waypoints_path(route), params: { waypoints: "[]" }
+        expect(response).to redirect_to(login_path)
+      end
+    end
+  end
 end

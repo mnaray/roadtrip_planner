@@ -120,31 +120,75 @@ class RoutesController < ApplicationController
 
   def update_waypoints
     # Handle waypoint updates
-    if params[:waypoints].present?
+    waypoints_param = params[:waypoints]
+
+    # Check if waypoints parameter is present and not empty
+    if waypoints_param.present? && waypoints_param.strip != ""
       begin
         # Parse waypoints data
-        waypoints_data = JSON.parse(params[:waypoints])
+        waypoints_data = JSON.parse(waypoints_param)
 
-        # Delete existing waypoints
-        @route.waypoints.destroy_all
+        # Validate that waypoints_data is an array
+        unless waypoints_data.is_a?(Array)
+          raise ArgumentError, "Waypoints data must be an array"
+        end
 
-        # Create new waypoints
-        waypoints_data.each do |waypoint_data|
-          @route.waypoints.create!(
-            latitude: waypoint_data["latitude"],
-            longitude: waypoint_data["longitude"],
-            position: waypoint_data["position"],
-            name: waypoint_data["name"]
-          )
+        # Use a transaction to ensure atomicity
+        ActiveRecord::Base.transaction do
+          # Delete existing waypoints
+          @route.waypoints.destroy_all
+
+          # Create new waypoints
+          waypoints_data.each_with_index do |waypoint_data, index|
+            # Validate required fields
+            latitude = waypoint_data["latitude"]
+            longitude = waypoint_data["longitude"]
+            position = waypoint_data["position"] || (index + 1)
+            name = waypoint_data["name"] || "Waypoint #{position}"
+
+            # Validate latitude and longitude are present and numeric
+            unless latitude.present? && longitude.present?
+              raise ArgumentError, "Waypoint #{index + 1}: latitude and longitude are required"
+            end
+
+            # Convert to float and validate range
+            lat_float = Float(latitude)
+            lng_float = Float(longitude)
+
+            unless lat_float.between?(-90, 90)
+              raise ArgumentError, "Waypoint #{index + 1}: latitude must be between -90 and 90"
+            end
+
+            unless lng_float.between?(-180, 180)
+              raise ArgumentError, "Waypoint #{index + 1}: longitude must be between -180 and 180"
+            end
+
+            @route.waypoints.create!(
+              latitude: lat_float,
+              longitude: lng_float,
+              position: position,
+              name: name
+            )
+          end
         end
 
         redirect_to @route.road_trip, notice: "Waypoints updated successfully."
+      rescue JSON::ParserError => e
+        Rails.logger.error "JSON parsing error: #{e.message}"
+        redirect_to edit_route_waypoints_path(@route), alert: "Invalid waypoints data format."
+      rescue ArgumentError => e
+        Rails.logger.error "Waypoint validation error: #{e.message}"
+        redirect_to edit_route_waypoints_path(@route), alert: e.message
+      rescue ActiveRecord::RecordInvalid => e
+        Rails.logger.error "Failed to save waypoint: #{e.message}"
+        redirect_to edit_route_waypoints_path(@route), alert: "Failed to save waypoints: #{e.message}"
       rescue => e
-        Rails.logger.error "Failed to update waypoints: #{e.message}"
-        redirect_to edit_route_waypoints_path(@route), alert: "Failed to update waypoints."
+        Rails.logger.error "Unexpected error updating waypoints: #{e.message}"
+        Rails.logger.error e.backtrace.join("\n")
+        redirect_to edit_route_waypoints_path(@route), alert: "An unexpected error occurred while updating waypoints."
       end
     else
-      # If no waypoints provided, just clear them
+      # If no waypoints provided or empty string, clear all existing waypoints
       @route.waypoints.destroy_all
       redirect_to @route.road_trip, notice: "All waypoints removed."
     end
