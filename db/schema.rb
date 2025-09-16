@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_16_092416) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_16_134156) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -47,6 +47,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_16_092416) do
     t.index ["user_id"], name: "index_road_trip_participants_on_user_id"
   end
 
+  create_table "road_trip_vehicles", force: :cascade do |t|
+    t.bigint "road_trip_id", null: false
+    t.bigint "user_id", null: false
+    t.bigint "vehicle_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["road_trip_id", "user_id"], name: "index_road_trip_vehicles_on_road_trip_id_and_user_id", unique: true
+    t.index ["road_trip_id"], name: "index_road_trip_vehicles_on_road_trip_id"
+    t.index ["user_id"], name: "index_road_trip_vehicles_on_user_id"
+    t.index ["vehicle_id"], name: "index_road_trip_vehicles_on_vehicle_id"
+  end
+
   create_table "road_trips", force: :cascade do |t|
     t.string "name"
     t.bigint "user_id", null: false
@@ -79,6 +91,26 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_16_092416) do
     t.index ["username"], name: "index_users_on_username", unique: true
   end
 
+  create_table "vehicles", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "name", null: false
+    t.string "vehicle_type", null: false
+    t.string "make_model"
+    t.integer "engine_volume_ccm"
+    t.integer "horsepower"
+    t.integer "torque"
+    t.decimal "fuel_consumption", precision: 8, scale: 2
+    t.decimal "dry_weight", precision: 8, scale: 2
+    t.decimal "wet_weight", precision: 8, scale: 2
+    t.integer "passenger_count"
+    t.decimal "load_capacity", precision: 8, scale: 2
+    t.boolean "is_default", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "is_default"], name: "index_vehicles_on_user_id_and_is_default", unique: true, where: "(is_default = true)"
+    t.index ["user_id"], name: "index_vehicles_on_user_id"
+  end
+
   create_table "waypoints", force: :cascade do |t|
     t.bigint "route_id", null: false
     t.decimal "latitude", precision: 10, scale: 8, null: false
@@ -96,8 +128,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_16_092416) do
   add_foreign_key "packing_lists", "users"
   add_foreign_key "road_trip_participants", "road_trips"
   add_foreign_key "road_trip_participants", "users"
+  add_foreign_key "road_trip_vehicles", "road_trips"
+  add_foreign_key "road_trip_vehicles", "users"
+  add_foreign_key "road_trip_vehicles", "vehicles"
   add_foreign_key "road_trips", "users"
   add_foreign_key "routes", "road_trips"
   add_foreign_key "routes", "users"
+  add_foreign_key "vehicles", "users"
   add_foreign_key "waypoints", "routes"
 end

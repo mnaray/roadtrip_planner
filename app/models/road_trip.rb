@@ -4,6 +4,7 @@ class RoadTrip < ApplicationRecord
   has_many :packing_lists, dependent: :destroy
   has_many :road_trip_participants, dependent: :destroy
   has_many :participants, through: :road_trip_participants, source: :user
+  has_many :road_trip_vehicles, dependent: :destroy
 
   validates :name, presence: true, length: { minimum: 1, maximum: 100 }
 
@@ -47,5 +48,39 @@ class RoadTrip < ApplicationRecord
 
   def participant_count
     participants.count + 1 # x invitees + 1 owner
+  end
+
+  def vehicles_for_user(user)
+    road_trip_vehicles.where(user: user).includes(:vehicle).map(&:vehicle)
+  end
+
+  def vehicle_for_user(user)
+    road_trip_vehicles.find_by(user: user)&.vehicle
+  end
+
+  def set_vehicle_for_user(user, vehicle)
+    return unless can_access?(user)
+    return unless vehicle&.user == user
+
+    existing = road_trip_vehicles.find_by(user: user)
+    if existing
+      existing.update(vehicle: vehicle)
+    else
+      road_trip_vehicles.create(user: user, vehicle: vehicle)
+    end
+  end
+
+  def remove_vehicle_for_user(user)
+    road_trip_vehicles.where(user: user).destroy_all
+  end
+
+  def has_vehicles?
+    road_trip_vehicles.exists?
+  end
+
+  def all_selected_vehicles
+    road_trip_vehicles.includes(:vehicle, :user).map do |rtv|
+      { user: rtv.user, vehicle: rtv.vehicle }
+    end
   end
 end
