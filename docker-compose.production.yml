@@ -46,6 +46,10 @@ services:
       RAILS_MASTER_KEY: REPLACE_WITH_YOUR_RAILS_MASTER_KEY
       RAILS_SERVE_STATIC_FILES: "true"
       RAILS_LOG_TO_STDOUT: "true"
+      # OpenRouteService API key for highway/toll avoidance routing
+      # Get your free API key at: https://openrouteservice.org/dev/#/signup
+      # Free tier: 2,000 requests/day, 40 requests/minute or unlimited when self-hosted
+      OPENROUTESERVICE_API_KEY: REPLACE_WITH_YOUR_OPENROUTESERVICE_API_KEY
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/up"]
       interval: 30s
