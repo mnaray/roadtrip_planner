@@ -50,6 +50,9 @@ class AboutPage < ApplicationComponent
                 "Organize packing lists with categories, checkboxes, and progress tracking"
               end
               li do
+                "Manage your vehicle garage to track fuel consumption and vehicle specifications"
+              end
+              li do
                 "Export route data for GPS devices and navigation apps"
               end
             end

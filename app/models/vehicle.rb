@@ -20,12 +20,12 @@ class Vehicle < ApplicationRecord
 
   def type_icon_class
     case vehicle_type
-    when 'car' then 'fas fa-car'
-    when 'motorcycle' then 'fas fa-motorcycle'
-    when 'bicycle' then 'fas fa-bicycle'
-    when 'skateboard' then 'fas fa-skating'
-    when 'scooter' then 'fas fa-scooter'
-    else 'fas fa-road'
+    when "car" then "fas fa-car"
+    when "motorcycle" then "fas fa-motorcycle"
+    when "bicycle" then "fas fa-bicycle"
+    when "skateboard" then "fas fa-skating"
+    when "scooter" then "fas fa-scooter"
+    else "fas fa-road"
     end
   end
 
@@ -34,9 +34,9 @@ class Vehicle < ApplicationRecord
   end
 
   def full_description
-    parts = [name]
+    parts = [ name ]
     parts << make_model if make_model.present?
-    parts.join(' - ')
+    parts.join(" - ")
   end
 
   def has_fuel_consumption?

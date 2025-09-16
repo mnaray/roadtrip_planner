@@ -18,6 +18,6 @@ class CreateVehicles < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :vehicles, [:user_id, :is_default], where: "is_default = true", unique: true
+    add_index :vehicles, [ :user_id, :is_default ], where: "is_default = true", unique: true
   end
 end

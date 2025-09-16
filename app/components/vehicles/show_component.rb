@@ -274,11 +274,11 @@ class Vehicles::ShowComponent < ApplicationComponent
 
   def vehicle_icon_path(vehicle_type)
     case vehicle_type
-    when 'car' then "M16 4h.01M4 20h16l-4-6H4l-4 6zm4-10h8"
-    when 'motorcycle' then "M5 21h14v-2a2 2 0 00-2-2H7a2 2 0 00-2 2v2zM12 7V3m0 0l-3 3m3-3l3 3"
-    when 'bicycle' then "M12 14l9-5-9-5-9 5 9 5zm0 7l-5.6-3.2a1 1 0 01-.4-.8V10l6 3.4 6-3.4v6.5a1 1 0 01-.4.8L12 21z"
-    when 'skateboard' then "M16 6l-4 14-4-14"
-    when 'scooter' then "M5 21h14v-2a2 2 0 00-2-2H7a2 2 0 00-2 2v2z"
+    when "car" then "M16 4h.01M4 20h16l-4-6H4l-4 6zm4-10h8"
+    when "motorcycle" then "M5 21h14v-2a2 2 0 00-2-2H7a2 2 0 00-2 2v2zM12 7V3m0 0l-3 3m3-3l3 3"
+    when "bicycle" then "M12 14l9-5-9-5-9 5 9 5zm0 7l-5.6-3.2a1 1 0 01-.4-.8V10l6 3.4 6-3.4v6.5a1 1 0 01-.4.8L12 21z"
+    when "skateboard" then "M16 6l-4 14-4-14"
+    when "scooter" then "M5 21h14v-2a2 2 0 00-2-2H7a2 2 0 00-2 2v2z"
     else "M3 21h18v-2H3v2zm3-18h12v12H6V3z"
     end
   end

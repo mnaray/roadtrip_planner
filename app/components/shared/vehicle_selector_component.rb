@@ -76,7 +76,7 @@ class Shared::VehicleSelectorComponent < ApplicationComponent
       display_text = vehicle.display_name
       display_text += " (#{vehicle.make_model})" if vehicle.make_model.present?
       display_text += " - Default" if vehicle.is_default?
-      [display_text, vehicle.id]
+      [ display_text, vehicle.id ]
     end
   end
 

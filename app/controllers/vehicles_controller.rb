@@ -1,7 +1,7 @@
 class VehiclesController < ApplicationController
   before_action :require_login
-  before_action :set_vehicle, only: [:show, :edit, :update, :destroy, :set_default]
-  before_action :ensure_owner, only: [:show, :edit, :update, :destroy, :set_default]
+  before_action :set_vehicle, only: [ :show, :edit, :update, :destroy, :set_default ]
+  before_action :ensure_owner, only: [ :show, :edit, :update, :destroy, :set_default ]
 
   def index
     @vehicles = current_user.vehicles.order(:name)
