@@ -273,9 +273,9 @@ class PackingLists::ShowComponent < ApplicationComponent
           div class: "flex-1" do
             div class: "flex items-center space-x-2" do
               text_classes = []
-              text_classes << (item.packed? ? 'line-through' : '')
-              text_classes << (item.optional? ? 'text-gray-400' : (item.packed? ? 'text-gray-500' : 'text-gray-900'))
-              text_classes << 'font-medium'
+              text_classes << (item.packed? ? "line-through" : "")
+              text_classes << (item.optional? ? "text-gray-400" : (item.packed? ? "text-gray-500" : "text-gray-900"))
+              text_classes << "font-medium"
 
               span class: "text-base #{text_classes.join(' ')}" do
                 item.name
