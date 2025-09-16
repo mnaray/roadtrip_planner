@@ -65,7 +65,7 @@ class Vehicles::IndexComponent < ApplicationComponent
       # Image section
       div class: "aspect-w-16 aspect-h-9 bg-gray-100" do
         if vehicle.image.attached?
-          img src: vehicle.image.url,
+          img src: url_for(vehicle.image),
               class: "w-full h-48 object-cover",
               alt: "#{vehicle.display_name} image"
         else

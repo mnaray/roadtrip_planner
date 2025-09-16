@@ -97,7 +97,7 @@ class Vehicles::EditComponent < ApplicationComponent
             "Current Image"
           end
           div class: "mb-2" do
-            img src: @vehicle.image.url,
+            img src: url_for(@vehicle.image),
                 class: "h-32 w-32 object-cover rounded-lg border border-gray-300",
                 alt: "#{@vehicle.display_name} image"
           end
