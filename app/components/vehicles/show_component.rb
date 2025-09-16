@@ -98,11 +98,10 @@ class Vehicles::ShowComponent < ApplicationComponent
               end
 
               if @vehicle.image.attached?
-                # TODO: Replace with actual image display once Active Storage is configured
-                div class: "bg-gray-100 rounded-lg flex items-center justify-center h-64" do
-                  p class: "text-gray-600" do
-                    "Image: #{@vehicle.image.filename}"
-                  end
+                div class: "rounded-lg overflow-hidden" do
+                  img src: @vehicle.image,
+                      class: "w-full h-64 object-cover",
+                      alt: "#{@vehicle.display_name} image"
                 end
               else
                 div class: "bg-gray-100 rounded-lg flex items-center justify-center h-64" do

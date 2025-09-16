@@ -65,10 +65,9 @@ class Vehicles::IndexComponent < ApplicationComponent
       # Image section
       div class: "aspect-w-16 aspect-h-9 bg-gray-100" do
         if vehicle.image.attached?
-          # TODO: Add image handling once Active Storage is configured
-          div class: "flex items-center justify-center h-48 text-gray-500" do
-            "Image: #{vehicle.image.filename}"
-          end
+          img src: vehicle.image,
+              class: "w-full h-48 object-cover",
+              alt: "#{vehicle.display_name} image"
         else
           div class: "flex items-center justify-center h-48 text-gray-400" do
             svg_icon path_d: vehicle_icon_path(vehicle.vehicle_type),

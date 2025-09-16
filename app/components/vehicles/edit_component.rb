@@ -97,10 +97,9 @@ class Vehicles::EditComponent < ApplicationComponent
             "Current Image"
           end
           div class: "mb-2" do
-            # TODO: Replace with actual image display once Active Storage is configured
-            p class: "text-sm text-gray-600" do
-              "Current image: #{@vehicle.image.filename}"
-            end
+            img src: @vehicle.image,
+                class: "h-32 w-32 object-cover rounded-lg border border-gray-300",
+                alt: "#{@vehicle.display_name} image"
           end
         end
       end
