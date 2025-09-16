@@ -44,4 +44,8 @@ class RoadTrip < ApplicationRecord
   def remove_participant(participant_user)
     participants.delete(participant_user)
   end
+
+  def participant_count
+    participants.count + 1
+  end
 end
