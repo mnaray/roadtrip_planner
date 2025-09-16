@@ -11,7 +11,6 @@ class Vehicle < ApplicationRecord
             numericality: { greater_than: 0, allow_blank: true }
   validates :fuel_consumption, :dry_weight, :wet_weight, :load_capacity,
             numericality: { greater_than: 0.0, allow_blank: true }
-  validates :is_default, uniqueness: { scope: :user_id }, if: :is_default?
 
   scope :for_user, ->(user) { where(user: user) }
   scope :default_for_user, ->(user) { where(user: user, is_default: true) }

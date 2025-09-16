@@ -22,8 +22,10 @@ class VehiclesController < ApplicationController
 
   def create
     @vehicle = current_user.vehicles.build(vehicle_params)
-    # Set as default if it's the user's first vehicle
-    @vehicle.is_default = !current_user.has_vehicles? if @vehicle.is_default.nil?
+    # Set as default if it's the user's first vehicle and no default was explicitly set
+    if !vehicle_params.key?(:is_default) && !current_user.has_vehicles?
+      @vehicle.is_default = true
+    end
 
     if @vehicle.save
       redirect_to garage_path, notice: "#{@vehicle.display_name} was successfully added to your garage."
