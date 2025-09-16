@@ -99,7 +99,7 @@ class Vehicles::ShowComponent < ApplicationComponent
 
               if @vehicle.image.attached?
                 div class: "rounded-lg overflow-hidden" do
-                  img src: @vehicle.image,
+                  img src: @vehicle.image.url,
                       class: "w-full h-64 object-cover",
                       alt: "#{@vehicle.display_name} image"
                 end
