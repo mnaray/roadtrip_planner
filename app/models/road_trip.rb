@@ -46,6 +46,6 @@ class RoadTrip < ApplicationRecord
   end
 
   def participant_count
-    participants.count + 1
+    participants.count + 1 # x invitees + 1 owner
   end
 end
