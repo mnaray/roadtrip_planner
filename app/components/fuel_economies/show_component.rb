@@ -132,6 +132,68 @@ class FuelEconomies::ShowComponent < ApplicationComponent
             "Fuel Cost Calculator"
           end
 
+          # Vehicle Selection for Fuel Data
+          if @road_trip.has_vehicles?
+            div class: "mb-6 p-4 bg-green-50 border border-green-200 rounded-lg" do
+              h3 class: "text-sm font-medium text-green-800 mb-3" do
+                "Select Vehicle for Fuel Data"
+              end
+
+              div class: "space-y-2" do
+                @road_trip.all_selected_vehicles.each_with_index do |selection, index|
+                  vehicle = selection[:vehicle]
+                  user = selection[:user]
+                  next unless vehicle.has_fuel_consumption?
+
+                  div class: "flex items-center space-x-3" do
+                    input type: "radio",
+                          id: "vehicle_#{vehicle.id}",
+                          name: "vehicle_selector",
+                          value: vehicle.fuel_consumption,
+                          checked: index == 0,
+                          class: "h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300",
+                          data: {
+                            action: "change->fuel-economy#updateFromVehicle",
+                            fuel_consumption: vehicle.fuel_consumption,
+                            passenger_count: vehicle.passenger_count || 1
+                          }
+
+                    label for: "vehicle_#{vehicle.id}", class: "flex items-center space-x-2 cursor-pointer" do
+                      svg_icon path_d: vehicle_icon_path(vehicle.vehicle_type),
+                               class: "h-5 w-5 text-gray-500"
+                      div do
+                        span class: "text-sm font-medium text-gray-900" do
+                          "#{vehicle.display_name} (#{user.username})"
+                        end
+                        div class: "text-xs text-gray-600" do
+                          parts = []
+                          parts << "#{vehicle.fuel_consumption}L/100km" if vehicle.fuel_consumption.present?
+                          parts << "#{vehicle.passenger_count} passengers" if vehicle.passenger_count.present?
+                          parts.join(" • ")
+                        end
+                      end
+                    end
+                  end
+                end
+
+                # Manual entry option
+                div class: "flex items-center space-x-3" do
+                  input type: "radio",
+                        id: "vehicle_manual",
+                        name: "vehicle_selector",
+                        value: "manual",
+                        checked: !@road_trip.all_selected_vehicles.any? { |s| s[:vehicle].has_fuel_consumption? },
+                        class: "h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300",
+                        data: { action: "change->fuel-economy#enableManualEntry" }
+
+                  label for: "vehicle_manual", class: "text-sm font-medium text-gray-900 cursor-pointer" do
+                    "Enter manually"
+                  end
+                end
+              end
+            end
+          end
+
           # Input Fields
           div class: "space-y-4 mb-6" do
             # Fuel Price
@@ -332,6 +394,19 @@ class FuelEconomies::ShowComponent < ApplicationComponent
           end
         end
       end
+    end
+  end
+
+  private
+
+  def vehicle_icon_path(vehicle_type)
+    case vehicle_type
+    when 'car' then "M16 4h.01M4 20h16l-4-6H4l-4 6zm4-10h8"
+    when 'motorcycle' then "M5 21h14v-2a2 2 0 00-2-2H7a2 2 0 00-2 2v2zM12 7V3m0 0l-3 3m3-3l3 3"
+    when 'bicycle' then "M12 14l9-5-9-5-9 5 9 5zm0 7l-5.6-3.2a1 1 0 01-.4-.8V10l6 3.4 6-3.4v6.5a1 1 0 01-.4.8L12 21z"
+    when 'skateboard' then "M16 6l-4 14-4-14"
+    when 'scooter' then "M5 21h14v-2a2 2 0 00-2-2H7a2 2 0 00-2 2v2z"
+    else "M3 21h18v-2H3v2zm3-18h12v12H6V3z"
     end
   end
 end
