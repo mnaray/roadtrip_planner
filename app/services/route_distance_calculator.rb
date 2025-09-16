@@ -68,10 +68,10 @@ class RouteDistanceCalculator
     route_data = if @avoid_motorways
                    # Use OpenRouteService for highway avoidance with waypoints
                    fetch_route_data_openrouteservice_with_coordinates(all_coords)
-                 else
+    else
                    # Use OSRM for normal routing with waypoints
                    fetch_route_data_osrm_with_waypoints(all_coords)
-                 end
+    end
 
     # Fallback to multiple segments if single request fails (only for normal routing)
     if route_data.nil? && !@avoid_motorways
