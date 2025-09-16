@@ -138,18 +138,6 @@ class Vehicles::IndexComponent < ApplicationComponent
         # Action buttons
         div class: "flex justify-between items-center" do
           div class: "flex space-x-2" do
-            link_to edit_vehicle_path(vehicle),
-                    class: "text-blue-600 hover:text-blue-500 text-sm font-medium" do
-              span { "Edit" }
-            end
-
-            link_to vehicle_path(vehicle),
-                    class: "text-green-600 hover:text-green-500 text-sm font-medium" do
-              span { "View" }
-            end
-          end
-
-          div class: "flex space-x-2" do
             unless is_default
               button_to set_default_vehicle_path(vehicle),
                         method: :patch,
@@ -158,15 +146,40 @@ class Vehicles::IndexComponent < ApplicationComponent
                 span { "Set Default" }
               end
             end
+          end
+
+          div class: "flex items-center space-x-2" do
+            link_to edit_vehicle_path(vehicle),
+                    class: "inline-flex items-center p-1.5 border border-transparent rounded-md text-gray-400 hover:text-gray-600",
+                    title: "Edit Vehicle" do
+              svg_icon path_d: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z",
+                       class: "w-4 h-4",
+                       stroke_linecap: "round",
+                       stroke_linejoin: "round",
+                       stroke_width: "2"
+            end
 
             link_to vehicle_path(vehicle),
-                    method: :delete,
-                    data: {
-                      confirm: "Are you sure you want to delete #{vehicle.display_name}?",
-                      turbo_method: :delete
-                    },
-                    class: "text-red-600 hover:text-red-500 text-sm font-medium" do
-              span { "Delete" }
+                    class: "inline-flex items-center p-1.5 border border-transparent rounded-md text-gray-400 hover:text-blue-600",
+                    title: "View Vehicle" do
+              svg_icon path_d: "M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z",
+                       class: "w-4 h-4",
+                       stroke_linecap: "round",
+                       stroke_linejoin: "round",
+                       stroke_width: "2"
+            end
+
+            button_to vehicle_path(vehicle),
+                      method: :delete,
+                      class: "inline-flex items-center p-1.5 border border-transparent rounded-md text-gray-400 hover:text-red-600",
+                      data: { turbo_confirm: "Are you sure you want to delete #{vehicle.display_name}?" },
+                      form: { class: "inline" },
+                      title: "Delete Vehicle" do
+              svg_icon path_d: "M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16",
+                       class: "w-4 h-4",
+                       stroke_linecap: "round",
+                       stroke_linejoin: "round",
+                       stroke_width: "2"
             end
           end
         end

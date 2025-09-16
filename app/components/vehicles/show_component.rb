@@ -61,29 +61,39 @@ class Vehicles::ShowComponent < ApplicationComponent
               end
             end
 
-            div class: "flex space-x-3" do
+            div class: "flex items-center space-x-3" do
               link_to edit_vehicle_path(@vehicle),
-                      class: "inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors" do
-                svg_icon path_d: "M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7",
-                         class: "w-4 h-4 mr-2",
+                      class: "inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" do
+                svg_icon path_d: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z",
+                         class: "w-4 h-4 mr-1.5",
                          stroke_linecap: "round",
                          stroke_linejoin: "round",
                          stroke_width: "2"
-                span { "Edit" }
+                "Edit"
               end
 
               unless @vehicle.is_default?
                 button_to set_default_vehicle_path(@vehicle),
                           method: :patch,
-                          class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors",
+                          class: "inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
                           form: { class: "inline" } do
                   svg_icon path_d: "M5 13l4 4L19 7",
-                           class: "w-4 h-4 mr-2",
+                           class: "w-4 h-4 mr-1.5",
                            stroke_linecap: "round",
                            stroke_linejoin: "round",
                            stroke_width: "2"
                   span { "Set as Default" }
                 end
+              end
+
+              link_to garage_path,
+                      class: "inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" do
+                svg_icon path_d: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",
+                         class: "w-4 h-4 mr-1.5",
+                         stroke_linecap: "round",
+                         stroke_linejoin: "round",
+                         stroke_width: "2"
+                span { "Back to Garage" }
               end
             end
           end
@@ -188,7 +198,7 @@ class Vehicles::ShowComponent < ApplicationComponent
       div class: "space-y-3" do
         link_to edit_vehicle_path(@vehicle),
                 class: "flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors" do
-          svg_icon path_d: "M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7",
+          svg_icon path_d: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z",
                    class: "w-4 h-4 mr-3 text-gray-400",
                    stroke_linecap: "round",
                    stroke_linejoin: "round",
