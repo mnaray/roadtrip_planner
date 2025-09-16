@@ -99,7 +99,7 @@ class Vehicles::ShowComponent < ApplicationComponent
 
               if @vehicle.image.attached?
                 div class: "rounded-lg overflow-hidden" do
-                  img src: url_for(@vehicle.image),
+                  img src: rails_blob_path(@vehicle.image, only_path: true),
                       class: "w-full h-64 object-cover",
                       alt: "#{@vehicle.display_name} image"
                 end

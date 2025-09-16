@@ -65,7 +65,7 @@ class Vehicles::IndexComponent < ApplicationComponent
       # Image section
       div class: "aspect-w-16 aspect-h-9 bg-gray-100" do
         if vehicle.image.attached?
-          img src: url_for(vehicle.image),
+          img src: rails_blob_path(vehicle.image, only_path: true),
               class: "w-full h-48 object-cover",
               alt: "#{vehicle.display_name} image"
         else

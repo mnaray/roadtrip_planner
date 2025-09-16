@@ -97,7 +97,7 @@ class Vehicles::EditComponent < ApplicationComponent
             "Current Image"
           end
           div class: "mb-2" do
-            img src: url_for(@vehicle.image),
+            img src: rails_blob_path(@vehicle.image, only_path: true),
                 class: "h-32 w-32 object-cover rounded-lg border border-gray-300",
                 alt: "#{@vehicle.display_name} image"
           end
