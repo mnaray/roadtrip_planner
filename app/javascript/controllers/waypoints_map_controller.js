@@ -292,10 +292,11 @@ export default class extends Controller {
         }
 
         // Draw new route with waypoints
-        // Use red color to show modified route (regardless of highway avoidance)
+        // Use different colors: Green for highway-avoiding routes, Red for normal routes with waypoints
+        const routeColor = this.avoidMotorwaysValue ? '#10B981' : '#DC2626' // Green for highway-free, red for normal with waypoints
         this.routeLine = L.geoJSON(routeWithWaypoints.geometry, {
           style: {
-            color: '#DC2626', // Red color to show modified route with waypoints
+            color: routeColor,
             weight: 4,
             opacity: 0.8
           }
@@ -307,38 +308,113 @@ export default class extends Controller {
   }
 
   async getRouteWithWaypoints(coordinates) {
+    // If avoid_motorways is enabled, use OpenRouteService
+    if (this.avoidMotorwaysValue) {
+      return await this.getRouteWithWaypointsOpenRouteService(coordinates)
+    } else {
+      return await this.getRouteWithWaypointsOSRM(coordinates)
+    }
+  }
+
+  async getRouteWithWaypointsOpenRouteService(coordinates) {
     try {
-      // Use OSRM for routing with waypoints
-      const coordsString = coordinates
-        .map(coord => `${coord[1]},${coord[0]}`) // lon,lat format
-        .join(';')
+      // Use Rails API proxy for OpenRouteService waypoint routing with highway avoidance
+      const coordinatesLonLat = coordinates.map(coord => [coord[1], coord[0]]) // Convert to [lon, lat]
 
-      const url = `https://router.project-osrm.org/route/v1/driving/${coordsString}?overview=full&geometries=geojson`
+      console.log('Using Rails API proxy for OpenRouteService waypoint routing:')
+      console.log('- Coordinates:', coordinatesLonLat)
 
-      const response = await fetch(url)
+      const response = await fetch('/api/route_data_with_waypoints', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+        },
+        body: JSON.stringify({
+          coordinates: coordinatesLonLat,
+          avoid_motorways: true
+        })
+      })
+
+      console.log('- Response status:', response.status)
+      console.log('- Response ok:', response.ok)
 
       if (!response.ok) {
-        throw new Error(`Routing request failed: ${response.status}`)
+        const errorText = await response.text()
+        console.error('Rails API waypoint routing error:', response.status, errorText)
+        return null
       }
 
       const data = await response.json()
+      console.log('- Response data structure:', {
+        type: data?.type || 'N/A',
+        hasGeometry: !!(data && data.geometry),
+        hasProperties: !!(data && data.properties)
+      })
 
-      if (data && data.routes && data.routes.length > 0) {
-        const route = data.routes[0]
-        return {
-          geometry: route.geometry,
-          properties: {
-            segments: [{
-              distance: route.distance,
-              duration: route.duration
-            }]
-          }
-        }
+      if (data && data.type === 'Feature' && data.geometry) {
+        console.log('- SUCCESS: Got waypoint route data via Rails API')
+        return data
       }
 
+      console.warn('- No valid waypoint route feature in response')
       return null
     } catch (error) {
-      console.error('Routing with waypoints error:', error)
+      console.error('Rails API waypoint routing error:', error)
+      // Don't fall back to OSRM as it doesn't avoid highways
+      return null
+    }
+  }
+
+  async getRouteWithWaypointsOSRM(coordinates) {
+    try {
+      // Use Rails API proxy for OSRM waypoint routing
+      const coordinatesLonLat = coordinates.map(coord => [coord[1], coord[0]]) // Convert to [lon, lat]
+
+      console.log('Using Rails API proxy for OSRM waypoint routing:')
+      console.log('- Coordinates:', coordinatesLonLat)
+
+      const response = await fetch('/api/route_data_with_waypoints', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+        },
+        body: JSON.stringify({
+          coordinates: coordinatesLonLat,
+          avoid_motorways: false
+        })
+      })
+
+      console.log('- Response status:', response.status)
+      console.log('- Response ok:', response.ok)
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Rails API OSRM waypoint routing error:', response.status, errorText)
+        return null
+      }
+
+      const data = await response.json()
+      console.log('- Response data structure:', {
+        type: data?.type || 'N/A',
+        hasGeometry: !!(data && data.geometry),
+        hasProperties: !!(data && data.properties)
+      })
+
+      if (data && data.type === 'Feature' && data.geometry) {
+        console.log('- SUCCESS: Got OSRM waypoint route data via Rails API')
+        return data
+      }
+
+      console.warn('- No valid OSRM waypoint route feature in response')
+      return null
+    } catch (error) {
+      console.error('Rails API OSRM waypoint routing error:', error)
       return null
     }
   }

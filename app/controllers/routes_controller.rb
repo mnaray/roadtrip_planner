@@ -1,5 +1,6 @@
 class RoutesController < ApplicationController
-  before_action :require_login, except: [ :route_data ]
+  before_action :require_login, except: [ :route_data, :route_data_with_waypoints ]
+  skip_before_action :verify_authenticity_token, only: [ :route_data, :route_data_with_waypoints ]
   before_action :set_road_trip, only: [ :new, :create ]
   before_action :set_route, only: [ :show, :edit, :update, :destroy, :map, :export_gpx, :edit_waypoints, :update_waypoints ]
   before_action :set_road_trip_for_route, only: [ :edit, :update ]
@@ -233,6 +234,42 @@ class RoutesController < ApplicationController
     end
   end
 
+  # API endpoint for waypoint route calculations (avoids CORS issues)
+  def route_data_with_waypoints
+    coordinates = params[:coordinates]
+    avoid_motorways = params[:avoid_motorways] == true || params[:avoid_motorways] == "true"
+
+    unless coordinates.is_a?(Array) && coordinates.length >= 2
+      render json: { error: "Invalid coordinates array" }, status: :bad_request
+      return
+    end
+
+    begin
+      if avoid_motorways
+        # Use OpenRouteService for highway avoidance with waypoints
+        route_feature = fetch_openrouteservice_route_with_waypoints(coordinates)
+
+        if route_feature
+          render json: route_feature
+        else
+          render json: { error: "Highway avoidance waypoint routing failed" }, status: :service_unavailable
+        end
+      else
+        # Use OSRM for normal routing with waypoints
+        route_data = fetch_osrm_route_with_waypoints(coordinates)
+
+        if route_data
+          render json: route_data
+        else
+          render json: { error: "Normal waypoint routing failed" }, status: :service_unavailable
+        end
+      end
+    rescue => e
+      Rails.logger.error "Waypoint route data API error: #{e.message}"
+      render json: { error: "Waypoint route calculation failed" }, status: :internal_server_error
+    end
+  end
+
   private
 
   def set_road_trip
@@ -385,6 +422,119 @@ class RoutesController < ApplicationController
       end
     rescue => e
       Rails.logger.error "OSRM routing error: #{e.message}"
+    end
+
+    nil
+  end
+
+  def fetch_openrouteservice_route_with_waypoints(coordinates)
+    require "net/http"
+    require "json"
+    require "uri"
+
+    uri = URI("https://api.openrouteservice.org/v2/directions/driving-car/geojson")
+
+    request_body = {
+      coordinates: coordinates,
+      options: {
+        avoid_features: [ "highways", "tollways" ]
+      }
+    }
+
+    api_key = ENV["OPENROUTESERVICE_API_KEY"] || Rails.application.credentials.dig(:openrouteservice, :api_key)
+
+    return nil unless api_key
+
+    begin
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = true
+
+      request = Net::HTTP::Post.new(uri)
+      request["Content-Type"] = "application/json"
+      request["Authorization"] = api_key
+      request.body = request_body.to_json
+
+      response = http.request(request)
+
+      if response.is_a?(Net::HTTPSuccess)
+        data = JSON.parse(response.body)
+        Rails.logger.info "OpenRouteService waypoint response structure: #{data.keys}"
+
+        if data["features"] && data["features"].any?
+          # OpenRouteService returns GeoJSON with features array
+          feature = data["features"].first
+          Rails.logger.info "OpenRouteService waypoint feature: type=#{feature['type']}, geometry=#{feature['geometry'] ? 'present' : 'missing'}"
+          return {
+            type: "Feature",
+            geometry: feature["geometry"],
+            properties: {
+              segments: [ {
+                distance: feature["properties"]["segments"].first["distance"],
+                duration: feature["properties"]["segments"].first["duration"]
+              } ]
+            }
+          }
+        elsif data["routes"] && data["routes"].any?
+          # Fallback for different response format
+          route = data["routes"].first
+          Rails.logger.info "OpenRouteService waypoint route: geometry=#{route['geometry'] ? 'present' : 'missing'}"
+          return {
+            type: "Feature",
+            geometry: route["geometry"],
+            properties: {
+              segments: [ {
+                distance: route["summary"]["distance"],
+                duration: route["summary"]["duration"]
+              } ]
+            }
+          }
+        else
+          Rails.logger.warn "OpenRouteService waypoint response missing expected data: #{data.keys}"
+        end
+      else
+        Rails.logger.error "OpenRouteService waypoint API error: #{response.code} - #{response.body}"
+      end
+    rescue => e
+      Rails.logger.error "OpenRouteService waypoint routing error: #{e.message}"
+    end
+
+    nil
+  end
+
+  def fetch_osrm_route_with_waypoints(coordinates)
+    require "net/http"
+    require "json"
+    require "uri"
+
+    # Convert coordinates to OSRM format: lon,lat;lon,lat;...
+    coords_string = coordinates.map { |coord| "#{coord[0]},#{coord[1]}" }.join(";")
+
+    url = "https://router.project-osrm.org/route/v1/driving/#{coords_string}?overview=full&geometries=geojson"
+
+    begin
+      response = Net::HTTP.get_response(URI(url))
+
+      if response.is_a?(Net::HTTPSuccess)
+        data = JSON.parse(response.body)
+
+        if data && data["routes"] && data["routes"].any?
+          route = data["routes"].first
+          return {
+            type: "Feature",
+            geometry: route["geometry"],
+            properties: {
+              segments: [ {
+                distance: route["distance"],
+                duration: route["duration"]
+              } ]
+            }
+          }
+        end
+      else
+        Rails.logger.error "OSRM waypoint API error: #{response.code} - #{response.body}"
+      end
+    rescue => e
+      Rails.logger.error "OSRM waypoint routing error: #{e.message}"
     end
 
     nil

@@ -64,11 +64,19 @@ class RouteDistanceCalculator
     # Build coordinates array: start -> waypoints (ordered) -> end
     all_coords = [ start_coords ] + waypoint_coords + [ end_coords ]
 
-    # Fetch route data with all waypoints
-    route_data = fetch_route_data_osrm_with_waypoints(all_coords)
+    # Choose routing service based on avoid_motorways setting
+    route_data = if @avoid_motorways
+                   # Use OpenRouteService for highway avoidance with waypoints
+                   fetch_route_data_openrouteservice_with_coordinates(all_coords)
+    else
+                   # Use OSRM for normal routing with waypoints
+                   fetch_route_data_osrm_with_waypoints(all_coords)
+    end
 
-    # Fallback to multiple segments if single request fails
-    route_data ||= calculate_multi_segment_route(all_coords)
+    # Fallback to multiple segments if single request fails (only for normal routing)
+    if route_data.nil? && !@avoid_motorways
+      route_data = calculate_multi_segment_route(all_coords)
+    end
 
     route_data
   end
@@ -311,6 +319,44 @@ class RouteDistanceCalculator
       { distance: route["summary"]["distance"], duration: route["summary"]["duration"] }
     rescue StandardError => e
       Rails.logger.error "OpenRouteService routing error: #{e.message}"
+      nil
+    end
+  end
+
+  def fetch_route_data_openrouteservice_with_coordinates(all_coords)
+    # Convert coordinates to OpenRouteService format (lon, lat)
+    coordinates_lonlat = all_coords.map do |coord|
+      lat, lon = coord
+      [ lon, lat ]
+    end
+
+    uri = URI("https://api.openrouteservice.org/v2/directions/driving-car")
+
+    request_body = {
+      coordinates: coordinates_lonlat,
+      options: {
+        avoid_features: [ "highways", "tollways" ]
+      }
+    }
+
+    api_key = ENV["OPENROUTESERVICE_API_KEY"] || Rails.application.credentials.dig(:openrouteservice, :api_key)
+
+    unless api_key
+      Rails.logger.warn "OpenRouteService API key not configured. Cannot guarantee highway/toll avoidance."
+      return nil
+    end
+
+    begin
+      response = make_openrouteservice_request(uri, request_body, api_key)
+      return nil unless response
+
+      data = JSON.parse(response.body)
+      return nil unless data["routes"] && data["routes"].any?
+
+      route = data["routes"][0]
+      { distance: route["summary"]["distance"], duration: route["summary"]["duration"] }
+    rescue StandardError => e
+      Rails.logger.error "OpenRouteService coordinates routing error: #{e.message}"
       nil
     end
   end

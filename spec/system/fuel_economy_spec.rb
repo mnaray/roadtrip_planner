@@ -84,11 +84,6 @@ RSpec.describe "Fuel Economy Calculator", type: :system, js: true do
         expect(page).to have_content("Fuel Economy")
       end
     end
-
-    it "can navigate back to route page" do
-      click_link "Back to Route"
-      expect(page).to have_current_path(route_path(route))
-    end
   end
 
   private

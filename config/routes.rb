@@ -52,8 +52,9 @@ Rails.application.routes.draw do
   patch "routes/:id/update_waypoints", to: "routes#update_waypoints", as: :update_route_waypoints
   get "routes/:route_id/fuel_economy", to: "fuel_economies#show", as: :route_fuel_economy
 
-  # API endpoint for route data (avoids CORS issues)
+  # API endpoints for route data (avoids CORS issues)
   get "api/route_data", to: "routes#route_data", as: :api_route_data
+  post "api/route_data_with_waypoints", to: "routes#route_data_with_waypoints", as: :api_route_data_with_waypoints
 
   # Static pages
   get "about", to: "pages#about", as: :about
