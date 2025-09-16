@@ -247,5 +247,27 @@ RSpec.describe RoadTrip, type: :model do
         }.not_to change { road_trip.participants.count }
       end
     end
+
+    describe '#participant_count' do
+      it 'returns 1 when there are no participants (owner only)' do
+        expect(road_trip.participant_count).to eq(1)
+      end
+
+      it 'returns the correct count including owner and participants' do
+        road_trip.add_participant(participant1)
+        road_trip.add_participant(participant2)
+
+        expect(road_trip.participant_count).to eq(3) # owner + 2 participants
+      end
+
+      it 'decreases when participants are removed' do
+        road_trip.add_participant(participant1)
+        road_trip.add_participant(participant2)
+        expect(road_trip.participant_count).to eq(3)
+
+        road_trip.remove_participant(participant1)
+        expect(road_trip.participant_count).to eq(2) # owner + 1 participant
+      end
+    end
   end
 end

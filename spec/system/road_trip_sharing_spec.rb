@@ -102,6 +102,13 @@ RSpec.describe 'Road Trip Sharing', type: :system do
       expect(page).to have_content('Shared')
     end
 
+    it 'displays participant count on road trip index' do
+      login_as(participant)
+      visit road_trips_path
+
+      expect(page).to have_content('2 participants')
+    end
+
     it 'allows participants to access shared road trips' do
       login_as(participant)
       visit road_trip_path(road_trip)
@@ -122,6 +129,40 @@ RSpec.describe 'Road Trip Sharing', type: :system do
 
       expect(page).to have_current_path(road_trips_path)
       expect(page).to have_content('You have left the road trip')
+    end
+  end
+
+  describe 'Participant count display' do
+    it 'shows correct participant count for owner with no participants' do
+      # Ensure the road trip exists by accessing it
+      road_trip
+      login_as(owner)
+      visit road_trips_path
+
+      expect(page).to have_content('1 participant')
+    end
+
+    it 'shows correct participant count for owner with multiple participants' do
+      road_trip.participants << participant
+      road_trip.participants << other_user
+      login_as(owner)
+      visit road_trips_path
+
+      expect(page).to have_content('3 participants')
+    end
+
+    it 'shows participant count with proper pluralization' do
+      # Ensure the road trip exists by accessing it
+      road_trip
+      login_as(owner)
+      visit road_trips_path
+
+      expect(page).to have_content('1 participant')
+
+      road_trip.participants << participant
+      visit road_trips_path
+
+      expect(page).to have_content('2 participants')
     end
   end
 

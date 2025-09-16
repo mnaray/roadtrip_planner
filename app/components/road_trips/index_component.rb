@@ -83,6 +83,10 @@ class RoadTrips::IndexComponent < ApplicationComponent
             span class: "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800" do
               "#{road_trip.routes.count} routes"
             end
+
+            span class: "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800" do
+              "#{road_trip.participant_count} #{'participant'.pluralize(road_trip.participant_count)}"
+            end
           end
         end
 
