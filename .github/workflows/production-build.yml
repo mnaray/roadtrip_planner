@@ -84,7 +84,7 @@ jobs:
           outputs: type=docker,dest=/tmp/docker-image-untagged.tar
 
       - name: Upload Docker image as artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: docker-image-candidate
           path: /tmp/docker-image-untagged.tar
