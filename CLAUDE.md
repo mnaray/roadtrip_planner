@@ -146,6 +146,7 @@ The application uses OpenRouteService for guaranteed highway and toll avoidance 
 - Fuel economy calculator with real-time cost calculations (client-side JavaScript)
 - Route waypoints for route manipulation (interactive map-based waypoint setting, ordering, removal)
 - Motorway avoidance option for routes (checkbox in route creation forms affects route calculation)
+- Vehicle garage for managing personal vehicles with specs, fuel consumption, and automatic integration with fuel economy calculator
 
 ### 🚧 In Progress
 - None currently
@@ -170,7 +171,8 @@ app/
 │   ├── road_trips/       # Road trip components
 │   ├── routes/           # Route components (including waypoints)
 │   ├── packing_lists/    # Packing list components
-│   └── packing_list_items/ # Packing list item components
+│   ├── packing_list_items/ # Packing list item components
+│   └── vehicles/         # Vehicle garage components
 ├── controllers/          # Rails controllers (including waypoints)
 ├── models/              # ActiveRecord models
 └── javascript/          # Stimulus controllers
