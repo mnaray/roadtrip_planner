@@ -26,6 +26,10 @@ class Navigation < ApplicationComponent
                      road_trips_path,
                      class: "inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
 
+              link_to "My Garage",
+                     garage_path,
+                     class: "inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+
               span class: "text-gray-600 text-sm" do
                 "Welcome, #{@current_user.username}!"
               end
