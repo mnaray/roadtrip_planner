@@ -25,6 +25,35 @@ export default class extends Controller {
     this.calculate()
   }
 
+  updateFromVehicle(event) {
+    const fuelConsumption = event.target.dataset.fuelConsumption
+    const passengerCount = event.target.dataset.passengerCount || 1
+
+    // Update form fields with vehicle data
+    if (this.fuelConsumptionTarget && fuelConsumption) {
+      this.fuelConsumptionTarget.value = fuelConsumption
+      this.fuelConsumptionTarget.readOnly = true
+      this.fuelConsumptionTarget.classList.add('bg-gray-100')
+    }
+
+    if (this.numPassengersTarget && passengerCount) {
+      this.numPassengersTarget.value = passengerCount
+    }
+
+    this.calculate()
+  }
+
+  enableManualEntry(event) {
+    // Re-enable manual entry
+    if (this.fuelConsumptionTarget) {
+      this.fuelConsumptionTarget.readOnly = false
+      this.fuelConsumptionTarget.classList.remove('bg-gray-100')
+      this.fuelConsumptionTarget.focus()
+    }
+
+    this.calculate()
+  }
+
   calculate() {
     try {
       const fuelPrice = parseFloat(this.fuelPriceTarget?.value) || 0

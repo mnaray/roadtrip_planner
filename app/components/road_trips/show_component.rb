@@ -115,6 +115,21 @@ class RoadTrips::ShowComponent < ApplicationComponent
           end
         end
 
+        # Selected vehicles display
+        if @road_trip.has_vehicles?
+          div class: "bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8" do
+            h2 class: "text-lg font-semibold text-gray-900 mb-4" do
+              "Selected Vehicles"
+            end
+
+            div class: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" do
+              @road_trip.all_selected_vehicles.each do |selection|
+                render_vehicle_card(selection[:user], selection[:vehicle])
+              end
+            end
+          end
+        end
+
         # Routes list
         div class: "bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden" do
           div class: "px-6 py-4 border-b border-gray-200" do
@@ -238,6 +253,53 @@ class RoadTrips::ShowComponent < ApplicationComponent
           end
         end
       end
+    end
+  end
+
+  def render_vehicle_card(user, vehicle)
+    div class: "bg-gray-50 rounded-lg p-4 border border-gray-200" do
+      div class: "flex items-center space-x-3" do
+        # Vehicle icon
+        div class: "flex-shrink-0" do
+          svg_icon path_d: vehicle_icon_path(vehicle.vehicle_type),
+                   class: "h-8 w-8 text-gray-500"
+        end
+
+        # Vehicle info
+        div class: "flex-1 min-w-0" do
+          p class: "text-sm font-medium text-gray-900 truncate" do
+            vehicle.display_name
+          end
+          p class: "text-xs text-gray-500" do
+            "#{user.username}'s #{vehicle.vehicle_type}"
+          end
+          if vehicle.make_model.present?
+            p class: "text-xs text-gray-500 truncate" do
+              vehicle.make_model
+            end
+          end
+        end
+
+        # Vehicle stats badge
+        if vehicle.fuel_consumption.present?
+          div class: "flex-shrink-0" do
+            span class: "inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800" do
+              "#{vehicle.fuel_consumption}L/100km"
+            end
+          end
+        end
+      end
+    end
+  end
+
+  def vehicle_icon_path(vehicle_type)
+    case vehicle_type
+    when "car" then "M16 4h.01M4 20h16l-4-6H4l-4 6zm4-10h8"
+    when "motorcycle" then "M5 21h14v-2a2 2 0 00-2-2H7a2 2 0 00-2 2v2zM12 7V3m0 0l-3 3m3-3l3 3"
+    when "bicycle" then "M12 14l9-5-9-5-9 5 9 5zm0 7l-5.6-3.2a1 1 0 01-.4-.8V10l6 3.4 6-3.4v6.5a1 1 0 01-.4.8L12 21z"
+    when "skateboard" then "M16 6l-4 14-4-14"
+    when "scooter" then "M5 21h14v-2a2 2 0 00-2-2H7a2 2 0 00-2 2v2z"
+    else "M3 21h18v-2H3v2zm3-18h12v12H6V3z"
     end
   end
 end

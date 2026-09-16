@@ -72,6 +72,13 @@ class RoadTrips::EditComponent < ApplicationComponent
               end
             end
 
+            # Vehicle selection
+            render Shared::VehicleSelectorComponent.new(
+              form: form,
+              user: @current_user,
+              selected_vehicle: @road_trip.vehicle_for_user(@current_user)
+            )
+
             div class: "flex items-center justify-between pt-4" do
               div class: "flex items-center space-x-3" do
                 link_to road_trip_path(@road_trip),
