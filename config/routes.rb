@@ -16,6 +16,14 @@ Rails.application.routes.draw do
   post "login", to: "sessions#create"
   delete "logout", to: "sessions#destroy", as: :logout
 
+  # Vehicle garage routes
+  get "garage", to: "vehicles#index", as: :garage
+  resources :vehicles, path: "garage/vehicles" do
+    member do
+      patch :set_default
+    end
+  end
+
   # Road trip planning routes
   resources :road_trips do
     resources :routes, except: [ :index ], shallow: true

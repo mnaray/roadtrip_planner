@@ -28,6 +28,7 @@ class RoadTripsController < ApplicationController
     @road_trip = current_user.road_trips.build(road_trip_params)
 
     if @road_trip.save
+      handle_vehicle_selection(@road_trip, params[:vehicle_id])
       redirect_to @road_trip, notice: "Road trip was successfully created."
     else
       render RoadTrips::NewComponent.new(road_trip: @road_trip, current_user: current_user), status: :unprocessable_entity
@@ -40,6 +41,7 @@ class RoadTripsController < ApplicationController
 
   def update
     if @road_trip.update(road_trip_params)
+      handle_vehicle_selection(@road_trip, params[:vehicle_id])
       redirect_to @road_trip, notice: "Road trip was successfully updated."
     else
       render RoadTrips::EditComponent.new(road_trip: @road_trip, current_user: current_user), status: :unprocessable_entity
@@ -82,6 +84,15 @@ class RoadTripsController < ApplicationController
   def ensure_owner
     unless @road_trip.owner?(current_user)
       redirect_to @road_trip, alert: "Only the owner can perform this action."
+    end
+  end
+
+  def handle_vehicle_selection(road_trip, vehicle_id)
+    if vehicle_id.present?
+      vehicle = current_user.vehicles.find_by(id: vehicle_id)
+      if vehicle
+        road_trip.set_vehicle_for_user(current_user, vehicle)
+      end
     end
   end
 

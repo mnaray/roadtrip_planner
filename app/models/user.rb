@@ -4,6 +4,8 @@ class User < ApplicationRecord
   has_many :routes, dependent: :destroy
   has_many :road_trip_participants, dependent: :destroy
   has_many :participating_road_trips, through: :road_trip_participants, source: :road_trip
+  has_many :vehicles, dependent: :destroy
+  has_many :road_trip_vehicles, dependent: :destroy
 
   validates :username, presence: true,
                       length: { minimum: 3 },
@@ -15,6 +17,18 @@ class User < ApplicationRecord
                                message: "must contain both letters and numbers" }
 
   before_save :downcase_username
+
+  def default_vehicle
+    vehicles.find_by(is_default: true)
+  end
+
+  def has_vehicles?
+    vehicles.exists?
+  end
+
+  def vehicle_for_road_trip(road_trip)
+    road_trip_vehicles.find_by(road_trip: road_trip)&.vehicle
+  end
 
   private
 
