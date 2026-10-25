@@ -59,7 +59,7 @@ css-build:
 
 # Watch CSS changes (for development)
 css-watch:
-	docker compose exec web npm run build-css:watch
+	docker compose exec web npm run build-css
 
 # Run Ruby linter
 lint:

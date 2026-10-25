@@ -1,17 +1,26 @@
+import { escapeHtml } from "html_escape";
+
 // Validation error popup functionality
-document.addEventListener('DOMContentLoaded', function() {
+// turbo:load covers the initial load and Turbo visits; turbo:render also covers
+// re-rendered form error responses (422), which DOMContentLoaded never sees.
+function showPagePopups() {
   // Show validation popup if errors exist
-  const errorContainer = document.querySelector('[data-validation-errors]');
+  const errorContainer = document.querySelector('[data-validation-errors]:not([data-popup-shown])');
   if (errorContainer) {
+    errorContainer.dataset.popupShown = "true";
     showValidationPopup(errorContainer.dataset.validationErrors);
   }
 
   // Show flash message popup if exists
-  const flashAlert = document.querySelector('[data-flash-alert]');
+  const flashAlert = document.querySelector('[data-flash-alert]:not([data-popup-shown])');
   if (flashAlert) {
+    flashAlert.dataset.popupShown = "true";
     showValidationPopup(flashAlert.dataset.flashAlert);
   }
-});
+}
+
+document.addEventListener('turbo:load', showPagePopups);
+document.addEventListener('turbo:render', showPagePopups);
 
 function showValidationPopup(message) {
   if (!message) return;
@@ -27,7 +36,7 @@ function showValidationPopup(message) {
         </svg>
       </div>
       <div class="ml-3 flex-1">
-        <p class="text-sm font-medium">${message}</p>
+        <p class="text-sm font-medium">${escapeHtml(message)}</p>
       </div>
       <div class="ml-4 flex-shrink-0">
         <button type="button" class="text-red-400 hover:text-red-600 focus:outline-none" onclick="this.closest('[class*=fixed]').remove()">

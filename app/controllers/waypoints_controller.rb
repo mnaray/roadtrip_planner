@@ -47,9 +47,15 @@ class WaypointsController < ApplicationController
       route = @waypoint.route
       position = @waypoint.position
 
-      @waypoint.destroy!
+      Waypoint.transaction do
+        @waypoint.destroy!
 
-      route.waypoints.where("position > ?", position).update_all("position = position - 1")
+        # Shift in two steps: the unique (route_id, position) index is checked per row,
+        # so a single "position - 1" update collides with not-yet-shifted neighbours.
+        following = route.waypoints.where("position > ?", position)
+        following.update_all("position = -(position - 1)")
+        route.waypoints.where("position < 0").update_all("position = -position")
+      end
 
       # Trigger route metrics recalculation
       updated_metrics = route.recalculate_metrics!

@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { escapeHtml } from "html_escape"
 
 // Connects to data-controller="edit-waypoints-map"
 export default class extends Controller {
@@ -96,7 +97,7 @@ export default class extends Controller {
           icon: this.createWaypointIcon(waypoint.position),
           draggable: true
         }).addTo(this.map)
-          .bindPopup(`<strong>${waypoint.name}</strong><br>Drag to reposition, click to remove`)
+          .bindPopup(`<strong>${escapeHtml(waypoint.name)}</strong><br>Drag to reposition, click to remove`)
 
         // Add click handler to remove waypoint
         marker.on('click', (e) => {
@@ -129,12 +130,12 @@ export default class extends Controller {
     const startMarker = L.marker(startCoords, {
       icon: this.createStartIcon()
     }).addTo(this.map)
-      .bindPopup(`<strong>Start:</strong><br>${this.startLocationValue}`)
+      .bindPopup(`<strong>Start:</strong><br>${escapeHtml(this.startLocationValue)}`)
 
     const endMarker = L.marker(endCoords, {
       icon: this.createEndIcon()
     }).addTo(this.map)
-      .bindPopup(`<strong>Destination:</strong><br>${this.endLocationValue}`)
+      .bindPopup(`<strong>Destination:</strong><br>${escapeHtml(this.endLocationValue)}`)
 
     // Store markers for later use
     this.startMarker = startMarker
@@ -199,7 +200,7 @@ export default class extends Controller {
       icon: this.createWaypointIcon(waypoint.position),
       draggable: true
     }).addTo(this.map)
-      .bindPopup(`<strong>${waypoint.name}</strong><br>Drag to reposition, click to remove`)
+      .bindPopup(`<strong>${escapeHtml(waypoint.name)}</strong><br>Drag to reposition, click to remove`)
 
     // Add click handler to remove waypoint
     marker.on('click', (e) => {
@@ -238,7 +239,7 @@ export default class extends Controller {
         w.name = `Waypoint ${w.position}`
       }
       w.marker.setIcon(this.createWaypointIcon(w.position))
-      w.marker.setPopupContent(`<strong>${w.name}</strong><br>Drag to reposition, click to remove`)
+      w.marker.setPopupContent(`<strong>${escapeHtml(w.name)}</strong><br>Drag to reposition, click to remove`)
     })
 
     this.updateWaypointsData()
@@ -397,7 +398,7 @@ export default class extends Controller {
         <div class="flex-1">
           <div class="flex items-center mb-1">
             <input type="text"
-                   value="${waypoint.name}"
+                   value="${escapeHtml(waypoint.name)}"
                    class="waypoint-name-input text-sm font-medium text-gray-900 bg-transparent border-none outline-none focus:bg-white focus:border focus:border-blue-300 focus:rounded px-2 py-1 -ml-2"
                    placeholder="Waypoint name"
                    maxlength="100">
@@ -437,7 +438,7 @@ export default class extends Controller {
       waypoint.longitude = lng
 
       // Update popup content
-      marker.setPopupContent(`<strong>${waypoint.name}</strong><br>Drag to reposition, click to remove`)
+      marker.setPopupContent(`<strong>${escapeHtml(waypoint.name)}</strong><br>Drag to reposition, click to remove`)
 
       // Update data and refresh route
       this.updateWaypointsData()
@@ -849,7 +850,7 @@ export default class extends Controller {
         // Update the marker icon and popup
         if (existingWaypoint.marker) {
           existingWaypoint.marker.setIcon(this.createWaypointIcon(newPosition))
-          existingWaypoint.marker.setPopupContent(`<strong>${currentName}</strong><br>Drag to reposition, click to remove`)
+          existingWaypoint.marker.setPopupContent(`<strong>${escapeHtml(currentName)}</strong><br>Drag to reposition, click to remove`)
         }
       }
     })
@@ -892,7 +893,7 @@ export default class extends Controller {
 
       // Update map marker popup if it exists
       if (waypoint.marker) {
-        waypoint.marker.setPopupContent(`<strong>${waypoint.name}</strong><br>Drag to reposition, click to remove`)
+        waypoint.marker.setPopupContent(`<strong>${escapeHtml(waypoint.name)}</strong><br>Drag to reposition, click to remove`)
       }
     }
 
@@ -905,7 +906,7 @@ export default class extends Controller {
 
         // Update map marker popup
         if (waypoint.marker) {
-          waypoint.marker.setPopupContent(`<strong>${waypoint.name}</strong><br>Drag to reposition, click to remove`)
+          waypoint.marker.setPopupContent(`<strong>${escapeHtml(waypoint.name)}</strong><br>Drag to reposition, click to remove`)
         }
       }
     }
@@ -929,7 +930,7 @@ export default class extends Controller {
             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
           </svg>
         </div>
-        <div class="text-sm text-red-700">${message}</div>
+        <div class="text-sm text-red-700">${escapeHtml(message)}</div>
       </div>
     `
     this.element.appendChild(errorDiv)

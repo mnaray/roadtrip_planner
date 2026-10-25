@@ -115,7 +115,8 @@ class RouteDistanceCalculator
     }
     uri.query = URI.encode_www_form(params)
 
-    response = Net::HTTP.get_response(uri)
+    # Nominatim's usage policy rejects stock HTTP-library User-Agents
+    response = Net::HTTP.get_response(uri, { "User-Agent" => "RoadtripPlanner/1.0 (Rails)" })
     return nil unless response.is_a?(Net::HTTPSuccess)
 
     data = JSON.parse(response.body)

@@ -21,7 +21,9 @@ module App
     # These settings can be overridden in specific environments using the files
     # in config/environments, which are processed later.
     #
-    # config.time_zone = "Central Time (US & Canada)"
+    # Swiss timezone. Must be set here: config/initializers run after
+    # Time.zone_default is assigned, so setting it there has no effect.
+    config.time_zone = "Bern"
     # config.eager_load_paths << Rails.root.join("extras")
 
     # Add components directory to autoload paths

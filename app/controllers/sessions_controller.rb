@@ -9,9 +9,10 @@ class SessionsController < ApplicationController
   end
 
   def create
-    user = User.find_by(username: params[:username].downcase)
+    user = User.find_by(username: params[:username].to_s.downcase)
 
     if user && user.authenticate(params[:password])
+      reset_session # prevent session fixation
       session[:user_id] = user.id
       redirect_to root_path, notice: "Welcome back, #{user.username}!"
     else
@@ -20,12 +21,12 @@ class SessionsController < ApplicationController
       component = ApplicationLayout.new(title: "Login", current_user: current_user) do
         render LoginForm.new
       end
-      render component, layout: false
+      render component, layout: false, status: :unprocessable_content
     end
   end
 
   def destroy
-    session[:user_id] = nil
+    reset_session
     redirect_to root_path, notice: "You have been logged out successfully."
   end
 end

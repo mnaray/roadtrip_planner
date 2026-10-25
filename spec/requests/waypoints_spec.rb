@@ -150,6 +150,17 @@ RSpec.describe WaypointsController, type: :controller do
       expect(remaining_waypoints.second.id).to eq(waypoint3.id)
     end
 
+    it "reorders when several waypoints follow the deleted one" do
+      calculator = instance_double(RouteDistanceCalculator)
+      allow(RouteDistanceCalculator).to receive(:new).and_return(calculator)
+      allow(calculator).to receive(:calculate).and_return({ distance: 300.0, duration: 5.5 })
+
+      delete :destroy, params: { id: waypoint1.id }, xhr: true
+
+      expect(response).to have_http_status(:success)
+      expect(route.waypoints.ordered.pluck(:id, :position)).to eq([ [ waypoint2.id, 1 ], [ waypoint3.id, 2 ] ])
+    end
+
     context "when user doesn't have access to the route" do
       let(:other_user) { create(:user) }
       let(:other_road_trip) { create(:road_trip, user: other_user) }

@@ -20,7 +20,7 @@ Rails.application.routes.draw do
   resources :road_trips do
     resources :routes, except: [ :index ], shallow: true
     resources :packing_lists do
-      resources :packing_list_items do
+      resources :packing_list_items, except: [ :index, :show ] do
         member do
           patch :toggle_packed
         end
