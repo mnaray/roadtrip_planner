@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { escapeHtml } from "html_escape"
 
 // Connects to data-controller="waypoints-map"
 export default class extends Controller {
@@ -79,12 +80,12 @@ export default class extends Controller {
     const startMarker = L.marker(startCoords, {
       icon: this.createStartIcon()
     }).addTo(this.map)
-      .bindPopup(`<strong>Start:</strong><br>${this.startLocationValue}`)
+      .bindPopup(`<strong>Start:</strong><br>${escapeHtml(this.startLocationValue)}`)
 
     const endMarker = L.marker(endCoords, {
       icon: this.createEndIcon()
     }).addTo(this.map)
-      .bindPopup(`<strong>Destination:</strong><br>${this.endLocationValue}`)
+      .bindPopup(`<strong>Destination:</strong><br>${escapeHtml(this.endLocationValue)}`)
 
     // Store markers for later use
     this.startMarker = startMarker
@@ -126,7 +127,7 @@ export default class extends Controller {
 
             startMarker.bindPopup(`
               <strong>Start:</strong><br>
-              ${this.startLocationValue}<br><br>
+              ${escapeHtml(this.startLocationValue)}<br><br>
               <strong>Route:</strong><br>
               Distance: ${distanceKm} km<br>
               Duration: ${durationHours} hours${avoidanceNote}
@@ -583,14 +584,14 @@ export default class extends Controller {
     // Add a note about the straight line with context-specific message
     const message = isHighwayAvoidanceFallback ?
       `<strong>Start:</strong><br>
-       ${this.startLocationValue}<br><br>
+       ${escapeHtml(this.startLocationValue)}<br><br>
        <em style="color: #10B981;">
          🛣️ Highway avoidance requested<br>
          Showing straight line distance<br>
          (highway-free routing unavailable)
        </em>` :
       `<strong>Start:</strong><br>
-       ${this.startLocationValue}<br><br>
+       ${escapeHtml(this.startLocationValue)}<br><br>
        <em style="color: #DC2626;">
          Note: Showing straight line distance<br>
          (routing service unavailable)
@@ -611,7 +612,7 @@ export default class extends Controller {
     // Add error message to start popup
     startMarker.bindPopup(`
       <strong>Start:</strong><br>
-      ${this.startLocationValue}<br><br>
+      ${escapeHtml(this.startLocationValue)}<br><br>
       <div style="color: #DC2626;">
         <strong>⚠️ Highway Avoidance Error</strong><br>
         Cannot calculate highway-free route.<br>
@@ -696,7 +697,7 @@ export default class extends Controller {
             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
           </svg>
         </div>
-        <div class="text-sm text-red-700">${message}</div>
+        <div class="text-sm text-red-700">${escapeHtml(message)}</div>
       </div>
     `
     this.element.appendChild(errorDiv)

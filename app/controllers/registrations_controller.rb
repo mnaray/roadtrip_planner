@@ -13,6 +13,7 @@ class RegistrationsController < ApplicationController
     @user = User.new(user_params)
 
     if @user.save
+      reset_session # prevent session fixation
       session[:user_id] = @user.id
       redirect_to root_path, notice: "Welcome! Your account has been created successfully."
     else

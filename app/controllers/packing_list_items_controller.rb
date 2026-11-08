@@ -1,20 +1,8 @@
 class PackingListItemsController < ApplicationController
   before_action :require_login
   before_action :set_road_trip_and_packing_list
-  before_action :set_packing_list_item, only: [ :show, :edit, :update, :destroy, :toggle_packed ]
-
-  def index
-    packing_list_items = safe_packing_list_items
-    resources = safe_resources.merge(packing_list_items: packing_list_items)
-
-    render PackingListItems::IndexComponent.new(**resources)
-  end
-
-  def show
-    resources = safe_resources
-
-    render PackingListItems::ShowComponent.new(**resources)
-  end
+  before_action :ensure_packing_list_owner
+  before_action :set_packing_list_item, only: [ :edit, :update, :destroy, :toggle_packed ]
 
   def new
     @packing_list_item = @packing_list.packing_list_items.build
@@ -72,9 +60,15 @@ class PackingListItemsController < ApplicationController
       return
     end
 
-    @packing_list = @road_trip.packing_lists.find(params[:packing_list_id])
+    @packing_list = @road_trip.packing_lists.visible_to_user(current_user).find(params[:packing_list_id])
   rescue ActiveRecord::RecordNotFound
     redirect_to road_trips_path, alert: "Road trip or packing list not found."
+  end
+
+  def ensure_packing_list_owner
+    unless @packing_list.owned_by?(current_user)
+      redirect_to [ @road_trip, @packing_list ], alert: "You can only edit your own packing lists."
+    end
   end
 
   def set_packing_list_item
@@ -91,12 +85,6 @@ class PackingListItemsController < ApplicationController
       packing_list_item: @packing_list_item,
       current_user: current_user
     }
-  end
-
-  # Safe method to get packing list items without parameter exposure
-  def safe_packing_list_items
-    packing_list = @packing_list
-    packing_list.packing_list_items.order(:category, :name)
   end
 
   def packing_list_item_params

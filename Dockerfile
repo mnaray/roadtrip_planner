@@ -50,6 +50,10 @@ COPY --chown=rails:rails . .
 # Build Tailwind CSS
 RUN npm run build-css:production
 
+# Precompile assets (digested CSS/JS into public/assets). Production does not
+# compile assets on the fly, so without this every stylesheet and script 404s.
+RUN SECRET_KEY_BASE_DUMMY=1 RAILS_ENV=production ./bin/rails assets:precompile
+
 # Expose port 3000
 EXPOSE 3000
 

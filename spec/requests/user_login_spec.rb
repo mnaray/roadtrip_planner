@@ -40,7 +40,7 @@ RSpec.describe "User Login", type: :request do
     context "with invalid credentials" do
       it "renders login form again with error" do
         post "/login", params: { username: user.username, password: "wrongpassword" }
-        expect(response).to have_http_status(:ok)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(response.body).to include("Invalid username or password")
       end
 
