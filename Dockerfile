@@ -1,4 +1,4 @@
-FROM ruby:3.4-slim
+FROM ruby:3.4.13-slim
 
 # Install build dependencies first including curl
 RUN apt-get update -qq && apt-get install -y \
