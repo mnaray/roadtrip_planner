@@ -284,7 +284,7 @@ GEM
       prism (>= 1.6.0)
       rbs (>= 4.0.0)
       tsort
-    refract (1.1.0)
+    refract (1.2.0)
       prism
       zeitwerk
     regexp_parser (2.11.2)
